@@ -150,6 +150,7 @@ Write-Host "📋 Adding deployment scripts..." -ForegroundColor Yellow
 Copy-Item -Path "deploy.php" -Destination "production_files\laravel_app\deploy.php" -Force
 Copy-Item -Path "fix_deployment.php" -Destination "production_files\laravel_app\fix_deployment.php" -Force
 Copy-Item -Path "migration_fix.php" -Destination "production_files\laravel_app\migration_fix.php" -Force
+Copy-Item -Path "database_connection_fix.php" -Destination "production_files\laravel_app\database_connection_fix.php" -Force
 
 # Copy documentation files
 Write-Host "📋 Adding documentation..." -ForegroundColor Yellow
