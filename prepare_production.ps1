@@ -74,6 +74,7 @@ DB_PASSWORD=your_database_password
 
 BROADCAST_DRIVER=log
 CACHE_DRIVER=file
+CACHE_STORE=file
 FILESYSTEM_DISK=local
 QUEUE_CONNECTION=database
 SESSION_DRIVER=file
@@ -145,8 +146,17 @@ New-Item -ItemType Directory -Force -Path "production_files\laravel_app\storage\
 New-Item -ItemType Directory -Force -Path "production_files\laravel_app\storage\app\public"
 
 # Copy deployment script
-Write-Host "📋 Adding deployment script..." -ForegroundColor Yellow
+Write-Host "📋 Adding deployment scripts..." -ForegroundColor Yellow
 Copy-Item -Path "deploy.php" -Destination "production_files\laravel_app\deploy.php" -Force
+Copy-Item -Path "fix_deployment.php" -Destination "production_files\laravel_app\fix_deployment.php" -Force
+Copy-Item -Path "migration_fix.php" -Destination "production_files\laravel_app\migration_fix.php" -Force
+
+# Copy documentation files
+Write-Host "📋 Adding documentation..." -ForegroundColor Yellow
+Copy-Item -Path "DEPLOYMENT_GUIDE.md" -Destination "production_files\laravel_app\DEPLOYMENT_GUIDE.md" -Force
+Copy-Item -Path "CACHE_ERROR_SOLUTION.md" -Destination "production_files\laravel_app\CACHE_ERROR_SOLUTION.md" -Force
+Copy-Item -Path "DEPLOYMENT_FINAL_CHECKLIST.md" -Destination "production_files\laravel_app\DEPLOYMENT_FINAL_CHECKLIST.md" -Force
+Copy-Item -Path "api-documentation.md" -Destination "production_files\laravel_app\api-documentation.md" -Force
 
 # Create upload instructions
 Write-Host "📋 Creating upload instructions..." -ForegroundColor Yellow
@@ -197,7 +207,11 @@ $instructionsContent = @'
 - Update all configuration values marked with "UPDATE THESE!"
 - Set APP_URL to your actual domain
 
-### 5. Run Deployment:
+### 5. Run Deployment Fix (if needed):
+- If you get cache table errors, run first: https://yourdomain.com/fix_deployment.php
+- Then run: https://yourdomain.com/deploy.php
+
+### 6. Main Deployment:
 - Access: https://yourdomain.com/deploy.php
 - Username: admin
 - Password: deploy123
