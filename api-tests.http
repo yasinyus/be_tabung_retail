@@ -1,0 +1,249 @@
+### Tabung Retail API Testing in VS Code
+### Base URL
+@baseUrl = http://127.0.0.1:8000/api
+@contentType = application/json
+
+### Variables untuk menyimpan token (Update setelah login)
+@authToken = 24|I7EI2y5czLBxmuuvUVq2SIwtcaKWTuFlkMNEpNvP3b819837
+
+#############################################
+### 0. BASIC TEST (MULAI DARI SINI)
+#############################################
+
+### 0.1 Test Basic Endpoint (No Auth Required)
+GET {{baseUrl}}/test
+
+#############################################
+### 1. LOGIN TESTS
+#############################################
+
+### 1.1 Login Kepala Gudang
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+    "email": "kepala.gudang@mobile.test",
+    "password": "password123",
+    "role": "kepala_gudang"
+}
+
+### 1.2 Login Operator
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+    "email": "operator@mobile.test",
+    "password": "password123",
+    "role": "operator"
+}
+
+### 1.3 Login Driver
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+    "email": "driver@mobile.test",
+    "password": "password123",
+    "role": "driver"
+}
+
+### 1.4 Login Pelanggan Agen
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+    "email": "agen@mobile.test",
+    "password": "password123",
+    "role": "pelanggan"
+}
+
+### 1.5 Login Pelanggan Umum
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+    "email": "umum@mobile.test",
+    "password": "password123",
+    "role": "pelanggan"
+}
+
+### 1.6 Test Login Invalid Credentials
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+    "email": "invalid@test.com",
+    "password": "wrongpassword",
+    "user_type": "staff"
+}
+
+### 1.7 Test Login Missing role
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+    "email": "kepala.gudang@mobile.test",
+    "password": "password123"
+}
+
+#############################################
+### 2. AUTHENTICATED ENDPOINTS
+### (Copy token from login response above and paste to @authToken variable)
+#############################################
+
+### 2.1 Get Profile
+GET {{baseUrl}}/v1/auth/profile
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+### 2.2 Get Dashboard
+GET {{baseUrl}}/v1/mobile/dashboard
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+### 2.3 Refresh Token
+POST {{baseUrl}}/v1/auth/refresh
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+### 2.4 Logout
+POST {{baseUrl}}/v1/auth/logout
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+#############################################
+### 3. ROLE-BASED ACCESS TESTS
+#############################################
+
+### 3.1 Get Tabung List (kepala_gudang, operator only)
+GET {{baseUrl}}/v1/mobile/tabung
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+### 3.2 Get Armada List (kepala_gudang, driver only)
+GET {{baseUrl}}/v1/mobile/armada
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+### 3.3 Get Gudang List (kepala_gudang, operator only)
+GET {{baseUrl}}/v1/mobile/gudang
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+### 3.4 Get Pelanggan Profile (pelanggan only)
+GET {{baseUrl}}/v1/mobile/profile
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+#############################################
+### 4. QR CODE SCANNER TESTS
+#############################################
+
+### 4.1 Scan Tabung QR
+POST {{baseUrl}}/v1/mobile/scan-qr
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+    "type": "tabung",
+    "id": 1
+}
+
+### 4.2 Scan Armada QR
+POST {{baseUrl}}/v1/mobile/scan-qr
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+    "type": "armada",
+    "id": 1
+}
+
+### 4.3 Scan Gudang QR
+POST {{baseUrl}}/v1/mobile/scan-qr
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+    "type": "gudang",
+    "id": 1
+}
+
+### 4.4 Scan Pelanggan QR
+POST {{baseUrl}}/v1/mobile/scan-qr
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+    "type": "pelanggan",
+    "id": 1
+}
+
+### 4.5 Test Invalid QR Type
+POST {{baseUrl}}/v1/mobile/scan-qr
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+    "type": "invalid",
+    "id": 1
+}
+
+### 4.6 Test QR with Non-existent ID
+POST {{baseUrl}}/v1/mobile/scan-qr
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
+
+{
+    "type": "tabung",
+    "id": 99999
+}
+
+#############################################
+### 5. UNAUTHORIZED ACCESS TESTS
+#############################################
+
+### 5.1 Access Dashboard without token
+GET {{baseUrl}}/v1/mobile/dashboard
+Content-Type: {{contentType}}
+
+### 5.2 Access Tabung without token
+GET {{baseUrl}}/v1/mobile/tabung
+Content-Type: {{contentType}}
+
+### 5.3 Test with Invalid Token
+GET {{baseUrl}}/v1/mobile/dashboard
+Authorization: Bearer invalid_token_here
+Content-Type: {{contentType}}
+
+#############################################
+### 6. CROSS-ROLE ACCESS TESTS
+### (Test with different role tokens to verify restrictions)
+#############################################
+
+### 6.1 Driver trying to access Tabung (should fail)
+# Login as driver first, then use driver token:
+GET {{baseUrl}}/v1/mobile/tabung
+Authorization: Bearer DRIVER_TOKEN_HERE
+Content-Type: {{contentType}}
+
+### 6.2 Operator trying to access Armada (should fail)  
+# Login as operator first, then use operator token:
+GET {{baseUrl}}/v1/mobile/armada
+Authorization: Bearer OPERATOR_TOKEN_HERE
+Content-Type: {{contentType}}
+
+### 6.3 Pelanggan trying to access Tabung (should fail)
+# Login as pelanggan first, then use pelanggan token:
+GET {{baseUrl}}/v1/mobile/tabung
+Authorization: Bearer PELANGGAN_TOKEN_HERE
+Content-Type: {{contentType}}
+
+#############################################
+### 7. LEGACY API TESTS (Optional)
+#############################################
+
+### 7.1 Legacy User Endpoint
+GET {{baseUrl}}/user
+Authorization: Bearer {{authToken}}
+Content-Type: {{contentType}}
