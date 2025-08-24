@@ -58,7 +58,7 @@ APP_NAME="Tabung Retail"
 APP_ENV=production
 APP_KEY=base64:$appKey
 APP_DEBUG=false
-APP_URL=https://yourdomain.com
+APP_URL=https://test.gasalamsolusi.my.id
 
 LOG_CHANNEL=stack
 LOG_DEPRECATIONS_CHANNEL=null
@@ -68,9 +68,9 @@ LOG_LEVEL=error
 DB_CONNECTION=mysql
 DB_HOST=localhost
 DB_PORT=3306
-DB_DATABASE=your_database_name
-DB_USERNAME=your_database_username
-DB_PASSWORD=your_database_password
+DB_DATABASE=gass1498_tabung
+DB_USERNAME=gass1498_user
+DB_PASSWORD=YOUR_DATABASE_PASSWORD
 
 BROADCAST_DRIVER=log
 CACHE_DRIVER=file
@@ -155,9 +155,20 @@ Copy-Item -Path "database_connection_fix.php" -Destination "production_files\lar
 # Copy documentation files
 Write-Host "📋 Adding documentation..." -ForegroundColor Yellow
 Copy-Item -Path "DEPLOYMENT_GUIDE.md" -Destination "production_files\laravel_app\DEPLOYMENT_GUIDE.md" -Force
+Copy-Item -Path "DEPLOYMENT_GUIDE_GASALAM.md" -Destination "production_files\laravel_app\DEPLOYMENT_GUIDE_GASALAM.md" -Force
+Copy-Item -Path "QUICK_DEPLOY_GASALAM.md" -Destination "production_files\laravel_app\QUICK_DEPLOY_GASALAM.md" -Force
+Copy-Item -Path "LIVE_API_TESTING_GUIDE.md" -Destination "production_files\laravel_app\LIVE_API_TESTING_GUIDE.md" -Force
+Copy-Item -Path "API_CHANGES_NO_ROLE.md" -Destination "production_files\laravel_app\API_CHANGES_NO_ROLE.md" -Force
 Copy-Item -Path "CACHE_ERROR_SOLUTION.md" -Destination "production_files\laravel_app\CACHE_ERROR_SOLUTION.md" -Force
 Copy-Item -Path "DEPLOYMENT_FINAL_CHECKLIST.md" -Destination "production_files\laravel_app\DEPLOYMENT_FINAL_CHECKLIST.md" -Force
 Copy-Item -Path "api-documentation.md" -Destination "production_files\laravel_app\api-documentation.md" -Force
+
+# Copy API testing files
+Write-Host "📋 Adding API testing files..." -ForegroundColor Yellow
+Copy-Item -Path "api-tests-live.http" -Destination "production_files\laravel_app\api-tests-live.http" -Force
+Copy-Item -Path "test-api-live.sh" -Destination "production_files\laravel_app\test-api-live.sh" -Force
+Copy-Item -Path "test-api-live.ps1" -Destination "production_files\laravel_app\test-api-live.ps1" -Force
+Copy-Item -Path "Tabung_Retail_API_Live.postman_collection.json" -Destination "production_files\laravel_app\Tabung_Retail_API_Live.postman_collection.json" -Force
 
 # Create upload instructions
 Write-Host "📋 Creating upload instructions..." -ForegroundColor Yellow

@@ -241,4 +241,28 @@ class MobileController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get pelanggan list - for staff roles
+     */
+    public function getPelangganList(Request $request)
+    {
+        try {
+            $pelanggan = Pelanggan::select('id', 'kode_pelanggan', 'nama_pelanggan', 'lokasi_pelanggan', 'jenis_pelanggan', 'harga_tabung', 'qr_code')
+                ->orderBy('kode_pelanggan')
+                ->paginate(20);
+
+            return response()->json([
+                'success' => true,
+                'data' => $pelanggan
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load pelanggan',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

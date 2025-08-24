@@ -66,11 +66,11 @@
 - [ ] Generate application key
 
 ### Step 7: Testing
-- [ ] Access admin panel: `/admin`
+- [ ] Access admin panel: `https://test.gasalamsolusi.my.id/admin`
 - [ ] Test login with default accounts
 - [ ] Test CRUD operations
 - [ ] Test QR code generation
-- [ ] Test API endpoints
+- [ ] Test API endpoints: `https://test.gasalamsolusi.my.id/api/test`
 - [ ] Test mobile authentication
 
 ### Step 8: Security & Cleanup

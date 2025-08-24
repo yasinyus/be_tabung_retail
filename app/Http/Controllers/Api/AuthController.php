@@ -1,158 +1,100 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Pelanggan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
+use App\Models\User;
+use App\Models\Pelanggan;
 
 class AuthController extends Controller
 {
     /**
-     * Login API for mobile application
-     * Supports multiple user types: User (with roles) and Pelanggan
+     * Handle login request without role parameter
+     * Automatically detects user type and role
      */
     public function login(Request $request)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'email' => 'required|email',
-                'password' => 'required|string|min:6',
-                'role' => 'required|in:kepala_gudang,operator,driver,pelanggan'
-            ]);
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            $email = $request->email;
-            $password = $request->password;
-            $role = $request->role;
-
-            if (in_array($role, ['kepala_gudang', 'operator', 'driver'])) {
-                // Login for staff users
-                return $this->loginStaff($email, $password, $role);
-            } else {
-                // Login for pelanggan
-                return $this->loginPelanggan($email, $password);
-            }
-
-        } catch (\Exception $e) {
+        // Try to authenticate as Staff (User) first
+        $user = User::where('email', $request->email)->first();
+        
+        if ($user && Hash::check($request->password, $user->password)) {
+            // Create token for staff user
+            $token = $user->createToken('auth-token')->plainTextToken;
+            
+            // Get user role (auto-detected from database)
+            $userRoles = $user->getRoleNames();
+            $primaryRole = $userRoles->isNotEmpty() ? $userRoles->first() : 'user';
+            
             return response()->json([
-                'success' => false,
-                'message' => 'Server error occurred',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Login for staff users (kepala_gudang, operator, driver)
-     */
-    private function loginStaff($email, $password, $expectedRole)
-    {
-        $user = User::where('email', $email)->first();
-
-        if (!$user || !Hash::check($password, $user->password)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid credentials'
-            ], 401);
-        }
-
-        // Check if user has the expected role
-        if (!$user->hasRole($expectedRole)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized role'
-            ], 403);
-        }
-
-        // Create token
-        $token = $user->createToken('mobile-app-' . $user->id)->plainTextToken;
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Login successful',
-            'data' => [
+                'status' => 'success',
+                'message' => 'Login successful',
+                'user_type' => 'staff',
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role' => $expectedRole,
-                    'created_at' => $user->created_at,
+                    'role' => $primaryRole, // Auto-detected role
                 ],
-                'token' => $token,
-                'token_type' => 'Bearer'
-            ]
-        ], 200);
-    }
-
-    /**
-     * Login for pelanggan users
-     */
-    private function loginPelanggan($email, $password)
-    {
-        $pelanggan = Pelanggan::where('email', $email)->first();
-
-        if (!$pelanggan || !Hash::check($password, $pelanggan->password)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid credentials'
-            ], 401);
+                'token' => $token
+            ], 200);
         }
 
-        // Create token for pelanggan (using User model for token generation)
-        // We need to create a temporary user or use a different approach
-        $token = $pelanggan->createToken('mobile-app-pelanggan-' . $pelanggan->id)->plainTextToken;
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Login successful',
-            'data' => [
+        // Try to authenticate as Customer (Pelanggan)
+        $pelanggan = Pelanggan::where('email', $request->email)->first();
+        
+        if ($pelanggan && Hash::check($request->password, $pelanggan->password)) {
+            // Create token for customer
+            $token = $pelanggan->createToken('auth-token')->plainTextToken;
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Login successful',
+                'user_type' => 'customer',
                 'user' => [
                     'id' => $pelanggan->id,
                     'name' => $pelanggan->nama_pelanggan,
                     'email' => $pelanggan->email,
-                    'role' => 'pelanggan',
                     'kode_pelanggan' => $pelanggan->kode_pelanggan,
                     'lokasi_pelanggan' => $pelanggan->lokasi_pelanggan,
                     'jenis_pelanggan' => $pelanggan->jenis_pelanggan,
-                    'harga_tabung' => $pelanggan->harga_tabung,
-                    'penanggung_jawab' => $pelanggan->penanggung_jawab,
-                    'created_at' => $pelanggan->created_at,
+                    'role' => 'pelanggan', // Fixed role for customers
                 ],
-                'token' => $token,
-                'token_type' => 'Bearer'
-            ]
-        ], 200);
+                'token' => $token
+            ], 200);
+        }
+
+        // Authentication failed
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Invalid credentials'
+        ], 401);
     }
 
     /**
-     * Logout API
+     * Handle logout
      */
     public function logout(Request $request)
     {
         try {
+            // Delete current access token
             $request->user()->currentAccessToken()->delete();
-
+            
             return response()->json([
-                'success' => true,
-                'message' => 'Logout successful'
+                'status' => 'success',
+                'message' => 'Logged out successfully'
             ], 200);
-
+            
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
+                'status' => 'error',
                 'message' => 'Logout failed',
                 'error' => $e->getMessage()
             ], 500);
@@ -160,89 +102,148 @@ class AuthController extends Controller
     }
 
     /**
-     * Get current user profile
+     * Get authenticated user profile
      */
     public function profile(Request $request)
     {
         try {
             $user = $request->user();
             
-            // Check if it's a staff user or pelanggan
             if ($user instanceof User) {
-                return response()->json([
-                    'success' => true,
-                    'data' => [
-                        'user_type' => 'staff',
-                        'user' => [
-                            'id' => $user->id,
-                            'name' => $user->name,
-                            'email' => $user->email,
-                            'roles' => $user->getRoleNames()->toArray(),
-                            'created_at' => $user->created_at,
-                        ]
-                    ]
-                ], 200);
-            } else {
-                // Handle pelanggan profile
-                $pelanggan = Pelanggan::where('email', $user->email)->first();
+                // Staff user
+                $userRoles = $user->getRoleNames();
+                $primaryRole = $userRoles->isNotEmpty() ? $userRoles->first() : 'user';
                 
                 return response()->json([
-                    'success' => true,
-                    'data' => [
-                        'user_type' => 'pelanggan',
-                        'user' => [
-                            'id' => $pelanggan->id,
-                            'name' => $pelanggan->nama_pelanggan,
-                            'email' => $pelanggan->email,
-                            'kode_pelanggan' => $pelanggan->kode_pelanggan,
-                            'lokasi_pelanggan' => $pelanggan->lokasi_pelanggan,
-                            'jenis_pelanggan' => $pelanggan->jenis_pelanggan,
-                            'harga_tabung' => $pelanggan->harga_tabung,
-                            'penanggung_jawab' => $pelanggan->penanggung_jawab,
-                            'created_at' => $pelanggan->created_at,
-                        ]
+                    'status' => 'success',
+                    'user_type' => 'staff',
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'role' => $primaryRole,
+                    ]
+                ], 200);
+                
+            } elseif ($user instanceof Pelanggan) {
+                // Customer user
+                return response()->json([
+                    'status' => 'success',
+                    'user_type' => 'customer',
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->nama_pelanggan,
+                        'email' => $user->email,
+                        'kode_pelanggan' => $user->kode_pelanggan,
+                        'lokasi_pelanggan' => $user->lokasi_pelanggan,
+                        'jenis_pelanggan' => $user->jenis_pelanggan,
+                        'role' => 'pelanggan',
                     ]
                 ], 200);
             }
-
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found'
+            ], 404);
+            
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
+                'status' => 'error',
                 'message' => 'Failed to get profile',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
+    // Legacy methods for backward compatibility
+    
     /**
-     * Refresh token
+     * Staff login (for backward compatibility)
      */
-    public function refreshToken(Request $request)
+    public function loginStaff(Request $request)
     {
-        try {
-            $user = $request->user();
-            
-            // Delete current token
-            $request->user()->currentAccessToken()->delete();
-            
-            // Create new token
-            $newToken = $user->createToken('mobile-app-' . $user->id)->plainTextToken;
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
 
+        return $this->authenticateStaff($request->email, $request->password);
+    }
+
+    /**
+     * Customer login (for backward compatibility)
+     */
+    public function loginPelanggan(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        return $this->authenticatePelanggan($request->email, $request->password);
+    }
+
+    /**
+     * Private method to authenticate staff
+     */
+    private function authenticateStaff($email, $password)
+    {
+        $user = User::where('email', $email)->first();
+        
+        if ($user && Hash::check($password, $user->password)) {
+            $token = $user->createToken('auth-token')->plainTextToken;
+            
+            $userRoles = $user->getRoleNames();
+            $primaryRole = $userRoles->isNotEmpty() ? $userRoles->first() : 'user';
+            
             return response()->json([
-                'success' => true,
-                'message' => 'Token refreshed successfully',
-                'data' => [
-                    'token' => $newToken,
-                    'token_type' => 'Bearer'
-                ]
+                'status' => 'success',
+                'message' => 'Login successful',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $primaryRole,
+                ],
+                'token' => $token
             ], 200);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to refresh token',
-                'error' => $e->getMessage()
-            ], 500);
         }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Invalid credentials'
+        ], 401);
+    }
+
+    /**
+     * Private method to authenticate customer
+     */
+    private function authenticatePelanggan($email, $password)
+    {
+        $pelanggan = Pelanggan::where('email', $email)->first();
+        
+        if ($pelanggan && Hash::check($password, $pelanggan->password)) {
+            $token = $pelanggan->createToken('auth-token')->plainTextToken;
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Login successful',
+                'user' => [
+                    'id' => $pelanggan->id,
+                    'name' => $pelanggan->nama_pelanggan,
+                    'email' => $pelanggan->email,
+                    'kode_pelanggan' => $pelanggan->kode_pelanggan,
+                    'lokasi_pelanggan' => $pelanggan->lokasi_pelanggan,
+                    'jenis_pelanggan' => $pelanggan->jenis_pelanggan,
+                ],
+                'token' => $token
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Invalid credentials'
+        ], 401);
     }
 }

@@ -1,0 +1,154 @@
+### 🧪 API Testing localhost - Tabung Retail
+### Base URL for localhost development
+@baseUrl = http://localhost:8000/api
+
+### 📋 Test 1: Public Endpoint
+GET {{baseUrl}}/test
+
+### 📋 Test 2: Staff Authentication - Kepala Gudang
+POST {{baseUrl}}/login-staff
+Content-Type: application/json
+
+{
+  "email": "kepala_gudang@tabungretail.com",
+  "password": "admin123"
+}
+
+### Store token from response above
+@token = {{response.body.token}}
+
+### 📋 Test 3: Staff Authentication - Operator
+POST {{baseUrl}}/login-staff
+Content-Type: application/json
+
+{
+  "email": "operator@tabungretail.com",
+  "password": "admin123"
+}
+
+### 📋 Test 4: Staff Authentication - Driver  
+POST {{baseUrl}}/login-staff
+Content-Type: application/json
+
+{
+  "email": "driver@tabungretail.com",
+  "password": "admin123"
+}
+
+### 📋 Test 5: Staff Authentication - Admin
+POST {{baseUrl}}/login-staff
+Content-Type: application/json
+
+{
+  "email": "admin@tabungretail.com",
+  "password": "admin123"
+}
+
+### 📋 Test 6: Customer Authentication
+POST {{baseUrl}}/login-pelanggan
+Content-Type: application/json
+
+{
+  "email": "pelanggan@test.com",
+  "password": "password123"
+}
+
+### 📋 Test 7: Protected Endpoints - Tabung
+GET {{baseUrl}}/tabung
+Authorization: Bearer {{token}}
+
+### 📋 Test 8: Protected Endpoints - Armada
+GET {{baseUrl}}/armada
+Authorization: Bearer {{token}}
+
+### 📋 Test 9: Protected Endpoints - Gudang
+GET {{baseUrl}}/gudang
+Authorization: Bearer {{token}}
+
+### 📋 Test 10: Protected Endpoints - Pelanggan
+GET {{baseUrl}}/pelanggan
+Authorization: Bearer {{token}}
+
+### 📋 Test 11: Security Test - Invalid Credentials
+POST {{baseUrl}}/login-staff
+Content-Type: application/json
+
+{
+  "email": "invalid@email.com",
+  "password": "wrongpassword"
+}
+
+### 📋 Test 12: Security Test - No Token
+GET {{baseUrl}}/tabung
+
+### 📋 Test 13: Logout
+POST {{baseUrl}}/logout
+Authorization: Bearer {{token}}
+
+### ============================================
+### 📱 LEGACY V1 ENDPOINTS (for comparison)
+### ============================================
+
+### Legacy Login with Role Parameter
+POST {{baseUrl}}/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "kepala_gudang@tabungretail.com",
+  "password": "admin123",
+  "role": "kepala_gudang"
+}
+
+### Legacy Data Endpoints
+GET {{baseUrl}}/v1/data/tabung
+Authorization: Bearer {{token}}
+
+GET {{baseUrl}}/v1/data/armada
+Authorization: Bearer {{token}}
+
+GET {{baseUrl}}/v1/data/gudang
+Authorization: Bearer {{token}}
+
+GET {{baseUrl}}/v1/data/pelanggan
+Authorization: Bearer {{token}}
+
+### ============================================
+### 🔧 DEVELOPMENT UTILITIES
+### ============================================
+
+### Check Laravel Routes
+# Run in terminal: php artisan route:list --path=api
+
+### Check Database
+# Run in terminal: php artisan tinker
+# Then: User::all(); or Pelanggan::all();
+
+### Clear Cache
+# Run in terminal: php artisan cache:clear
+
+### Migrate Fresh with Seed
+# Run in terminal: php artisan migrate:fresh --seed
+
+### ============================================
+### 📝 NOTES FOR FLUTTER INTEGRATION
+### ============================================
+
+### New Simplified Format (Recommended):
+### POST /login-staff or /login-pelanggan
+### Body: { "email": "...", "password": "..." }
+### Response auto-detects role from database
+
+### Legacy Format (Still supported):
+### POST /v1/auth/login  
+### Body: { "email": "...", "password": "...", "role": "..." }
+### Requires explicit role parameter
+
+### All data endpoints require:
+### Authorization: Bearer <token>
+
+### Response format is consistent across all endpoints:
+### {
+###   "message": "...",
+###   "user": {...},
+###   "token": "..."
+### }

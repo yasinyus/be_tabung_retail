@@ -121,15 +121,15 @@ QUEUE_CONNECTION=database
 ### 4. **Fix Issues (pilih sesuai error):**
    
 #### Jika Error Cache Table:
-- Akses: `https://yourdomain.com/fix_deployment.php`
+- Akses: `https://test.gasalamsolusi.my.id/fix_deployment.php`
 - Jalankan script untuk membuat tabel cache/queue
 
 #### Jika Error Migration Exists:
-- Akses: `https://yourdomain.com/migration_fix.php`
+- Akses: `https://test.gasalamsolusi.my.id/migration_fix.php`
 - Pilih "Mark Existing Tables as Migrated" atau "Safe Migration"
 
 #### Jika Error Database Connection:
-- Akses: `https://yourdomain.com/database_connection_fix.php`
+- Akses: `https://test.gasalamsolusi.my.id/database_connection_fix.php`
 - Ikuti panduan untuk memperbaiki kredensial database
 
 ### 5. **Deploy:**
@@ -146,13 +146,13 @@ QUEUE_CONNECTION=database
 
 ```bash
 # Test endpoint
-curl https://yourdomain.com/api/test
+curl https://test.gasalamsolusi.my.id/api/test
 
 # Test admin
-https://yourdomain.com/admin
+https://test.gasalamsolusi.my.id/admin
 
 # Test homepage  
-https://yourdomain.com
+https://test.gasalamsolusi.my.id
 ```
 
 ## ⚠️ **Pencegahan untuk Deploy Berikutnya:**

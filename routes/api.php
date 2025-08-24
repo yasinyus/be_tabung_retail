@@ -2,10 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\API\MobileController;
-use App\Http\Controllers\API\TestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,73 +11,64 @@ use App\Http\Controllers\API\TestController;
 |--------------------------------------------------------------------------
 |
 | Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
 |
 */
 
-// Authentication Routes (Public)
-Route::prefix('v1/auth')->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
-});
-
-// Test routes
-Route::get('test', function() {
+// Test endpoint
+Route::get('/test', function () {
     return response()->json([
-        'success' => true,
-        'message' => 'API Test endpoint working',
+        'message' => 'API is working!',
         'timestamp' => now(),
-        'server' => 'Laravel ' . app()->version()
+        'version' => 'v1.0'
     ]);
 });
 
-// Protected Routes (Require Authentication)
-Route::middleware('auth:sanctum')->group(function () {
-    // Auth management
-    Route::prefix('v1/auth')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/profile', [AuthController::class, 'profile']);
-        Route::post('/refresh', [AuthController::class, 'refreshToken']);
+// V1 API Group
+Route::prefix('v1')->group(function () {
+    
+    // Authentication routes (no role parameter required)
+    Route::prefix('auth')->group(function () {
+        Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+        Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
     });
     
-    // Legacy user endpoint
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-    
-    // Mobile App API Routes
-    Route::prefix('v1/mobile')->group(function () {
-        // Dashboard - available for all authenticated users
+    // Protected routes requiring authentication
+    Route::middleware('auth:sanctum')->group(function () {
+        // Dashboard
         Route::get('/dashboard', [MobileController::class, 'dashboard']);
         
-        // QR Scanner - available for all authenticated users
+        // Data endpoints
+        Route::get('/tabung', [MobileController::class, 'getTabung']);
+        Route::get('/armada', [MobileController::class, 'getArmada']);
+        Route::get('/gudang', [MobileController::class, 'getGudang']);
+        Route::get('/pelanggan', [MobileController::class, 'getTabung']); // Note: using getTabung for staff access
+        
+        // Customer profile (for pelanggan only)
+        Route::get('/pelanggan/profile', [MobileController::class, 'getPelangganProfile']);
+        
+        // QR Scanner
         Route::post('/scan-qr', [MobileController::class, 'scanQr']);
-        
-        // Staff only endpoints
-        Route::middleware('api.role:kepala_gudang,operator')->group(function () {
-            Route::get('/tabung', [MobileController::class, 'getTabung']);
-            Route::get('/gudang', [MobileController::class, 'getGudang']);
-        });
-        
-        // Driver and kepala_gudang endpoints
-        Route::middleware('api.role:kepala_gudang,driver')->group(function () {
-            Route::get('/armada', [MobileController::class, 'getArmada']);
-        });
-        
-        // Pelanggan only endpoints
-        Route::middleware('api.role:pelanggan')->group(function () {
-            Route::get('/profile', [MobileController::class, 'getPelangganProfile']);
-        });
     });
 });
 
-// User Management API Routes (Legacy - Keep for backward compatibility)
-Route::prefix('v1')->group(function () {
-    // Register endpoint - admin_utama can register new users (no auth required for this example)
-    Route::post('/register', [UserController::class, 'register']);
-    
-    // Protected User CRUD operations - require authentication
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::apiResource('users', UserController::class);
-    });
+// Legacy API endpoints for backward compatibility
+Route::post('/login-staff', [AuthController::class, 'loginStaff']);
+Route::post('/login-pelanggan', [AuthController::class, 'loginPelanggan']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+// Legacy protected endpoints
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/tabung', [MobileController::class, 'getTabung']);
+    Route::get('/armada', [MobileController::class, 'getArmada']);
+    Route::get('/gudang', [MobileController::class, 'getGudang']);
+    Route::get('/pelanggan', [MobileController::class, 'getTabung']); // Note: using getTabung for staff access
+    Route::get('/pelanggan/profile', [MobileController::class, 'getPelangganProfile']);
+    Route::post('/scan-qr', [MobileController::class, 'scanQr']);
+});
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
 });

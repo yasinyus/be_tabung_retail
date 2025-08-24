@@ -1,0 +1,529 @@
+{
+  "info": {
+    "name": "Tabung Retail API v1 - No Role Login",
+    "description": "API Collection untuk testing endpoint baru /api/v1/auth/login tanpa role parameter",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://test.gasalamsolusi.my.id/api",
+      "type": "string"
+    },
+    {
+      "key": "v1_url",
+      "value": "https://test.gasalamsolusi.my.id/api/v1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🆕 API v1 - Universal Login (No Role)",
+      "item": [
+        {
+          "name": "🔓 Test API v1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/test",
+              "host": ["{{base_url}}"],
+              "path": ["test"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('API v1 test endpoint accessible', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains message', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "🔐 V1 Login - Driver (No Role)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"driver@gmail.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{v1_url}}/auth/login",
+              "host": ["{{v1_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.environment.set('token', response.token);",
+                  "        pm.test('Token saved successfully', function () {",
+                  "            pm.expect(response.token).to.not.be.empty;",
+                  "        });",
+                  "        ",
+                  "        pm.test('Role auto-detected for driver', function () {",
+                  "            pm.expect(response.user.role).to.exist;",
+                  "            pm.expect(response.user.role).to.equal('driver');",
+                  "        });",
+                  "        ",
+                  "        pm.test('User type is staff', function () {",
+                  "            pm.expect(response.user_type).to.equal('staff');",
+                  "        });",
+                  "    }",
+                  "}",
+                  "",
+                  "pm.test('V1 Login successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().status).to.equal('success');",
+                  "});",
+                  "",
+                  "pm.test('User info returned', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.user).to.exist;",
+                  "    pm.expect(response.user.name).to.exist;",
+                  "    pm.expect(response.user.email).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "🔐 V1 Login - Kepala Gudang (No Role)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"kepala_gudang@tabungretail.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{v1_url}}/auth/login",
+              "host": ["{{v1_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.environment.set('token', response.token);",
+                  "        ",
+                  "        pm.test('Role auto-detected as kepala_gudang', function () {",
+                  "            pm.expect(response.user.role).to.equal('kepala_gudang');",
+                  "        });",
+                  "    }",
+                  "}",
+                  "",
+                  "pm.test('Kepala Gudang login successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "🔐 V1 Login - Operator (No Role)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"operator@tabungretail.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{v1_url}}/auth/login",
+              "host": ["{{v1_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.environment.set('token', response.token);",
+                  "        ",
+                  "        pm.test('Role auto-detected as operator', function () {",
+                  "            pm.expect(response.user.role).to.equal('operator');",
+                  "        });",
+                  "    }",
+                  "}",
+                  "",
+                  "pm.test('Operator login successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "👤 V1 Login - Customer (No Role)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"pelanggan@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{v1_url}}/auth/login",
+              "host": ["{{v1_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.environment.set('token', response.token);",
+                  "        ",
+                  "        pm.test('Customer login successful', function () {",
+                  "            pm.expect(response.user_type).to.equal('customer');",
+                  "            pm.expect(response.user.kode_pelanggan).to.exist;",
+                  "        });",
+                  "    }",
+                  "}",
+                  "",
+                  "pm.test('Customer login successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "👤 Get V1 Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{v1_url}}/auth/profile",
+              "host": ["{{v1_url}}"],
+              "path": ["auth", "profile"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Profile accessible', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Profile contains user info', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.user).to.exist;",
+                  "    pm.expect(response.user_type).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "🚪 V1 Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{v1_url}}/auth/logout",
+              "host": ["{{v1_url}}"],
+              "path": ["auth", "logout"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.environment.unset('token');",
+                  "    pm.test('Token cleared successfully', function () {",
+                  "        pm.expect(pm.environment.get('token')).to.be.undefined;",
+                  "    });",
+                  "}",
+                  "",
+                  "pm.test('V1 Logout successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🔄 Backward Compatibility Tests",
+      "item": [
+        {
+          "name": "🔐 Legacy Login Staff - Kepala Gudang",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"kepala_gudang@tabungretail.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login-staff",
+              "host": ["{{base_url}}"],
+              "path": ["login-staff"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Legacy login still works', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Compatible response format', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.user.role).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📊 V1 Protected Endpoints",
+      "item": [
+        {
+          "name": "Get V1 Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{v1_url}}/dashboard",
+              "host": ["{{v1_url}}"],
+              "path": ["dashboard"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('V1 Dashboard accessible', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Dashboard data format', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.data).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get V1 Tabung Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{v1_url}}/tabung",
+              "host": ["{{v1_url}}"],
+              "path": ["tabung"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('V1 Tabung endpoint accessible', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🔒 V1 Security Tests",
+      "item": [
+        {
+          "name": "❌ V1 Invalid Credentials",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"invalid@email.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{v1_url}}/auth/login",
+              "host": ["{{v1_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('V1 Invalid credentials rejected', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test('Error message returned', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "❌ V1 Access Without Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{v1_url}}/dashboard",
+              "host": ["{{v1_url}}"],
+              "path": ["dashboard"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('V1 Access denied without token', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

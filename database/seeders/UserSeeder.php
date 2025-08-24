@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
         $adminUser = User::firstOrCreate(
             ['email' => 'admin@tabungretail.com'],
             [
-                'name' => 'Administrator Utama',
+                'name' => 'Administrator Utama', 
                 'role' => 'admin_utama',
                 'password' => Hash::make('admin123'),
             ]
