@@ -36,7 +36,6 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Login successful',
-                'user_type' => 'staff',
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -57,7 +56,6 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Login successful',
-                'user_type' => 'customer',
                 'user' => [
                     'id' => $pelanggan->id,
                     'name' => $pelanggan->nama_pelanggan,
