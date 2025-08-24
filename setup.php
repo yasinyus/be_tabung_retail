@@ -3,6 +3,32 @@
 
 echo "🔧 Starting manual setup...\n";
 
+// Fix Laravel Pail error
+echo "🚨 Fixing Laravel Pail error...\n";
+$envPath = '.env';
+if (file_exists($envPath)) {
+    $envContent = file_get_contents($envPath);
+    
+    // Ensure production environment
+    if (strpos($envContent, 'APP_ENV=') === false) {
+        $envContent .= "\nAPP_ENV=production\n";
+    } else {
+        $envContent = preg_replace('/APP_ENV=.*/', 'APP_ENV=production', $envContent);
+    }
+    
+    // Ensure debug is false
+    if (strpos($envContent, 'APP_DEBUG=') === false) {
+        $envContent .= "APP_DEBUG=false\n";
+    } else {
+        $envContent = preg_replace('/APP_DEBUG=.*/', 'APP_DEBUG=false', $envContent);
+    }
+    
+    file_put_contents($envPath, $envContent);
+    echo "✅ Updated .env for production environment\n";
+} else {
+    echo "⚠️  .env file not found\n";
+}
+
 // 1. Create storage directories
 $directories = [
     'storage/app/public',

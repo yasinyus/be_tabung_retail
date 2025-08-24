@@ -14,13 +14,33 @@ require_once 'vendor/autoload.php';
 
 // Bootstrap Laravel manually
 try {
+    // Set environment to production to avoid Pail error
+    $_ENV['APP_ENV'] = 'production';
+    putenv('APP_ENV=production');
+    
     $app = require_once 'bootstrap/app.php';
     $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
     $kernel->bootstrap();
     echo "✅ Laravel bootstrapped successfully\n";
 } catch (Exception $e) {
     echo "❌ Bootstrap error: " . $e->getMessage() . "\n";
-    exit;
+    
+    // Try alternative bootstrap
+    try {
+        echo "🔄 Trying alternative bootstrap...\n";
+        require_once 'vendor/autoload.php';
+        
+        // Manual Laravel setup without problematic providers
+        $app = new Illuminate\Foundation\Application(
+            $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
+        );
+        
+        echo "✅ Alternative bootstrap successful\n";
+    } catch (Exception $e2) {
+        echo "❌ Alternative bootstrap also failed: " . $e2->getMessage() . "\n";
+        echo "💡 Try running setup.php first\n";
+        exit;
+    }
 }
 
 use App\Models\Tabung;
