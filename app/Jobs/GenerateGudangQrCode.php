@@ -4,10 +4,9 @@ namespace App\Jobs;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Gudang;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 
 class GenerateGudangQrCode implements ShouldQueue
 {
@@ -28,35 +27,32 @@ class GenerateGudangQrCode implements ShouldQueue
      */
     public function handle(): void
     {
-        try {
-            // Create QR code content with URL to view the gudang
-            $qrContent = url("/gudang/{$this->gudang->id}");
-            
-            // Generate QR code as SVG
-            $qrCode = QrCode::format('svg')
-                ->size(300)
-                ->margin(2)
-                ->generate($qrContent);
+        // Generate QR data
+        $qrData = json_encode([
+            'type' => 'gudang',
+            'id' => $this->gudang->id,
+            'kode_gudang' => $this->gudang->kode_gudang,
+            'nama_gudang' => $this->gudang->nama_gudang,
+            'url' => url('gudang/' . $this->gudang->id)
+        ]);
 
-            // Create directory if it doesn't exist
-            $directory = 'public/qrcodes/gudang';
-            if (!Storage::exists($directory)) {
-                Storage::makeDirectory($directory);
-            }
+        // Generate QR code as SVG (no imagick dependency)
+        $qrCode = QrCode::size(200)
+            ->margin(1)
+            ->format('svg')
+            ->generate($qrData);
 
-            // Save QR code to storage
-            $filename = "gudang_{$this->gudang->id}_qr.svg";
-            $path = "qrcodes/gudang/{$filename}";
-            
-            Storage::disk('public')->put($path, $qrCode);
+        // Create directory if not exists
+        $directory = 'qr_codes/gudang';
+        Storage::disk('public')->makeDirectory($directory);
 
-            // Update gudang record with QR code path (using saveQuietly to prevent infinite loop)
-            $this->gudang->qr_code = $path;
-            $this->gudang->saveQuietly();
+        // Save QR code
+        $filename = 'gudang_' . $this->gudang->id . '.svg';
+        $path = $directory . '/' . $filename;
+        
+        Storage::disk('public')->put($path, $qrCode);
 
-        } catch (\Exception $e) {
-            // Log error but don't fail the job
-            Log::error("Failed to generate QR code for Gudang {$this->gudang->id}: " . $e->getMessage());
-        }
+        // Update model
+        $this->gudang->update(['qr_code' => $path]);
     }
 }

@@ -4,10 +4,9 @@ namespace App\Jobs;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Pelanggan;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 
 class GeneratePelangganQrCode implements ShouldQueue
 {
@@ -28,35 +27,32 @@ class GeneratePelangganQrCode implements ShouldQueue
      */
     public function handle(): void
     {
-        try {
-            // Create QR code content with URL to view the pelanggan
-            $qrContent = url("/pelanggan/{$this->pelanggan->id}");
-            
-            // Generate QR code as SVG
-            $qrCode = QrCode::format('svg')
-                ->size(300)
-                ->margin(2)
-                ->generate($qrContent);
+        // Generate QR data
+        $qrData = json_encode([
+            'type' => 'pelanggan',
+            'id' => $this->pelanggan->id,
+            'kode_pelanggan' => $this->pelanggan->kode_pelanggan,
+            'nama_pelanggan' => $this->pelanggan->nama_pelanggan,
+            'url' => url('pelanggan/' . $this->pelanggan->id)
+        ]);
 
-            // Create directory if it doesn't exist
-            $directory = 'public/qrcodes/pelanggan';
-            if (!Storage::exists($directory)) {
-                Storage::makeDirectory($directory);
-            }
+        // Generate QR code as SVG (no imagick dependency)
+        $qrCode = QrCode::size(200)
+            ->margin(1)
+            ->format('svg')
+            ->generate($qrData);
 
-            // Save QR code to storage
-            $filename = "pelanggan_{$this->pelanggan->id}_qr.svg";
-            $path = "qrcodes/pelanggan/{$filename}";
-            
-            Storage::disk('public')->put($path, $qrCode);
+        // Create directory if not exists
+        $directory = 'qr_codes/pelanggan';
+        Storage::disk('public')->makeDirectory($directory);
 
-            // Update pelanggan record with QR code path (using saveQuietly to prevent infinite loop)
-            $this->pelanggan->qr_code = $path;
-            $this->pelanggan->saveQuietly();
+        // Save QR code
+        $filename = 'pelanggan_' . $this->pelanggan->id . '.svg';
+        $path = $directory . '/' . $filename;
+        
+        Storage::disk('public')->put($path, $qrCode);
 
-        } catch (\Exception $e) {
-            // Log error but don't fail the job
-            Log::error("Failed to generate QR code for Pelanggan {$this->pelanggan->id}: " . $e->getMessage());
-        }
+        // Update model
+        $this->pelanggan->update(['qr_code' => $path]);
     }
 }
