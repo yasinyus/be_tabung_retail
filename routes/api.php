@@ -3,72 +3,53 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\API\MobileController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
-
-// Test endpoint
-Route::get('/test', function () {
-    return response()->json([
-        'message' => 'API is working!',
-        'timestamp' => now(),
-        'version' => 'v1.0'
-    ]);
-});
-
-// V1 API Group
+// API V1 Routes
 Route::prefix('v1')->group(function () {
     
-    // Authentication routes (no role parameter required)
+    // Authentication routes (no auth required)
     Route::prefix('auth')->group(function () {
-        Route::post('/login', [AuthController::class, 'login']);
-        Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-        Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
+        Route::post('login', [AuthController::class, 'login']);
+        Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+        Route::get('profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
     });
-    
-    // Protected routes requiring authentication
-    Route::middleware('auth:sanctum')->group(function () {
-        // Dashboard
-        Route::get('/dashboard', [MobileController::class, 'dashboard']);
-        
-        // Data endpoints
-        Route::get('/tabung', [MobileController::class, 'getTabung']);
-        Route::get('/armada', [MobileController::class, 'getArmada']);
-        Route::get('/gudang', [MobileController::class, 'getGudang']);
-        Route::get('/pelanggan', [MobileController::class, 'getTabung']); // Note: using getTabung for staff access
-        
-        // Customer profile (for pelanggan only)
-        Route::get('/pelanggan/profile', [MobileController::class, 'getPelangganProfile']);
-        
-        // QR Scanner
-        Route::post('/scan-qr', [MobileController::class, 'scanQr']);
+
+    // Mobile routes (auth required)
+    Route::prefix('mobile')->middleware('auth:sanctum')->group(function () {
+        Route::get('dashboard', [AuthController::class, 'dashboard']);
+        Route::post('terima-tabung', [AuthController::class, 'terimaTabung']);
+    });
+
+    // Public test route
+    Route::get('test', function () {
+        return response()->json([
+            'status' => 'success',
+            'message' => 'API V1 is working!',
+            'timestamp' => now()->format('Y-m-d H:i:s'),
+            'endpoints' => [
+                'auth' => [
+                    'POST /api/v1/auth/login',
+                    'POST /api/v1/auth/logout',
+                    'GET /api/v1/auth/profile'
+                ],
+                'mobile' => [
+                    'GET /api/v1/mobile/dashboard',
+                    'POST /api/v1/mobile/terima-tabung'
+                ]
+            ]
+        ]);
     });
 });
 
-// Legacy API endpoints for backward compatibility
-Route::post('/login-staff', [AuthController::class, 'loginStaff']);
-Route::post('/login-pelanggan', [AuthController::class, 'loginPelanggan']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-
-// Legacy protected endpoints
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/tabung', [MobileController::class, 'getTabung']);
-    Route::get('/armada', [MobileController::class, 'getArmada']);
-    Route::get('/gudang', [MobileController::class, 'getGudang']);
-    Route::get('/pelanggan', [MobileController::class, 'getTabung']); // Note: using getTabung for staff access
-    Route::get('/pelanggan/profile', [MobileController::class, 'getPelangganProfile']);
-    Route::post('/scan-qr', [MobileController::class, 'scanQr']);
-});
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Fallback route for API
+Route::fallback(function () {
+    return response()->json([
+        'status' => 'error',
+        'message' => 'API endpoint not found',
+        'available_endpoints' => [
+            'GET /api/v1/test',
+            'POST /api/v1/auth/login',
+            'GET /api/v1/mobile/dashboard (requires auth)'
+        ]
+    ], 404);
 });

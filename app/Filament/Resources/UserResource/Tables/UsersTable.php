@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Filament\Resources\Users\Tables;
+namespace App\Filament\Resources\UserResource\Tables;
 
+use App\Filament\Resources\UserResource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -29,37 +29,26 @@ class UsersTable
                     
                 BadgeColumn::make('role')
                     ->label('Role')
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'admin_utama' => 'Administrator Utama',
-                        'admin_umum' => 'Administrator Umum',
-                        'kepala_gudang' => 'Kepala Gudang',
-                        'operator_retail' => 'Operator Retail',
-                        'driver' => 'Driver',
-                        'auditor' => 'Auditor',
-                        'pelanggan_umum' => 'Pelanggan Umum',
-                        'pelanggan_agen' => 'Pelanggan Agen',
-                        default => $state,
-                    })
                     ->colors([
                         'danger' => 'admin_utama',
                         'warning' => 'admin_umum',
-                        'success' => 'kepala_gudang',
-                        'primary' => 'operator_retail',
-                        'secondary' => ['driver', 'auditor'],
-                        'gray' => ['pelanggan_umum', 'pelanggan_agen'],
+                        'info' => 'kepala_gudang',
+                        'success' => 'operator_retail',
+                        'gray' => 'driver',
                     ])
-                    ->searchable()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'admin_utama' => 'Admin Utama',
+                        'admin_umum' => 'Admin Umum',
+                        'kepala_gudang' => 'Kepala Gudang',
+                        'operator_retail' => 'Operator Retail',
+                        'driver' => 'Driver',
+                        default => $state,
+                    })
                     ->sortable(),
                     
                 TextColumn::make('created_at')
                     ->label('Dibuat')
-                    ->dateTime('d M Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                    
-                TextColumn::make('updated_at')
-                    ->label('Diperbarui')
-                    ->dateTime('d M Y H:i')
+                    ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -67,25 +56,30 @@ class UsersTable
                 SelectFilter::make('role')
                     ->label('Filter Role')
                     ->options([
-                        'admin_utama' => 'Administrator Utama',
-                        'admin_umum' => 'Administrator Umum',
+                        'admin_utama' => 'Admin Utama',
+                        'admin_umum' => 'Admin Umum',
                         'kepala_gudang' => 'Kepala Gudang',
                         'operator_retail' => 'Operator Retail',
                         'driver' => 'Driver',
-                        'auditor' => 'Auditor',
-                        'pelanggan_umum' => 'Pelanggan Umum',
-                        'pelanggan_agen' => 'Pelanggan Agen',
-                    ]),
+                    ])
+                    ->multiple(),
             ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+            ->actions([
+                Action::make('edit')
+                    ->label('Edit')
+                    ->icon('heroicon-o-pencil')
+                    ->url(fn ($record) => UserResource::getUrl('edit', ['record' => $record])),
+                Action::make('delete')
+                    ->label('Delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->delete()),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ])
-            ->defaultSort('created_at', 'desc');
+            ]);
     }
 }
