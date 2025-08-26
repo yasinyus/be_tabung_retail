@@ -51,13 +51,34 @@ class User extends Authenticatable
 
     /**
      * Determine if the user can access the admin panel.
+     * SECURE: Only specific roles can access admin
      */
     public function canAccessPanel($panel): bool
     {
-        // Sementara allow semua user untuk debugging
-        return true;
+        // SECURITY: Only allow specific roles to access admin
+        $allowedRoles = [
+            'admin_utama',
+            'admin_umum', 
+            'kepala_gudang',
+            'operator_retail'  // if needed
+        ];
         
-        // Nanti bisa diubah ke:
-        // return in_array($this->role, ['admin_utama', 'admin_umum', 'kepala_gudang']);
+        return in_array($this->role, $allowedRoles);
+    }
+    
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return in_array($this->role, ['admin_utama', 'admin_umum']);
+    }
+    
+    /**
+     * Check if user is super admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'admin_utama';
     }
 }
