@@ -28,6 +28,7 @@ class ArmadaResource extends Resource
     // Menggunakan policy untuk mengatur akses
     public static function canViewAny(): bool
     {
+        return true; // Temporarily disable authorization for debugging
         /** @var \App\Models\User $user */
         $user = Auth::user();
         return $user && $user->hasAnyRole(['admin_utama', 'admin_umum', 'kepala_gudang', 'operator_retail']);
