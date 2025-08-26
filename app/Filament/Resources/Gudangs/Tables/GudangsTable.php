@@ -4,9 +4,8 @@ namespace App\Filament\Resources\Gudangs\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Actions\Action;
+use App\Filament\Resources\Gudangs\GudangResource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -80,9 +79,17 @@ class GudangsTable
                         return $years;
                     }),
             ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+            ->actions([
+                Action::make('view')
+                    ->label('View')
+                    ->icon('heroicon-o-eye')
+                    ->url(fn ($record) => GudangResource::getUrl('edit', ['record' => $record]))
+                    ->color('info'),
+                Action::make('edit')
+                    ->label('Edit')
+                    ->icon('heroicon-o-pencil')
+                    ->url(fn ($record) => GudangResource::getUrl('edit', ['record' => $record]))
+                    ->color('warning'),
                 Action::make('qr_code')
                     ->label('QR Code')
                     ->icon('heroicon-o-qr-code')

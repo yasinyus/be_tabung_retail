@@ -65,10 +65,16 @@ class UsersTable
                     ->multiple(),
             ])
             ->actions([
+                Action::make('view')
+                    ->label('View')
+                    ->icon('heroicon-o-eye')
+                    ->url(fn ($record) => UserResource::getUrl('edit', ['record' => $record]))
+                    ->color('info'),
                 Action::make('edit')
                     ->label('Edit')
                     ->icon('heroicon-o-pencil')
-                    ->url(fn ($record) => UserResource::getUrl('edit', ['record' => $record])),
+                    ->url(fn ($record) => UserResource::getUrl('edit', ['record' => $record]))
+                    ->color('warning'),
                 Action::make('delete')
                     ->label('Delete')
                     ->icon('heroicon-o-trash')
