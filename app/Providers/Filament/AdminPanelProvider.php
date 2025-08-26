@@ -25,8 +25,8 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
-            ->authGuard('web')
+            // ->login()
+            // ->authGuard('web')
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -51,7 +51,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
+                // Sementara kosong untuk debugging
             ]);
     }
 }
