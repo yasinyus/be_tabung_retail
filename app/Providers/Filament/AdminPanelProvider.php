@@ -25,12 +25,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            // ->login()
-            // ->authGuard('web')
+            ->login()
+            ->authGuard('web')
             ->colors([
                 'primary' => Color::Amber,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->resources([
                 \App\Filament\Resources\UserResource::class,
                 \App\Filament\Resources\Tabungs\TabungResource::class,
@@ -58,7 +57,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                // Sementara kosong untuk debugging
+                Authenticate::class,
             ]);
     }
 }

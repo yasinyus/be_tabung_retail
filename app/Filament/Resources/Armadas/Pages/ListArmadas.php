@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Armadas\Pages;
 
 use App\Filament\Resources\Armadas\ArmadaResource;
 use Filament\Actions\CreateAction;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 
 class ListArmadas extends ListRecords
@@ -13,7 +14,11 @@ class ListArmadas extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            Action::make('create')
+                ->label('Create Armada')
+                ->icon('heroicon-o-plus')
+                ->color('primary')
+                ->url(ArmadaResource::getUrl('create')),
         ];
     }
 }
