@@ -29,6 +29,31 @@ class GudangResource extends Resource
         return true; // Temporarily disable authorization for debugging
     }
 
+    public static function canView($record): bool
+    {
+        return true; // Temporarily disable authorization for debugging
+    }
+
+    public static function canCreate(): bool
+    {
+        return true; // Temporarily disable authorization for debugging
+    }
+
+    public static function canEdit($record): bool
+    {
+        return true; // Temporarily disable authorization for debugging
+    }
+
+    public static function canDelete($record): bool
+    {
+        return true; // Temporarily disable authorization for debugging
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return true; // Temporarily disable authorization for debugging
+    }
+
     public static function form(Schema $schema): Schema
     {
         return GudangForm::configure($schema);
