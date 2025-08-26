@@ -48,4 +48,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Determine if the user can access the admin panel.
+     */
+    public function canAccessPanel($panel): bool
+    {
+        // Sementara allow semua user untuk debugging
+        return true;
+        
+        // Nanti bisa diubah ke:
+        // return in_array($this->role, ['admin_utama', 'admin_umum', 'kepala_gudang']);
+    }
 }
