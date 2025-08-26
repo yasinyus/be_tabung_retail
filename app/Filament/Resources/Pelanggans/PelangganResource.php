@@ -18,9 +18,16 @@ class PelangganResource extends Resource
 {
     protected static ?string $model = Pelanggan::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $recordTitleAttribute = 'pelanggan';
+    protected static ?string $navigationLabel = 'Pelanggan';
+
+    protected static ?string $recordTitleAttribute = 'nama_pelanggan';
+
+    public static function canViewAny(): bool
+    {
+        return true; // Temporarily disable authorization for debugging
+    }
 
     public static function form(Schema $schema): Schema
     {

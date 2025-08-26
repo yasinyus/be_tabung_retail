@@ -18,9 +18,16 @@ class GudangResource extends Resource
 {
     protected static ?string $model = Gudang::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-storefront';
 
-    protected static ?string $recordTitleAttribute = 'gudang';
+    protected static ?string $navigationLabel = 'Gudang';
+
+    protected static ?string $recordTitleAttribute = 'nama_gudang';
+
+    public static function canViewAny(): bool
+    {
+        return true; // Temporarily disable authorization for debugging
+    }
 
     public static function form(Schema $schema): Schema
     {

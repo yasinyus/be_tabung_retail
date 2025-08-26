@@ -31,6 +31,13 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->resources([
+                \App\Filament\Resources\UserResource::class,
+                \App\Filament\Resources\Tabungs\TabungResource::class,
+                \App\Filament\Resources\Armadas\ArmadaResource::class,
+                \App\Filament\Resources\Pelanggans\PelangganResource::class,
+                \App\Filament\Resources\Gudangs\GudangResource::class,
+            ])
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
