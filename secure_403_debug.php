@@ -70,11 +70,34 @@ try {
 // 4. Check Filament Panel Configuration
 echo "\n4️⃣  Checking Filament Panel...\n";
 try {
-    $panelProvider = new \App\Providers\Filament\AdminPanelProvider();
-    echo "   ✅ AdminPanelProvider loaded\n";
-    
-    // Check if panel has login
-    echo "   Panel has login enabled\n";
+    // Check if AdminPanelProvider class exists
+    if (class_exists('\App\Providers\Filament\AdminPanelProvider')) {
+        echo "   ✅ AdminPanelProvider class exists\n";
+        
+        // Read the provider file to check configuration
+        $providerContent = file_get_contents('app/Providers/Filament/AdminPanelProvider.php');
+        
+        if (strpos($providerContent, '->login()') !== false) {
+            echo "   ✅ Login enabled in panel\n";
+        } else {
+            echo "   ⚠️  Login not found in panel config\n";
+        }
+        
+        if (strpos($providerContent, '->authGuard(') !== false) {
+            echo "   ✅ Auth guard configured\n";
+        } else {
+            echo "   ⚠️  Auth guard not configured\n";
+        }
+        
+        if (strpos($providerContent, 'Authenticate::class') !== false) {
+            echo "   ✅ Auth middleware configured\n";
+        } else {
+            echo "   ⚠️  Auth middleware not found\n";
+        }
+        
+    } else {
+        echo "   ❌ AdminPanelProvider class not found\n";
+    }
     
 } catch (Exception $e) {
     echo "   ❌ Panel error: {$e->getMessage()}\n";
