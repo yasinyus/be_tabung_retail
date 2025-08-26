@@ -1,5 +1,11 @@
 <?php
 
+// Bootstrap Laravel untuk script ini
+require_once 'vendor/autoload.php';
+
+$app = require_once 'bootstrap/app.php';
+$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
 echo "=== DEEP DEBUG 403 FORBIDDEN ===\n\n";
 
 // 1. Check if Filament is properly installed
@@ -19,7 +25,11 @@ if (is_dir('vendor/filament')) {
 // 2. Check web server and PHP
 echo "\n2️⃣  Checking Environment...\n";
 echo "   PHP version: " . phpversion() . "\n";
-echo "   Laravel version: " . app()->version() . "\n";
+try {
+    echo "   Laravel version: " . app()->version() . "\n";
+} catch (Exception $e) {
+    echo "   Laravel version: ERROR - {$e->getMessage()}\n";
+}
 
 // 3. Check file permissions
 echo "\n3️⃣  Checking File Permissions...\n";
@@ -82,10 +92,14 @@ foreach ($envVars as $var) {
 // 6. Test basic HTTP response
 echo "\n6️⃣  Testing Basic Response...\n";
 try {
-    $response = \Illuminate\Support\Facades\Http::get(url('/'));
-    echo "   Homepage status: " . $response->status() . "\n";
+    $appUrl = env('APP_URL', 'http://localhost');
+    echo "   App URL: {$appUrl}\n";
+    
+    // Skip HTTP test in script untuk avoid issues
+    echo "   ⚠️  HTTP test skipped (run manually)\n";
+    echo "   Manual test: curl {$appUrl}\n";
 } catch (Exception $e) {
-    echo "   ❌ HTTP test failed: {$e->getMessage()}\n";
+    echo "   ❌ URL test failed: {$e->getMessage()}\n";
 }
 
 // 7. Check for common blocking issues
