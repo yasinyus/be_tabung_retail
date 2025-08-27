@@ -6,8 +6,15 @@ use Filament\Pages\Page;
 
 class TestPage extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static string $view = 'filament.pages.test-page';
-    protected static ?string $title = 'Test Page';
-    protected static ?string $navigationLabel = 'Test';
+    
+    public static function getNavigationLabel(): string
+    {
+        return 'Test';
+    }
+    
+    public function getTitle(): string
+    {
+        return 'Test Page';
+    }
 }
