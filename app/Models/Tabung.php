@@ -67,15 +67,17 @@ class Tabung extends Model
         parent::boot();
 
         static::created(function ($tabung) {
-            // Dispatch job untuk generate QR code secara asynchronous
-            GenerateTabungQrCode::dispatch($tabung);
+            // Generate QR code immediately when created from form
+            $qrCode = base64_encode($tabung->generateQrCode());
+            $tabung->update(['qr_code' => $qrCode]);
         });
 
         static::updated(function ($tabung) {
             // Generate QR code hanya jika field yang mempengaruhi QR code berubah
             if ($tabung->wasChanged(['kode_tabung', 'seri_tabung', 'tahun'])) {
-                // Dispatch job untuk generate QR code secara asynchronous
-                GenerateTabungQrCode::dispatch($tabung);
+                // Generate immediately
+                $qrCode = base64_encode($tabung->generateQrCode());
+                $tabung->update(['qr_code' => $qrCode]);
             }
         });
     }
