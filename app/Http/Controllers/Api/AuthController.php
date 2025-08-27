@@ -38,7 +38,7 @@ class AuthController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'roles' => $user->getRoleNames()->first() ?? 'user',
+                    'roles' => $user->role ?? 'user', // ✅ Consistent dengan database column
                 ],
                 'token' => $token
             ]);
@@ -100,7 +100,7 @@ class AuthController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'roles' => $user->getRoleNames()->first() ?? 'user',
+                    'roles' => $user->role ?? 'user', // ✅ Consistent dengan database column
                 ]
             ]);
         } else {
