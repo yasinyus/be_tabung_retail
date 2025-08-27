@@ -2,74 +2,79 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
+use App\Models\User;
 use App\Models\Tabung;
-use App\Models\Pelanggan;
 use App\Models\Armada;
+use App\Models\Pelanggan;
 use App\Models\Gudang;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class StatsOverview extends StatsOverviewWidget
+class StatsOverview extends BaseWidget
 {
-    protected static ?int $sort = 0;
-
     protected function getStats(): array
     {
-        $totalTabung = Tabung::count();
-        $totalPelanggan = Pelanggan::count();
-        $totalArmada = Armada::count();
-        $totalGudang = Gudang::count();
-
-        // Additional statistics
-        $pelangganAgen = Pelanggan::where('jenis_pelanggan', 'agen')->count();
-        $pelangganUmum = Pelanggan::where('jenis_pelanggan', 'umum')->count();
-        $tabungAktif = Tabung::whereNotNull('qr_code')->count();
-
         return [
-            Stat::make('Total Tabung', $totalTabung)
-                ->description('Tabung gas terdaftar')
-                ->descriptionIcon('heroicon-m-fire')
-                ->chart([7, 12, 8, 15, 9, 11, $totalTabung])
-                ->color('success')
-                ->extraAttributes([
-                    'class' => 'cursor-pointer',
-                ])
-                ->url('/admin/tabungs'),
-
-            Stat::make('Total Pelanggan', $totalPelanggan)
-                ->description("{$pelangganAgen} Agen, {$pelangganUmum} Umum")
+            Stat::make('Total Users', User::count())
+                ->description('Total pengguna sistem')
                 ->descriptionIcon('heroicon-m-users')
-                ->chart([3, 7, 5, 8, 6, 9, $totalPelanggan])
-                ->color('info')
-                ->extraAttributes([
-                    'class' => 'cursor-pointer',
-                ])
-                ->url('/admin/pelanggans'),
-
-            Stat::make('Total Armada', $totalArmada)
-                ->description('Kendaraan operasional')
+                ->color('success'),
+                
+            Stat::make('Total Tabung', $this->getTabungCount())
+                ->description('Total tabung gas')
+                ->descriptionIcon('heroicon-m-fire')
+                ->color('info'),
+                
+            Stat::make('Total Armada', $this->getArmadaCount())
+                ->description('Total kendaraan')
                 ->descriptionIcon('heroicon-m-truck')
-                ->chart([2, 3, 1, 4, 2, 3, $totalArmada])
-                ->color('warning')
-                ->extraAttributes([
-                    'class' => 'cursor-pointer',
-                ])
-                ->url('/admin/armadas'),
-
-            Stat::make('Total Gudang', $totalGudang)
-                ->description('Gudang distribusi')
+                ->color('warning'),
+                
+            Stat::make('Total Pelanggan', $this->getPelangganCount())
+                ->description('Total pelanggan')
+                ->descriptionIcon('heroicon-m-user-group')
+                ->color('primary'),
+                
+            Stat::make('Total Gudang', $this->getGudangCount())
+                ->description('Total gudang')
                 ->descriptionIcon('heroicon-m-building-storefront')
-                ->chart([1, 2, 1, 3, 2, 2, $totalGudang])
-                ->color('primary')
-                ->extraAttributes([
-                    'class' => 'cursor-pointer',
-                ])
-                ->url('/admin/gudangs'),
+                ->color('gray'),
         ];
     }
-
-    protected function getColumns(): int
+    
+    private function getTabungCount(): int
     {
-        return 2; // 2 columns on desktop, will stack on mobile
+        try {
+            return Tabung::count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+    
+    private function getArmadaCount(): int
+    {
+        try {
+            return Armada::count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+    
+    private function getPelangganCount(): int
+    {
+        try {
+            return Pelanggan::count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+    
+    private function getGudangCount(): int
+    {
+        try {
+            return Gudang::count();
+        } catch (\Exception $e) {
+            return 0;
+        }
     }
 }
