@@ -60,10 +60,14 @@ class User extends Authenticatable
             'admin_utama',
             'admin_umum', 
             'kepala_gudang',
-            'operator_retail'  // if needed
+            'operator_retail',
+            'driver'  // Added for debugging - dapat disesuaikan nanti
         ];
         
         return in_array($this->role, $allowedRoles);
+        
+        // Alternative: Temporary allow all for debugging
+        // return true;
     }
     
     /**
