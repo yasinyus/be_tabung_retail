@@ -25,8 +25,8 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
-            ->authGuard('web')
+            ->login()                    // ✅ ENABLE LOGIN - REQUIRED FOR SECURITY
+            ->authGuard('web')          // ✅ SET AUTH GUARD - REQUIRED FOR SECURITY
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -57,7 +57,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
+                Authenticate::class,     // ✅ ENABLE AUTH MIDDLEWARE - REQUIRED FOR SECURITY
             ]);
     }
 }
