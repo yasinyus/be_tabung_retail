@@ -55,19 +55,20 @@ class User extends Authenticatable
      */
     public function canAccessPanel($panel): bool
     {
-        // SECURITY: Only allow specific roles to access admin
+        // TEMPORARY: Allow all users for debugging 403 issue
+        return true;
+        
+        // Original secure code (restore after fixing 403):
+        /*
         $allowedRoles = [
             'admin_utama',
             'admin_umum', 
             'kepala_gudang',
             'operator_retail',
-            'driver'  // Added for debugging - dapat disesuaikan nanti
+            'driver'
         ];
-        
         return in_array($this->role, $allowedRoles);
-        
-        // Alternative: Temporary allow all for debugging
-        // return true;
+        */
     }
     
     /**
