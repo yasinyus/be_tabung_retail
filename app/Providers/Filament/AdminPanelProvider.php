@@ -57,10 +57,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,     // ✅ ENABLE AUTH MIDDLEWARE
-            ])
-            ->canAccess(function ($user) {
-                return in_array($user->role, ['admin_utama', 'admin_umum']);
-            });
+            ]);
 
     }
 }
