@@ -18,6 +18,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('mobile')->middleware('auth:sanctum')->group(function () {
         Route::get('dashboard', [AuthController::class, 'dashboard']);
         Route::post('terima-tabung', [AuthController::class, 'terimaTabung']);
+        Route::post('tabung-datang', [AuthController::class, 'tabungDatang']);
     });
 
     // Public test route
@@ -34,7 +35,8 @@ Route::prefix('v1')->group(function () {
                 ],
                 'mobile' => [
                     'GET /api/v1/mobile/dashboard',
-                    'POST /api/v1/mobile/terima-tabung'
+                    'POST /api/v1/mobile/terima-tabung',
+                    'POST /api/v1/mobile/tabung-datang'
                 ]
             ]
         ]);
