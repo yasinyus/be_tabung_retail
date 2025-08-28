@@ -51,15 +51,17 @@ class Pelanggan extends Authenticatable
         static::created(function ($pelanggan) {
             // Generate QR code immediately when created from form
             $qrCode = base64_encode($pelanggan->generateQrCodeSvg());
-            $pelanggan->update(['qr_code' => $qrCode]);
+            // Use updateQuietly to avoid triggering events
+            $pelanggan->updateQuietly(['qr_code' => $qrCode]);
         });
 
         static::updated(function ($pelanggan) {
             // Regenerate QR code only if relevant fields changed
-            if ($pelanggan->wasChanged(['kode_pelanggan', 'nama_pelanggan', 'jenis_pelanggan'])) {
-                // Generate immediately
+            if ($pelanggan->wasChanged(['kode_pelanggan', 'nama_pelanggan', 'jenis_pelanggan']) && !$pelanggan->wasChanged(['qr_code'])) {
+                // Generate immediately, but only if qr_code wasn't already updated
                 $qrCode = base64_encode($pelanggan->generateQrCodeSvg());
-                $pelanggan->update(['qr_code' => $qrCode]);
+                // Use updateQuietly to avoid triggering events
+                $pelanggan->updateQuietly(['qr_code' => $qrCode]);
             }
         });
     }

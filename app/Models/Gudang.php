@@ -27,15 +27,17 @@ class Gudang extends Model
         static::created(function ($gudang) {
             // Generate QR code immediately when created from form
             $qrCode = base64_encode($gudang->generateQrCodeSvg());
-            $gudang->update(['qr_code' => $qrCode]);
+            // Use updateQuietly to avoid triggering events
+            $gudang->updateQuietly(['qr_code' => $qrCode]);
         });
 
         static::updated(function ($gudang) {
             // Regenerate QR code only if relevant fields changed
-            if ($gudang->wasChanged(['kode_gudang', 'nama_gudang', 'tahun_gudang'])) {
-                // Generate immediately
+            if ($gudang->wasChanged(['kode_gudang', 'nama_gudang', 'tahun_gudang']) && !$gudang->wasChanged(['qr_code'])) {
+                // Generate immediately, but only if qr_code wasn't already updated
                 $qrCode = base64_encode($gudang->generateQrCodeSvg());
-                $gudang->update(['qr_code' => $qrCode]);
+                // Use updateQuietly to avoid triggering events
+                $gudang->updateQuietly(['qr_code' => $qrCode]);
             }
         });
     }

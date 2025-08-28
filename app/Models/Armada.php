@@ -71,15 +71,17 @@ class Armada extends Model
         static::created(function ($armada) {
             // Generate QR code immediately when created from form
             $qrCode = base64_encode($armada->generateQrCode());
-            $armada->update(['qr_code' => $qrCode]);
+            // Use updateQuietly to avoid triggering events
+            $armada->updateQuietly(['qr_code' => $qrCode]);
         });
 
         static::updated(function ($armada) {
             // Generate QR code hanya jika field yang mempengaruhi QR code berubah
-            if ($armada->wasChanged(['nopol', 'kapasitas', 'tahun'])) {
-                // Generate immediately
+            if ($armada->wasChanged(['nopol', 'kapasitas', 'tahun']) && !$armada->wasChanged(['qr_code'])) {
+                // Generate immediately, but only if qr_code wasn't already updated
                 $qrCode = base64_encode($armada->generateQrCode());
-                $armada->update(['qr_code' => $qrCode]);
+                // Use updateQuietly to avoid triggering events
+                $armada->updateQuietly(['qr_code' => $qrCode]);
             }
         });
     }
