@@ -261,24 +261,57 @@ class AuthController extends Controller
      */
     private function validateQrCode($qr_code, $type)
     {
-        // Simulasi validasi QR Code
-        // Nanti bisa disesuaikan dengan query database real
-        
-        switch ($type) {
-            case 'gudang':
-                // Contoh format QR Gudang: GDG-001, GDG-002, etc.
-                return preg_match('/^GDG-\d{3}$/', $qr_code);
-                
-            case 'armada':
-                // Contoh format QR Armada: ARM-001, ARM-002, etc.
-                return preg_match('/^ARM-\d{3}$/', $qr_code);
-                
-            case 'tabung':
-                // Contoh format QR Tabung: TBG-001, TBG-002, etc.
-                return preg_match('/^TBG-\d{3}$/', $qr_code);
-                
-            default:
-                return false;
+        try {
+            // Decode QR code (base64 decoded JSON)
+            if (is_string($qr_code) && strlen($qr_code) > 100) {
+                // Might be base64 encoded SVG, try to decode
+                $decoded = base64_decode($qr_code);
+                if ($decoded !== false && str_contains($decoded, 'svg')) {
+                    // This is a base64 encoded SVG, extract data from it
+                    // For now, assume it's valid if it's properly encoded SVG
+                    return true;
+                }
+            }
+            
+            // Try to parse as JSON (direct QR data)
+            $qr_data = json_decode($qr_code, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($qr_data)) {
+                // Validate based on QR data structure
+                switch ($type) {
+                    case 'gudang':
+                        return isset($qr_data['type']) && $qr_data['type'] === 'gudang' 
+                            && isset($qr_data['code']) && str_starts_with($qr_data['code'], 'GDG-');
+                            
+                    case 'armada':
+                        return isset($qr_data['id']) && isset($qr_data['nopol']);
+                        
+                    case 'tabung':
+                        return isset($qr_data['id']) && isset($qr_data['code']);
+                        
+                    default:
+                        return false;
+                }
+            }
+            
+            // Fallback: validate as simple code format
+            switch ($type) {
+                case 'gudang':
+                    return str_starts_with($qr_code, 'GDG-');
+                    
+                case 'armada':
+                    // More flexible pattern for armada (license plates)
+                    return strlen($qr_code) >= 3;
+                    
+                case 'tabung':
+                    return str_starts_with($qr_code, 'T-') || str_starts_with($qr_code, 'TBG-');
+                    
+                default:
+                    return false;
+            }
+            
+        } catch (Exception $e) {
+            // If any error occurs, assume invalid
+            return false;
         }
     }
 }

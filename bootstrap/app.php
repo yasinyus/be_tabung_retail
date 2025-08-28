@@ -17,5 +17,21 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Handle unauthenticated redirects for Filament admin
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
+            // For Filament admin routes, redirect to the correct login route
+            if ($request->routeIs('filament.*')) {
+                return redirect()->guest(route('filament.admin.auth.login'));
+            }
+            
+            // For API routes, return JSON response
+            if ($request->is('api/*') || $request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Unauthenticated.'
+                ], 401);
+            }
+            
+            // Default redirect for web routes (using named route)
+            return redirect()->guest(route('filament.admin.auth.login'));
+        });
     })->create();
