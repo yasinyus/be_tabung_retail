@@ -1,0 +1,36 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+/* Custom Logo Styling - Rounded Logo */
+.fi-logo img {
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    aspect-ratio: 1 !important;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+}
+
+/* Brand Logo in Sidebar */
+.fi-sidebar-nav-brand .fi-logo img {
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    aspect-ratio: 1 !important;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Logo on Login Page */
+.fi-simple-layout .fi-logo img {
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    aspect-ratio: 1 !important;
+    width: 3rem !important;
+    height: 3rem !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Brand Logo Hover Effect */
+.fi-logo img:hover {
+    transform: scale(1.05) !important;
+    transition: transform 0.2s ease-in-out !important;
+}

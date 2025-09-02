@@ -37,7 +37,6 @@ class Armada extends Model
         $qrData = json_encode([
             'id' => $this->id,
             'nopol' => $this->nopol,
-            'type' => 'armada',
             'url' => url("/armada/{$this->id}")
         ]);
 

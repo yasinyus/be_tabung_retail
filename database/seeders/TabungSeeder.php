@@ -15,49 +15,49 @@ class TabungSeeder extends Seeder
     {
         $tabungs = [
             [
-                'kode_tabung' => 'TBG-001',
+                'kode_tabung' => 'T-001',
                 'seri_tabung' => 'A123456789',
                 'tahun' => 2023,
                 'keterangan' => 'Tabung gas 3kg kondisi baik'
             ],
             [
-                'kode_tabung' => 'TBG-002',
+                'kode_tabung' => 'T-002',
                 'seri_tabung' => 'B234567890',
                 'tahun' => 2023,
                 'keterangan' => 'Tabung gas 12kg untuk retail'
             ],
             [
-                'kode_tabung' => 'TBG-003',
+                'kode_tabung' => 'T-003',
                 'seri_tabung' => 'C345678901',
                 'tahun' => 2024,
                 'keterangan' => 'Tabung gas 5.5kg baru'
             ],
             [
-                'kode_tabung' => 'TBG-004',
+                'kode_tabung' => 'T-004',
                 'seri_tabung' => 'D456789012',
                 'tahun' => 2024,
                 'keterangan' => 'Tabung gas 3kg untuk pengiriman'
             ],
             [
-                'kode_tabung' => 'TBG-005',
+                'kode_tabung' => 'T-005',
                 'seri_tabung' => 'E567890123',
                 'tahun' => 2022,
                 'keterangan' => 'Tabung gas 12kg perlu inspeksi'
             ],
             [
-                'kode_tabung' => 'TBG-006',
+                'kode_tabung' => 'T-006',
                 'seri_tabung' => 'F678901234',
                 'tahun' => 2025,
                 'keterangan' => 'Tabung gas 3kg terbaru'
             ],
             [
-                'kode_tabung' => 'TBG-007',
+                'kode_tabung' => 'T-007',
                 'seri_tabung' => 'G789012345',
                 'tahun' => 2024,
                 'keterangan' => 'Tabung gas 5.5kg ready stock'
             ],
             [
-                'kode_tabung' => 'TBG-008',
+                'kode_tabung' => 'T-008',
                 'seri_tabung' => 'H890123456',
                 'tahun' => 2023,
                 'keterangan' => 'Tabung gas 12kg cadangan'

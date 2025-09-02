@@ -52,7 +52,6 @@ class Gudang extends Model
         $qrData = json_encode([
             'id' => $this->id,
             'code' => $this->kode_gudang,
-            'type' => 'gudang',
             'url' => url("/gudang/{$this->id}")
         ]);
 

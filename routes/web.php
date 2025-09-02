@@ -5,6 +5,11 @@ use App\Http\Controllers\TabungController;
 use App\Http\Controllers\ArmadaController;
 use App\Http\Controllers\GudangController;
 use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\CodeDetailsController;
+use App\Http\Controllers\QrCodePdfController;
+use App\Http\Controllers\TabungQrCodePdfController;
+use App\Http\Controllers\PelangganQrCodePdfController;
+use App\Http\Controllers\GudangQrCodePdfController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -21,3 +26,12 @@ Route::get('/gudang/{id}', [GudangController::class, 'show'])->name('gudang.show
 
 // Route untuk menampilkan detail pelanggan via QR Code
 Route::get('/pelanggan/{id}', [PelangganController::class, 'show'])->name('pelanggan.show');
+
+// Route untuk mendapatkan detail kode (untuk popup modal)
+Route::get('/admin/get-code-details/{code}', [CodeDetailsController::class, 'getDetails'])->name('code.details');
+
+// Route untuk download PDF QR codes
+Route::get('/download/armada-qr-codes', [QrCodePdfController::class, 'downloadArmadaQrCodes'])->name('armada.qr-codes.pdf');
+Route::get('/download/tabung-qr-codes', [TabungQrCodePdfController::class, 'downloadTabungQrCodes'])->name('tabung.qr-codes.pdf');
+Route::get('/download/pelanggan-qr-codes', [PelangganQrCodePdfController::class, 'downloadPelangganQrCodes'])->name('pelanggan.qr-codes.pdf');
+Route::get('/download/gudang-qr-codes', [GudangQrCodePdfController::class, 'downloadGudangQrCodes'])->name('gudang.qr-codes.pdf');

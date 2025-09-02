@@ -19,6 +19,12 @@ class ListGudangs extends ListRecords
                 ->icon('heroicon-o-plus')
                 ->color('primary')
                 ->url(GudangResource::getUrl('create')),
+            // Action::make('downloadQrCodes')
+            //     ->label('Download QR Codes')
+            //     ->icon('heroicon-o-arrow-down-tray')
+            //     ->color('success')
+            //     ->url(route('gudang.qr-codes.pdf'))
+            //     ->openUrlInNewTab(),
         ];
     }
 }

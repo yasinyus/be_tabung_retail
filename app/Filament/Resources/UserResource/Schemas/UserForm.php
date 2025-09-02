@@ -33,6 +33,8 @@ class UserForm
                         'kepala_gudang' => 'Kepala Gudang',
                         'operator_retail' => 'Operator Retail',
                         'driver' => 'Driver',
+                        'auditor' => 'Auditor',
+                        'keuangan' => 'Keuangan',
                     ])
                     ->required()
                     ->native(false),

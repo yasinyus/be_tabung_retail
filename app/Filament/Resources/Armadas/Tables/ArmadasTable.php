@@ -6,11 +6,17 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Action;
 use App\Filament\Resources\Armadas\ArmadaResource;
+use App\Exports\ArmadaExport;
+use App\Exports\ArmadaTemplateExport;
+use App\Imports\ArmadaImport;
+use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
+use Maatwebsite\Excel\Facades\Excel;
+use Filament\Notifications\Notification;
 
 class ArmadasTable
 {
@@ -139,6 +145,58 @@ class ArmadasTable
                     ->slideOver(),
             ])
             ->toolbarActions([
+                Action::make('download_template')
+                    ->label('Download Template')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('gray')
+                    ->action(function () {
+                        return Excel::download(new ArmadaTemplateExport, 'template-armada.xlsx');
+                    }),
+                    
+                Action::make('export')
+                    ->label('Export Excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function () {
+                        return Excel::download(new ArmadaExport, 'armada-' . date('Y-m-d') . '.xlsx');
+                    }),
+                    
+                Action::make('import')
+                    ->label('Import Excel')
+                    ->icon('heroicon-o-arrow-up-tray')
+                    ->color('info')
+                    ->form([
+                        FileUpload::make('file')
+                            ->label('File Excel')
+                            ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'])
+                            ->required()
+                            ->helperText('Upload file Excel dengan format: nopol, kapasitas, tahun, keterangan'),
+                    ])
+                    ->action(function (array $data) {
+                        try {
+                            Excel::import(new ArmadaImport, $data['file']);
+                            
+                            Notification::make()
+                                ->title('Import Berhasil')
+                                ->body('Data armada berhasil diimport.')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Import Gagal')
+                                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+                    
+                Action::make('download_qr_codes')
+                    ->label('Download QR Codes')
+                    ->icon('heroicon-o-qr-code')
+                    ->color('info')
+                    ->url(route('armada.qr-codes.pdf'))
+                    ->openUrlInNewTab(),
+                    
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

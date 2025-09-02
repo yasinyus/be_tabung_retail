@@ -76,7 +76,6 @@ class Pelanggan extends Authenticatable
         $qrData = json_encode([
             'id' => $this->id,
             'code' => $this->kode_pelanggan,
-            'type' => 'pelanggan',
             'url' => url("/pelanggan/{$this->id}")
         ]);
 
@@ -115,5 +114,17 @@ class Pelanggan extends Authenticatable
     public function getJenisPelangganLabelAttribute()
     {
         return ucfirst($this->jenis_pelanggan);
+    }
+
+    // Relationship dengan Deposit
+    public function deposits()
+    {
+        return $this->hasMany(Deposit::class);
+    }
+
+    // Get total saldo deposits
+    public function getTotalSaldoAttribute()
+    {
+        return $this->deposits()->sum('saldo');
     }
 }

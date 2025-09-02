@@ -35,6 +35,16 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-user-group')
                 ->color('primary'),
                 
+            Stat::make('Pelanggan Agen', $this->getPelangganAgenCount())
+                ->description('Pelanggan jenis agen')
+                ->descriptionIcon('heroicon-m-building-office')
+                ->color('success'),
+                
+            Stat::make('Pelanggan Umum', $this->getPelangganUmumCount())
+                ->description('Pelanggan jenis umum')
+                ->descriptionIcon('heroicon-m-users')
+                ->color('info'),
+                
             Stat::make('Total Gudang', $this->getGudangCount())
                 ->description('Total gudang')
                 ->descriptionIcon('heroicon-m-building-storefront')
@@ -64,6 +74,24 @@ class StatsOverview extends BaseWidget
     {
         try {
             return Pelanggan::count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+    
+    private function getPelangganAgenCount(): int
+    {
+        try {
+            return Pelanggan::where('jenis_pelanggan', 'agen')->count();
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+    
+    private function getPelangganUmumCount(): int
+    {
+        try {
+            return Pelanggan::where('jenis_pelanggan', 'umum')->count();
         } catch (\Exception $e) {
             return 0;
         }

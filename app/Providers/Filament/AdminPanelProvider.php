@@ -26,15 +26,50 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()                    // ✅ ENABLE LOGIN
             ->authGuard('web')          // ✅ SET AUTH GUARD
+            ->brandLogo(asset('img/logo.png'))
+            ->brandLogoHeight('4rem')
+            ->brandName('Admin Tabung Retail')
+            ->renderHook(
+                'panels::auth.login.form.before',
+                fn () => '<style>
+                    .fi-simple-layout .fi-logo img {
+                        border-radius: 50% !important;
+                        object-fit: cover !important;
+                        aspect-ratio: 1 !important;
+                        width: 6rem !important;
+                        height: 6rem !important;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+                        margin-bottom: 1rem !important;
+                    }
+                    .fi-simple-layout .fi-logo {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        margin-bottom: 2rem !important;
+                    }
+                    .fi-simple-main {
+                        max-width: 400px !important;
+                    }
+                </style>'
+            )
+            ->renderHook(
+                'panels::body.end',
+                fn () => view('filament.custom-styles')
+            )
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->resources([
                 \App\Filament\Resources\UserResource::class,
                 \App\Filament\Resources\Tabungs\TabungResource::class,
+                \App\Filament\Resources\TabungActivityResource::class,
+                \App\Filament\Resources\VolumeTabungResource::class,
                 \App\Filament\Resources\Armadas\ArmadaResource::class,
                 \App\Filament\Resources\Pelanggans\PelangganResource::class,
                 \App\Filament\Resources\Gudangs\GudangResource::class,
+                \App\Filament\Resources\Deposits\DepositResource::class,
+                \App\Filament\Resources\Audits\AuditResource::class,
+                \App\Filament\Resources\Transactions\TransactionResource::class,
             ])
             ->pages([
                 Dashboard::class,

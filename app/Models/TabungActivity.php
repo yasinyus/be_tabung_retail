@@ -9,24 +9,26 @@ class TabungActivity extends Model
 {
     use HasFactory;
 
-    protected $table = 'tabung_activity';
+    protected $table = 'aktivitas_tabung';
 
     protected $fillable = [
-        'activity',
-        'nama_user',
-        'qr_tabung',
-        'lokasi_gudang',
-        'armada',
+        'nama_aktivitas',
+        'dari',
+        'tujuan',
+        'tabung',
         'keterangan',
+        'nama_petugas',
+        'id_user',
+        'total_tabung',
+        'tanggal',
         'status',
-        'user_id',
-        'transaksi_id',
-        'tanggal_aktivitas'
+        'waktu'
     ];
 
     protected $casts = [
-        'qr_tabung' => 'array', // Cast JSON ke array
-        'tanggal_aktivitas' => 'date'
+        'tabung' => 'array', // Cast JSON ke array
+        'waktu' => 'datetime',
+        'tanggal' => 'string'
     ];
 
     /**
@@ -34,7 +36,15 @@ class TabungActivity extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'id_user');
+    }
+
+    /**
+     * Accessor untuk mapping activity ke nama_aktivitas
+     */
+    public function getActivityAttribute()
+    {
+        return $this->nama_aktivitas;
     }
 
     /**
@@ -42,7 +52,7 @@ class TabungActivity extends Model
      */
     public function getTotalTabungAttribute()
     {
-        return is_array($this->qr_tabung) ? count($this->qr_tabung) : 0;
+        return $this->total_tabung ?? (is_array($this->tabung) ? count($this->tabung) : 0);
     }
 
     /**
@@ -50,7 +60,7 @@ class TabungActivity extends Model
      */
     public function scopeByUser($query, $userId)
     {
-        return $query->where('user_id', $userId);
+        return $query->where('id_user', $userId);
     }
 
     /**
@@ -58,14 +68,14 @@ class TabungActivity extends Model
      */
     public function scopeByDate($query, $date)
     {
-        return $query->whereDate('tanggal_aktivitas', $date);
+        return $query->where('tanggal', $date);
     }
 
     /**
-     * Scope untuk filter berdasarkan activity
+     * Scope untuk filter berdasarkan aktivitas
      */
     public function scopeByActivity($query, $activity)
     {
-        return $query->where('activity', $activity);
+        return $query->where('nama_aktivitas', $activity);
     }
 }

@@ -14,6 +14,14 @@ class ListArmadas extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            // Action::make('downloadQrCodes')
+            //     ->label('Download QR Codes')
+            //     ->icon('heroicon-o-qr-code')
+            //     ->color('success')
+            //     ->action(function () {
+            //         return redirect()->route('armada.qr-codes.pdf');
+            //     })
+            //     ->tooltip('Download semua QR Code Armada dalam format PDF'),
             Action::make('create')
                 ->label('Create Armada')
                 ->icon('heroicon-o-plus')
