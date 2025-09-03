@@ -171,6 +171,21 @@ class TagihanResource extends Resource
                         $harga_satuan = $record->harga_tabung ?? 0;
                         $total_harga = $jumlah_tabung * $harga_satuan;
                         
+                        // Validasi harga satuan tidak boleh 0
+                        if ($harga_satuan <= 0) {
+                            Notification::make()
+                                ->title('Harga Satuan Tidak Valid!')
+                                ->body(
+                                    "Harga satuan tabung belum ditentukan atau bernilai 0.\n" .
+                                    "Silakan hubungi administrator untuk mengatur harga tabung pelanggan ini."
+                                )
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                                
+                            return; // Stop execution
+                        }
+                        
                         // Cek saldo pelanggan terlebih dahulu
                         $saldoPelanggan = SaldoPelanggan::where('kode_pelanggan', $record->kode_pelanggan)->first();
                         $saldo_saat_ini = $saldoPelanggan ? $saldoPelanggan->saldo : 0;
@@ -201,12 +216,11 @@ class TagihanResource extends Resource
                             'transaction_date' => $data['transaction_date'],
                             'type' => 'purchase',
                             'total' => $total_harga,
-                            'description' => "Pembelian {$jumlah_tabung} tabung @ Rp " . number_format($harga_satuan, 0, ',', '.'),
+                            'harga' => $harga_satuan,
+                            'jumlah_tabung' => $jumlah_tabung,
+                            'Payment Method' => $data['payment_method'],
                             'status' => $data['status'],
-                            'notes' => "Harga Satuan: Rp " . number_format($harga_satuan, 0, ',', '.') . "\n" .
-                                      "Jumlah Tabung: {$jumlah_tabung}\n" .
-                                      "Payment Method: {$data['payment_method']}\n" .
-                                      ($data['notes'] ? "Catatan: " . $data['notes'] : ''),
+                            'notes' => $data['notes'],
                         ]);
                         
                         // Update saldo pelanggan (kurangi saldo dengan total harga)
@@ -289,7 +303,7 @@ class TagihanResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        $user = auth()->user();
+        $user = Auth::user();
         return $user && in_array($user->role, ['admin_utama', 'keuangan']);
     }
 }
