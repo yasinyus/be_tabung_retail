@@ -171,7 +171,29 @@ class TagihanResource extends Resource
                         $harga_satuan = $record->harga_tabung ?? 0;
                         $total_harga = $jumlah_tabung * $harga_satuan;
                         
-                        // Simpan transaksi
+                        // Cek saldo pelanggan terlebih dahulu
+                        $saldoPelanggan = SaldoPelanggan::where('kode_pelanggan', $record->kode_pelanggan)->first();
+                        $saldo_saat_ini = $saldoPelanggan ? $saldoPelanggan->saldo : 0;
+                        
+                        // Validasi apakah saldo mencukupi
+                        if ($saldo_saat_ini < $total_harga) {
+                            $kekurangan = $total_harga - $saldo_saat_ini;
+                            
+                            Notification::make()
+                                ->title('Saldo Deposit Tidak Mencukupi!')
+                                ->body(
+                                    "Saldo deposit saat ini: Rp " . number_format($saldo_saat_ini, 0, ',', '.') . "\n" .
+                                    "Total tagihan: Rp " . number_format($total_harga, 0, ',', '.') . "\n" .
+                                    "Kekurangan: Rp " . number_format($kekurangan, 0, ',', '.')
+                                )
+                                ->danger()
+                                ->persistent() // Notifikasi akan tetap tampil sampai ditutup manual
+                                ->send();
+                                
+                            return; // Stop execution, tidak melanjutkan ke penyimpanan
+                        }
+                        
+                        // Jika saldo mencukupi, lanjutkan simpan transaksi
                         Transaction::create([
                             'trx_id' => 'TRX-' . strtoupper(uniqid()),
                             'user_id' => Auth::id(),
@@ -188,22 +210,25 @@ class TagihanResource extends Resource
                         ]);
                         
                         // Update saldo pelanggan (kurangi saldo dengan total harga)
-                        $saldoPelanggan = SaldoPelanggan::where('kode_pelanggan', $record->kode_pelanggan)->first();
+                        $saldo_baru = $saldo_saat_ini - $total_harga;
+                        
                         if ($saldoPelanggan) {
-                            $saldo_lama = $saldoPelanggan->saldo;
-                            $saldo_baru = $saldo_lama - $total_harga;
                             $saldoPelanggan->update(['saldo' => $saldo_baru]);
                         } else {
                             // Jika belum ada record saldo, buat baru dengan saldo minus
                             SaldoPelanggan::create([
                                 'kode_pelanggan' => $record->kode_pelanggan,
-                                'saldo' => -$total_harga
+                                'saldo' => $saldo_baru
                             ]);
                         }
                         
                         Notification::make()
-                            ->title('Transaksi berhasil dibuat')
-                            ->body("Transaksi pembelian {$jumlah_tabung} tabung sebesar Rp " . number_format($total_harga, 0, ',', '.') . " berhasil disimpan. Saldo pelanggan telah diupdate.")
+                            ->title('Transaksi Berhasil Dibuat')
+                            ->body(
+                                "Transaksi pembelian {$jumlah_tabung} tabung sebesar Rp " . number_format($total_harga, 0, ',', '.') . " berhasil disimpan.\n" .
+                                "Saldo sebelumnya: Rp " . number_format($saldo_saat_ini, 0, ',', '.') . "\n" .
+                                "Saldo sekarang: Rp " . number_format($saldo_baru, 0, ',', '.')
+                            )
                             ->success()
                             ->send();
                     }),
