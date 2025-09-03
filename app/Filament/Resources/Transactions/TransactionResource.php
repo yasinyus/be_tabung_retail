@@ -19,7 +19,7 @@ class TransactionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static ?string $navigationLabel = 'Transactions';
+    protected static ?string $navigationLabel = 'Transaksi';
 
     protected static ?int $navigationSort = 7;
 
@@ -49,5 +49,11 @@ class TransactionResource extends Resource
             'create' => CreateTransaction::route('/create'),
             'edit' => EditTransaction::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+        return $user && in_array($user->role, ['admin_utama', 'keuangan']);
     }
 }

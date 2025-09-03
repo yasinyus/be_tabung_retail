@@ -29,31 +29,12 @@ class AuditForm
                     ->required()
                     ->maxLength(255),
 
-                Repeater::make('tabung')
+                TextInput::make('tabung')
                     ->label('Tabung')
-                    ->required()
-                    ->schema([
-                        Select::make('kode_tabung')
-                            ->label('Pilih Tabung')
-                            ->searchable()
-                            ->options(function () {
-                                return Tabung::pluck('kode_tabung', 'kode_tabung');
-                            })
-                            ->required(),
-                        
-                        TextInput::make('kondisi')
-                            ->label('Kondisi')
-                            ->placeholder('Baik, Rusak, Perlu Perbaikan, dll')
-                            ->maxLength(255),
-
-                        Textarea::make('catatan')
-                            ->label('Catatan')
-                            ->placeholder('Catatan khusus untuk tabung ini')
-                            ->maxLength(500),
-                    ])
-                    ->columns(3)
-                    ->minItems(1)
-                    ->addActionLabel('Tambah Tabung'),
+                    ->placeholder('Masukkan kode tabung atau daftar tabung')
+                    ->maxLength(1000)
+                    ->columnSpanFull()
+                    ->helperText('Contoh: TBG001, TBG002, TBG003 atau format lainnya'),
 
                 TextInput::make('nama')
                     ->label('Nama Auditor')

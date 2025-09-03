@@ -70,14 +70,20 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Resources\Deposits\DepositResource::class,
                 \App\Filament\Resources\Audits\AuditResource::class,
                 \App\Filament\Resources\Transactions\TransactionResource::class,
+                \App\Filament\Resources\Tagihans\TagihanResource::class,
             ])
             ->pages([
                 Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 \App\Filament\Widgets\StatsOverview::class,
                 \Filament\Widgets\AccountWidget::class,
+                // Temporarily disabled problematic widgets that cause childNodes errors:
+                // \App\Filament\Widgets\TabungActivityJavaScript::class,
+                // \App\Filament\Widgets\PelangganChart::class,
+                // \App\Filament\Widgets\MonthlyRegistrationsChart::class,
+                // \App\Filament\Widgets\TabungQrChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,

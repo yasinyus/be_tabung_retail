@@ -80,4 +80,10 @@ class TabungActivityResource extends Resource
     {
         return true; // Temporarily disable authorization for debugging
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+        return $user && in_array($user->role, ['admin_utama', 'admin_umum']);
+    }
 }

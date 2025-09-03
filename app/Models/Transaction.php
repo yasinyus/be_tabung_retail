@@ -17,6 +17,8 @@ class Transaction extends Model
         'transaction_date',
         'type',
         'total',
+        'harga',
+        'jumlah_tabung',
         'payment_method',
         'status',
         'notes'

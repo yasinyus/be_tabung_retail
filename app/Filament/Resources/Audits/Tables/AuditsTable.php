@@ -30,12 +30,25 @@ class AuditsTable
                 TextColumn::make('tabung')
                     ->label('Tabung')
                     ->formatStateUsing(function ($state) {
+                        // Handle both array and string cases for backward compatibility
                         if (is_array($state)) {
                             $codes = collect($state)->pluck('kode_tabung')->filter()->values();
                             if ($codes->count() > 2) {
                                 return $codes->take(2)->implode(', ') . ' (+' . ($codes->count() - 2) . ' lainnya)';
                             }
                             return $codes->implode(', ');
+                        } elseif (is_string($state) && !empty($state)) {
+                            // Try to decode as JSON first for backward compatibility
+                            $decoded = json_decode($state, true);
+                            if (is_array($decoded)) {
+                                $codes = collect($decoded)->pluck('kode_tabung')->filter()->values();
+                                if ($codes->count() > 2) {
+                                    return $codes->take(2)->implode(', ') . ' (+' . ($codes->count() - 2) . ' lainnya)';
+                                }
+                                return $codes->implode(', ');
+                            }
+                            // If not JSON, treat as plain string and limit display
+                            return strlen($state) > 50 ? substr($state, 0, 50) . '...' : $state;
                         }
                         return '-';
                     })
@@ -43,6 +56,12 @@ class AuditsTable
                     ->tooltip(function ($state) {
                         if (is_array($state)) {
                             return collect($state)->pluck('kode_tabung')->filter()->implode(', ');
+                        } elseif (is_string($state) && !empty($state)) {
+                            $decoded = json_decode($state, true);
+                            if (is_array($decoded)) {
+                                return collect($decoded)->pluck('kode_tabung')->filter()->implode(', ');
+                            }
+                            return $state;
                         }
                         return null;
                     }),

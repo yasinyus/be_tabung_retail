@@ -79,4 +79,10 @@ class GudangResource extends Resource
             'edit' => EditGudang::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+        return $user && in_array($user->role, ['admin_utama', 'admin_umum']);
+    }
 }

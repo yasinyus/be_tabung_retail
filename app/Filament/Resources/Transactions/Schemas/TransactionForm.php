@@ -18,25 +18,21 @@ class TransactionForm
         return $schema
             ->components([
                 TextInput::make('trx_id')
-                    ->label('Transaction ID')
+                    ->label('Transaction IDs')
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->default(fn () => 'TRX-' . strtoupper(uniqid()))
                     ->maxLength(50),
                     
-                Select::make('user_id')
-                    ->label('User')
-                    ->relationship('user', 'name')
+                TextInput::make('user_id')
+                    ->label('User ID')
                     ->default(Auth::id())
                     ->required()
-                    ->searchable()
-                    ->preload(),
+                    ->hidden(),
                     
                 Select::make('customer_id')
-                    ->label('Customer')
+                    ->label('Pelanggan')
                     ->relationship('customer', 'nama_pelanggan')
-                    ->searchable()
-                    ->preload()
                     ->nullable(),
                     
                 DateTimePicker::make('transaction_date')

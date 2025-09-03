@@ -6,7 +6,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Hidden;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 
 class TabungActivityForm
 {
@@ -22,13 +24,8 @@ class TabungActivityForm
                     ->placeholder('Contoh: Terima Tabung Dari Armada')
                     ->helperText('Jenis aktivitas yang dilakukan'),
 
-                Select::make('id_user')
-                    ->label('User')
-                    ->relationship('user', 'name')
-                    ->required()
-                    ->searchable()
-                    ->preload()
-                    ->helperText('Pilih user yang melakukan aktivitas'),
+                Hidden::make('id_user')
+                    ->default(Auth::id()),
 
                 TextInput::make('nama_petugas')
                     ->label('Nama Petugas')
@@ -61,12 +58,8 @@ class TabungActivityForm
                     ->default('Pending')
                     ->helperText('Status tabung saat aktivitas'),
 
-                TextInput::make('total_tabung')
-                    ->label('Total Tabung')
-                    ->numeric()
-                    ->required()
-                    ->default(0)
-                    ->helperText('Jumlah total tabung'),
+                Hidden::make('total_tabung')
+                    ->default(0),
 
                 TextInput::make('tanggal')
                     ->label('Tanggal')

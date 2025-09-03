@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Audits;
 use App\Filament\Resources\Audits\Pages\CreateAudit;
 use App\Filament\Resources\Audits\Pages\EditAudit;
 use App\Filament\Resources\Audits\Pages\ListAudits;
+use App\Filament\Resources\Audits\Pages\ViewAudit;
 use App\Filament\Resources\Audits\Schemas\AuditForm;
 use App\Filament\Resources\Audits\Tables\AuditsTable;
 use App\Models\Audit;
@@ -47,7 +48,14 @@ class AuditResource extends Resource
         return [
             'index' => ListAudits::route('/'),
             'create' => CreateAudit::route('/create'),
+            'view' => ViewAudit::route('/{record}'),
             'edit' => EditAudit::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+        return $user && in_array($user->role, ['admin_utama', 'auditor']);
     }
 }

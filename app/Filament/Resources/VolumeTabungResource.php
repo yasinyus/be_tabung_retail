@@ -53,4 +53,10 @@ class VolumeTabungResource extends Resource
             'edit' => Pages\EditVolumeTabung::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+        return $user && in_array($user->role, ['admin_utama']);
+    }
 }
