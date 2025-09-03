@@ -176,7 +176,7 @@ class TagihanResource extends Resource
                             Notification::make()
                                 ->title('Harga Satuan Tidak Valid!')
                                 ->body(
-                                    "Harga satuan tabung belum ditentukan atau bernilai 0.\n" .
+                                    "Harga satuan tabung belum ditentukan atau bernilai  0.\n" .
                                     "Silakan hubungi administrator untuk mengatur harga tabung pelanggan ini."
                                 )
                                 ->danger()
