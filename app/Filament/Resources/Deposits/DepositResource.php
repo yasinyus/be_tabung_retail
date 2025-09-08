@@ -53,6 +53,6 @@ class DepositResource extends Resource
     public static function shouldRegisterNavigation(): bool
     {
         $user = auth()->user();
-        return $user && in_array($user->role, ['admin_utama', 'keuangan']);
+        return $user && in_array($user->role, ['a', 'b']);
     }
 }

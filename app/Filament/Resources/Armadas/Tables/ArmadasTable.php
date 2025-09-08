@@ -10,6 +10,9 @@ use App\Exports\ArmadaExport;
 use App\Exports\ArmadaTemplateExport;
 use App\Imports\ArmadaImport;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -24,6 +27,14 @@ class ArmadasTable
     {
         return $table
             ->columns([
+                TextColumn::make('kode_kendaraan')
+                    ->label('Kode Kendaraan')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable()
+                    ->copyMessage('Kode kendaraan disalin!')
+                    ->weight('medium'),
+                    
                 TextColumn::make('nopol')
                     ->label('Nomor Polisi')
                     ->searchable()
@@ -32,7 +43,7 @@ class ArmadasTable
                     
                 TextColumn::make('kapasitas')
                     ->label('Kapasitas')
-                    ->suffix(' ton')
+                    ->suffix(' Tabung')
                     ->numeric()
                     ->sortable(),
                     
@@ -92,8 +103,60 @@ class ArmadasTable
                 Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
-                    ->url(fn ($record) => ArmadaResource::getUrl('edit', ['record' => $record]))
-                    ->color('info'),
+                    ->color('info')
+                    ->form([
+                        TextInput::make('kode_kendaraan')
+                            ->label('Kode Kendaraan')
+                            ->default(fn ($record) => $record->kode_kendaraan)
+                            ->disabled(),
+                            
+                        TextInput::make('nopol')
+                            ->label('Nomor Polisi')
+                            ->default(fn ($record) => $record->nopol)
+                            ->disabled(),
+                            
+                        TextInput::make('kapasitas')
+                            ->label('Kapasitas')
+                            ->default(fn ($record) => $record->kapasitas . ' tabung')
+                            ->disabled(),
+                            
+                        Select::make('tahun')
+                            ->label('Tahun Pembuatan')
+                            ->options(function () {
+                                $currentYear = date('Y');
+                                $startYear = $currentYear - 30;
+                                $endYear = $currentYear + 2;
+                                
+                                $years = [];
+                                for ($year = $endYear; $year >= $startYear; $year--) {
+                                    $years[$year] = $year;
+                                }
+                                
+                                return $years;
+                            })
+                            ->default(fn ($record) => $record->tahun)
+                            ->disabled(),
+                            
+                        Textarea::make('keterangan')
+                            ->label('Keterangan')
+                            ->default(fn ($record) => $record->keterangan)
+                            ->disabled()
+                            ->rows(3),
+                            
+                        TextInput::make('created_at')
+                            ->label('Dibuat Pada')
+                            ->default(fn ($record) => $record->created_at?->format('d-m-Y H:i:s'))
+                            ->disabled(),
+                            
+                        TextInput::make('updated_at')
+                            ->label('Diupdate Pada')
+                            ->default(fn ($record) => $record->updated_at?->format('d-m-Y H:i:s'))
+                            ->disabled(),
+                    ])
+                    ->modalHeading(fn ($record) => 'Detail Armada - ' . $record->nopol)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->modalWidth('4xl'),
                 Action::make('edit')
                     ->label('Edit')
                     ->icon('heroicon-o-pencil')

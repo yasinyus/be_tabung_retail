@@ -10,6 +10,9 @@ use App\Exports\GudangExport;
 use App\Exports\GudangTemplateExport;
 use App\Imports\GudangImport;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -89,8 +92,55 @@ class GudangsTable
                 Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
-                    ->url(fn ($record) => GudangResource::getUrl('edit', ['record' => $record]))
-                    ->color('info'),
+                    ->color('info')
+                    ->form([
+                        TextInput::make('kode_gudang')
+                            ->label('Kode Gudang')
+                            ->default(fn ($record) => $record->kode_gudang)
+                            ->disabled(),
+                            
+                        TextInput::make('nama_gudang')
+                            ->label('Nama Gudang')
+                            ->default(fn ($record) => $record->nama_gudang)
+                            ->disabled(),
+                            
+                        Select::make('tahun_gudang')
+                            ->label('Tahun Dibangun')
+                            ->options(function () {
+                                $currentYear = date('Y');
+                                $startYear = 1980;
+                                $endYear = $currentYear + 5;
+                                
+                                $years = [];
+                                for ($year = $endYear; $year >= $startYear; $year--) {
+                                    $years[$year] = $year;
+                                }
+                                
+                                return $years;
+                            })
+                            ->default(fn ($record) => $record->tahun_gudang)
+                            ->disabled(),
+                            
+                        Textarea::make('keterangan')
+                            ->label('Keterangan')
+                            ->default(fn ($record) => $record->keterangan)
+                            ->disabled()
+                            ->rows(3),
+                            
+                        TextInput::make('created_at')
+                            ->label('Dibuat Pada')
+                            ->default(fn ($record) => $record->created_at?->format('d-m-Y H:i:s'))
+                            ->disabled(),
+                            
+                        TextInput::make('updated_at')
+                            ->label('Diupdate Pada')
+                            ->default(fn ($record) => $record->updated_at?->format('d-m-Y H:i:s'))
+                            ->disabled(),
+                    ])
+                    ->modalHeading(fn ($record) => 'Detail Gudang - ' . $record->kode_gudang)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->modalWidth('4xl'),
                 Action::make('edit')
                     ->label('Edit')
                     ->icon('heroicon-o-pencil')

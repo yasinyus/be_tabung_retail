@@ -46,35 +46,6 @@ class VolumeTabungsTable
                     ->sortable()
                     ->label('Jumlah Tabung'),
                     
-                TextColumn::make('total_volume_tabung')
-                    ->getStateUsing(function ($record) {
-                        $tabungData = $record->tabung;
-                        $totalVolume = 0;
-                        
-                        if (is_array($tabungData)) {
-                            foreach ($tabungData as $tabung) {
-                                $totalVolume += floatval($tabung['volume'] ?? 0);
-                            }
-                        } elseif (is_string($tabungData)) {
-                            $decoded = json_decode($tabungData, true);
-                            if (is_array($decoded)) {
-                                foreach ($decoded as $tabung) {
-                                    $totalVolume += floatval($tabung['volume'] ?? 0);
-                                }
-                            }
-                        }
-                        
-                        return number_format($totalVolume, 1);
-                    })
-                    ->numeric()
-                    ->sortable()
-                    ->suffix(' m³')
-                    ->label('Total Volume Tabung'),
-                    
-                TextColumn::make('nama')
-                    ->searchable()
-                    ->label('Nama'),
-                    
                 TextColumn::make('keterangan')
                     ->searchable()
                     ->limit(50)
@@ -90,11 +61,34 @@ class VolumeTabungsTable
                     ->label('Keterangan')
                     ->toggleable(isToggledHiddenByDefault: true),
                     
-                TextColumn::make('volume')
-                    ->numeric(2)
-                    ->sortable()
-                    ->suffix(' m³')
-                    ->label('Volume'),
+                TextColumn::make('status')
+                    ->getStateUsing(function ($record) {
+                        $tabungData = $record->tabung;
+                        $statusCounts = ['kosong' => 0, 'isi' => 0];
+                        
+                        if (is_array($tabungData)) {
+                            foreach ($tabungData as $tabung) {
+                                $status = $tabung['status'] ?? 'kosong';
+                                if (isset($statusCounts[$status])) {
+                                    $statusCounts[$status]++;
+                                }
+                            }
+                        } elseif (is_string($tabungData)) {
+                            $decoded = json_decode($tabungData, true);
+                            if (is_array($decoded)) {
+                                foreach ($decoded as $tabung) {
+                                    $status = $tabung['status'] ?? 'kosong';
+                                    if (isset($statusCounts[$status])) {
+                                        $statusCounts[$status]++;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        return "Isi: {$statusCounts['isi']}, Kosong: {$statusCounts['kosong']}";
+                    })
+                    ->searchable()
+                    ->label('Status Tabung'),
                     
                 TextColumn::make('created_at')
                     ->dateTime('d/m/Y H:i')
@@ -147,7 +141,7 @@ class VolumeTabungsTable
                 ]),
             ])
             ->defaultSort('tanggal', 'desc')
-            ->emptyStateHeading('Belum ada data volume tabung')
+            ->emptyStateHeading('Belum ada data status tabung')
             ->emptyStateDescription('Belum ada data volume tabung yang tercatat dalam sistem.')
             ->striped();
     }

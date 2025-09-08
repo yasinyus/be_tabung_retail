@@ -15,9 +15,12 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
 use App\Models\Transaction;
 use App\Models\SaldoPelanggan;
+use App\Models\Deposit;
+use App\Filament\Resources\Deposits\DepositResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -27,7 +30,11 @@ class TagihanResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static ?string $navigationLabel = 'Tagihan';
+    protected static ?string $navigationLabel = 'Transaksi Pelanggan';
+    
+    protected static ?string $modelLabel = 'Transaksi Pelanggan';
+    
+    protected static ?string $pluralModelLabel = 'Transaksi Pelanggan';
 
     protected static ?int $navigationSort = 8;
 
@@ -39,7 +46,11 @@ class TagihanResource extends Resource
             ->query(
                 Tagihan::query()
                     ->leftJoin('saldo_pelanggans', 'pelanggans.kode_pelanggan', '=', 'saldo_pelanggans.kode_pelanggan')
-                    ->select('pelanggans.*', 'saldo_pelanggans.saldo')
+                    ->select(
+                        'pelanggans.*', 
+                        'saldo_pelanggans.saldo as saldo_amount',
+                        'saldo_pelanggans.id as saldo_id'
+                    )
             )
             ->columns([
                 TextColumn::make('row_number')
@@ -56,11 +67,15 @@ class TagihanResource extends Resource
                     ->searchable()
                     ->sortable(),
                     
-                TextColumn::make('saldo')
+                TextColumn::make('saldo_amount')
                     ->label('Saldo')
                     ->money('IDR')
                     ->sortable()
-                    ->color(fn ($record) => $record->saldo < 0 ? 'danger' : ($record->saldo > 0 ? 'success' : 'gray')),
+                    ->getStateUsing(fn ($record) => $record->saldo_amount ?? 0)
+                    ->color(function ($record) {
+                        $saldo = $record->saldo_amount ?? 0;
+                        return $saldo < 0 ? 'danger' : ($saldo > 0 ? 'success' : 'gray');
+                    }),
                     
                 TextColumn::make('created_at')
                     ->label('Dibuat')
@@ -86,6 +101,10 @@ class TagihanResource extends Resource
                 Filter::make('saldo_nol')
                     ->label('Saldo Nol')
                     ->query(fn (Builder $query): Builder => $query->where('saldo_pelanggans.saldo', '=', 0)),
+                    
+                Filter::make('belum_ada_saldo')
+                    ->label('Belum Ada Data Saldo')
+                    ->query(fn (Builder $query): Builder => $query->whereNull('saldo_pelanggans.saldo')),
             ])
             ->actions([
                 Action::make('tagihan')
@@ -112,10 +131,15 @@ class TagihanResource extends Resource
                         TextInput::make('jumlah_tabung')
                             ->label('Jumlah Tabung')
                             ->numeric()
-                            ->required()
+                            ->required(fn ($record) => $record->jenis_pelanggan !== 'agen')
                             ->minValue(1)
                             ->reactive()
+                            ->hidden(fn ($record) => $record->jenis_pelanggan === 'agen')
                             ->afterStateUpdated(function ($state, $set, $get, $record) {
+                                if ($record->jenis_pelanggan === 'agen') {
+                                    $set('total_harga', 0);
+                                    return;
+                                }
                                 $harga_satuan = $record->harga_tabung ?? 0;
                                 $total = $state * $harga_satuan;
                                 $set('total_harga', $total);
@@ -131,13 +155,18 @@ class TagihanResource extends Resource
                             ->default(fn ($record) => $record->harga_tabung ?? 0)
                             ->numeric()
                             ->prefix('Rp')
-                            ->disabled(),
+                            ->disabled()
+                            ->hidden(fn ($record) => $record->jenis_pelanggan === 'agen'),
                             
                         TextInput::make('total_harga')
                             ->label('Total Harga')
                             ->numeric()
                             ->prefix('Rp')
-                            ->disabled(),
+                            ->disabled(fn ($record) => $record->jenis_pelanggan !== 'agen')
+                            ->required(fn ($record) => $record->jenis_pelanggan === 'agen')
+                            ->minValue(1)
+                            ->placeholder(fn ($record) => $record->jenis_pelanggan === 'agen' ? 'Masukkan total harga' : null)
+                            ->helperText(fn ($record) => $record->jenis_pelanggan === 'agen' ? 'Masukkan total harga untuk transaksi agen' : 'Total harga dihitung otomatis'),
                             
                         Select::make('payment_method')
                             ->label('Metode Pembayaran')
@@ -167,31 +196,50 @@ class TagihanResource extends Resource
                             ->default(Auth::id()),
                     ])
                     ->action(function (array $data, $record) {
-                        $jumlah_tabung = $data['jumlah_tabung'];
-                        $harga_satuan = $record->harga_tabung ?? 0;
-                        $total_harga = $jumlah_tabung * $harga_satuan;
-                        
-                        // Validasi harga satuan tidak boleh 0
-                        if ($harga_satuan <= 0) {
-                            Notification::make()
-                                ->title('Harga Satuan Tidak Valid!')
-                                ->body(
-                                    "Harga satuan tabung belum ditentukan atau bernilai  0.\n" .
-                                    "Silakan hubungi administrator untuk mengatur harga tabung pelanggan ini."
-                                )
-                                ->danger()
-                                ->persistent()
-                                ->send();
-                                
-                            return; // Stop execution
+                        // Untuk agen, gunakan input total_harga langsung
+                        if ($record->jenis_pelanggan === 'agen') {
+                            $jumlah_tabung = null;
+                            $harga_satuan = null;
+                            $total_harga = $data['total_harga'] ?? 0;
+                            
+                            // Validasi total harga untuk agen tidak boleh 0
+                            if ($total_harga <= 0) {
+                                Notification::make()
+                                    ->title('Total Harga Tidak Valid!')
+                                    ->body('Total harga harus lebih dari 0 untuk transaksi agen.')
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+                                    
+                                return; // Stop execution
+                            }
+                        } else {
+                            $jumlah_tabung = $data['jumlah_tabung'];
+                            $harga_satuan = $record->harga_tabung ?? 0;
+                            $total_harga = $jumlah_tabung * $harga_satuan;
+                            
+                            // Validasi harga satuan tidak boleh 0 (hanya untuk non-agen)
+                            if ($harga_satuan <= 0) {
+                                Notification::make()
+                                    ->title('Harga Satuan Tidak Valid!')
+                                    ->body(
+                                        "Harga satuan tabung belum ditentukan atau bernilai 0.\n" .
+                                        "Silakan hubungi administrator untuk mengatur harga tabung pelanggan ini."
+                                    )
+                                    ->danger()
+                                    ->persistent()
+                                    ->send();
+                                    
+                                return; // Stop execution
+                            }
                         }
                         
                         // Cek saldo pelanggan terlebih dahulu
                         $saldoPelanggan = SaldoPelanggan::where('kode_pelanggan', $record->kode_pelanggan)->first();
                         $saldo_saat_ini = $saldoPelanggan ? $saldoPelanggan->saldo : 0;
                         
-                        // Validasi apakah saldo mencukupi
-                        if ($saldo_saat_ini < $total_harga) {
+                        // Validasi saldo hanya untuk non-agen (agen boleh minus)
+                        if ($record->jenis_pelanggan !== 'agen' && $total_harga > 0 && $saldo_saat_ini < $total_harga) {
                             $kekurangan = $total_harga - $saldo_saat_ini;
                             
                             Notification::make()
@@ -202,13 +250,13 @@ class TagihanResource extends Resource
                                     "Kekurangan: Rp " . number_format($kekurangan, 0, ',', '.')
                                 )
                                 ->danger()
-                                ->persistent() // Notifikasi akan tetap tampil sampai ditutup manual
+                                ->persistent()
                                 ->send();
                                 
-                            return; // Stop execution, tidak melanjutkan ke penyimpanan
+                            return; // Stop execution
                         }
                         
-                        // Jika saldo mencukupi, lanjutkan simpan transaksi
+                        // Simpan transaksi
                         Transaction::create([
                             'trx_id' => 'TRX-' . strtoupper(uniqid()),
                             'user_id' => Auth::id(),
@@ -223,28 +271,49 @@ class TagihanResource extends Resource
                             'notes' => $data['notes'],
                         ]);
                         
-                        // Update saldo pelanggan (kurangi saldo dengan total harga)
-                        $saldo_baru = $saldo_saat_ini - $total_harga;
-                        
-                        if ($saldoPelanggan) {
-                            $saldoPelanggan->update(['saldo' => $saldo_baru]);
+                        // Update saldo untuk semua jenis pelanggan jika ada total harga
+                        if ($total_harga > 0) {
+                            $saldo_baru = $saldo_saat_ini - $total_harga;
+                            
+                            if ($saldoPelanggan) {
+                                $saldoPelanggan->update(['saldo' => $saldo_baru]);
+                            } else {
+                                SaldoPelanggan::create([
+                                    'kode_pelanggan' => $record->kode_pelanggan,
+                                    'saldo' => $saldo_baru
+                                ]);
+                            }
+                            
+                            // Notifikasi berdasarkan jenis pelanggan
+                            if ($record->jenis_pelanggan === 'agen') {
+                                Notification::make()
+                                    ->title('Transaksi Agen Berhasil Dibuat')
+                                    ->body(
+                                        "Transaksi agen sebesar Rp " . number_format($total_harga, 0, ',', '.') . " berhasil disimpan.\n" .
+                                        "Saldo sebelumnya: Rp " . number_format($saldo_saat_ini, 0, ',', '.') . "\n" .
+                                        "Saldo sekarang: Rp " . number_format($saldo_baru, 0, ',', '.')
+                                    )
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('Transaksi Berhasil Dibuat')
+                                    ->body(
+                                        "Transaksi pembelian {$jumlah_tabung} tabung sebesar Rp " . number_format($total_harga, 0, ',', '.') . " berhasil disimpan.\n" .
+                                        "Saldo sebelumnya: Rp " . number_format($saldo_saat_ini, 0, ',', '.') . "\n" .
+                                        "Saldo sekarang: Rp " . number_format($saldo_baru, 0, ',', '.')
+                                    )
+                                    ->success()
+                                    ->send();
+                            }
                         } else {
-                            // Jika belum ada record saldo, buat baru dengan saldo minus
-                            SaldoPelanggan::create([
-                                'kode_pelanggan' => $record->kode_pelanggan,
-                                'saldo' => $saldo_baru
-                            ]);
+                            // Jika total harga 0, hanya buat record transaksi tanpa update saldo
+                            Notification::make()
+                                ->title('Transaksi Berhasil Dibuat')
+                                ->body("Transaksi untuk {$record->nama_pelanggan} berhasil disimpan tanpa perubahan saldo.")
+                                ->success()
+                                ->send();
                         }
-                        
-                        Notification::make()
-                            ->title('Transaksi Berhasil Dibuat')
-                            ->body(
-                                "Transaksi pembelian {$jumlah_tabung} tabung sebesar Rp " . number_format($total_harga, 0, ',', '.') . " berhasil disimpan.\n" .
-                                "Saldo sebelumnya: Rp " . number_format($saldo_saat_ini, 0, ',', '.') . "\n" .
-                                "Saldo sekarang: Rp " . number_format($saldo_baru, 0, ',', '.')
-                            )
-                            ->success()
-                            ->send();
                     }),
                     
                 Action::make('lihat')
@@ -252,39 +321,107 @@ class TagihanResource extends Resource
                     ->icon('heroicon-o-eye')
                     ->color('info')
                     ->form([
-                        TextInput::make('kode_pelanggan')
+                        
+                            
+                        ViewField::make('pelanggan_history')
+                            ->label('')
+                            ->view('filament.components.pelanggan-history')
+                            ->viewData(function ($record) {
+                                // Get deposit history
+                                $deposits = Deposit::where('kode_pelanggan', $record->kode_pelanggan)
+                                    ->orderBy('created_at', 'desc')
+                                    ->get();
+                                
+                                // Get transaction history - menggunakan relationship customer
+                                $transactions = Transaction::with('customer')
+                                    ->whereHas('customer', function($query) use ($record) {
+                                        $query->where('kode_pelanggan', $record->kode_pelanggan);
+                                    })
+                                    ->orderBy('created_at', 'desc')
+                                    ->get();
+                                
+                                return [
+                                    'deposits' => $deposits,
+                                    'transactions' => $transactions,
+                                    'pelanggan' => $record
+                                ];
+                            })
+                            ->columnSpanFull(),
+                    ])
+                    ->modalHeading(fn ($record) => 'Detail Pelanggan - ' . $record->nama_pelanggan)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->modalWidth('7xl'),
+                    
+                Action::make('tambah_deposit')
+                    ->label('Tambah Deposit')
+                    ->icon('heroicon-o-plus-circle')
+                    ->color('success')
+                    ->form([
+                        Hidden::make('kode_pelanggan')
+                            ->default(fn ($record) => $record->kode_pelanggan),
+                            
+                        Hidden::make('nama_pelanggan')
+                            ->default(fn ($record) => $record->nama_pelanggan),
+                            
+                        TextInput::make('kode_pelanggan_display')
                             ->label('Kode Pelanggan')
                             ->default(fn ($record) => $record->kode_pelanggan)
                             ->disabled(),
                             
-                        TextInput::make('nama_pelanggan')
+                        TextInput::make('nama_pelanggan_display')
                             ->label('Nama Pelanggan')
                             ->default(fn ($record) => $record->nama_pelanggan)
                             ->disabled(),
                             
-                        // TextInput::make('alamat')
-                        //     ->label('Alamat')
-                        //     ->default(fn ($record) => $record->alamat)
-                        //     ->disabled(),
+                        TextInput::make('saldo')
+                            ->label('Jumlah Deposit')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->required()
+                            ->minValue(1)
+                            ->placeholder('Masukkan jumlah deposit'),
                             
-                        // TextInput::make('telepon')
-                        //     ->label('Telepon')
-                        //     ->default(fn ($record) => $record->telepon)
-                        //     ->disabled(),
+                        DatePicker::make('tanggal')
+                            ->label('Tanggal')
+                            ->required()
+                            ->default(now()),
                             
-                        TextInput::make('harga_tabung')
-                            ->label('Harga Tabung')
-                            ->default(fn ($record) => 'Rp ' . number_format($record->harga_tabung, 0, ',', '.'))
-                            ->disabled(),
-                            
-                        TextInput::make('saldo_display')
-                            ->label('Saldo')
-                            ->default(fn ($record) => 'Rp ' . number_format($record->saldo, 0, ',', '.'))
-                            ->disabled(),
+                        Textarea::make('keterangan')
+                            ->label('Keterangan')
+                            ->placeholder('Catatan tambahan untuk deposit ini...')
+                            ->rows(3),
                     ])
-                    ->modalHeading('Detail Pelanggan')
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Tutup'),
+                    ->action(function (array $data, $record) {
+                        // Import model yang diperlukan
+                        $depositData = [
+                            'pelanggan_id' => $record->id,
+                            'kode_pelanggan' => $data['kode_pelanggan'],
+                            'nama_pelanggan' => $data['nama_pelanggan'],
+                            'saldo' => $data['saldo'],
+                            'tanggal' => $data['tanggal'],
+                            'keterangan' => $data['keterangan'] ?? null,
+                        ];
+                        
+                        // Buat deposit baru - model observer akan otomatis update saldo
+                        Deposit::create($depositData);
+                        
+                        // Notifikasi sukses
+                        Notification::make()
+                            ->title('Deposit Berhasil Ditambahkan!')
+                            ->body(
+                                "Deposit sebesar Rp " . number_format($data['saldo'], 0, ',', '.') . 
+                                " berhasil ditambahkan untuk pelanggan " . $record->nama_pelanggan
+                            )
+                            ->success()
+                            ->send();
+                            
+                        // Redirect ke halaman tagihan
+                        return redirect()->to('/admin/tagihans');
+                    })
+                    ->modalHeading(fn ($record) => 'Tambah Deposit - ' . $record->nama_pelanggan)
+                    ->modalSubmitActionLabel('Simpan Deposit')
+                    ->modalWidth('md'),
             ])
             ->defaultSort('saldo', 'asc'); // Sort by saldo ascending (minus first)
     }

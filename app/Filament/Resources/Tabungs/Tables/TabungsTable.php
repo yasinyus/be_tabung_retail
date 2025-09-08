@@ -6,10 +6,14 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Action;
 use App\Filament\Resources\Tabungs\TabungResource;
+use App\Models\TabungActivity;
 use App\Exports\TabungExport;
 use App\Exports\TabungTemplateExport;
 use App\Imports\TabungImport;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\ViewField;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -82,8 +86,57 @@ class TabungsTable
                 Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
-                    ->url(fn ($record) => TabungResource::getUrl('edit', ['record' => $record]))
-                    ->color('info'),
+                    ->color('info')
+                    ->form([
+                        \Filament\Forms\Components\TextInput::make('kode_tabung')
+                            ->label('Kode Tabung')
+                            ->default(fn ($record) => $record->kode_tabung)
+                            ->disabled(),
+                            
+                        \Filament\Forms\Components\TextInput::make('seri_tabung')
+                            ->label('Seri Tabung')
+                            ->default(fn ($record) => $record->seri_tabung)
+                            ->disabled(),
+                            
+                        \Filament\Forms\Components\TextInput::make('tahun')
+                            ->label('Tahun Produksi')
+                            ->default(fn ($record) => $record->tahun)
+                            ->disabled(),
+                            
+                        \Filament\Forms\Components\Textarea::make('keterangan')
+                            ->label('Keterangan')
+                            ->default(fn ($record) => $record->keterangan)
+                            ->disabled()
+                            ->rows(3),
+                            
+                        \Filament\Forms\Components\TextInput::make('created_at')
+                            ->label('Dibuat Pada')
+                            ->default(fn ($record) => $record->created_at?->format('d-m-Y H:i:s'))
+                            ->disabled(),
+                            
+                        \Filament\Forms\Components\TextInput::make('updated_at')
+                            ->label('Diupdate Pada')
+                            ->default(fn ($record) => $record->updated_at?->format('d-m-Y H:i:s'))
+                            ->disabled(),
+                            
+                        \Filament\Forms\Components\ViewField::make('aktivitas_tabung')
+                            ->label('Riwayat Aktivitas Tabung')
+                            ->view('filament.components.tabung-activity-table')
+                            ->viewData(function ($record) {
+                                // Get activities yang memiliki kode tabung ini dalam array JSON
+                                $activities = TabungActivity::where(function($query) use ($record) {
+                                    $query->whereRaw("JSON_SEARCH(tabung, 'one', ?) IS NOT NULL", [$record->kode_tabung]);
+                                })
+                                ->orderBy('created_at', 'desc')
+                                ->get();
+                                
+                                return ['activities' => $activities];
+                            }),
+                    ])
+                    ->modalHeading(fn ($record) => 'Detail Tabung - ' . $record->kode_tabung)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->modalWidth('6xl'),
                 Action::make('edit')
                     ->label('Edit')
                     ->icon('heroicon-o-pencil')

@@ -37,7 +37,7 @@ class ViewVolumeTabung extends ViewRecord
                 $tabungList[] = [
                     'no' => $index + 1,
                     'qr_code' => $tabung['qr_code'] ?? '',
-                    'volume' => $tabung['volume'] ?? 0,
+                    'status' => $tabung['status'] ?? 'kosong',
                 ];
             }
         }

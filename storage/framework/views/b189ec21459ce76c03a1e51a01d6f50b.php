@@ -1,6 +1,15 @@
-<x-filament-panels::page>
+<?php if (isset($component)) { $__componentOriginal166a02a7c5ef5a9331faf66fa665c256 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal166a02a7c5ef5a9331faf66fa665c256 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'filament-panels::components.page.index','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('filament-panels::page'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <div class="space-y-8">
-        {{-- Header Volume Tabung --}}
+        
         <div class="bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-8">
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">
                 📊 Informasi Status Tabung
@@ -10,63 +19,68 @@
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">ID Status:</label>
                     <p class="text-base text-gray-900 dark:text-white font-mono bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-md">
-                        #{{ $record->id }}
+                        #<?php echo e($record->id); ?>
+
                     </p>
                 </div>
                 
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Tanggal Pengecekan:</label>
                     <p class="text-base text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-md font-mono">
-                        📅 {{ $record->tanggal->format('d/m/Y') }}
+                        📅 <?php echo e($record->tanggal->format('d/m/Y')); ?>
+
                     </p>
                 </div>
                 
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Lokasi:</label>
                     <p class="text-base text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-md">
-                        📍 {{ $record->lokasi }}
+                        📍 <?php echo e($record->lokasi); ?>
+
                     </p>
                 </div>
                 
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Nama Petugas:</label>
                     <p class="text-base text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-md">
-                        👤 {{ $record->nama }}
+                        👤 <?php echo e($record->nama); ?>
+
                     </p>
                 </div>
                 
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Jumlah Tabung:</label>
                     <p class="text-xl font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-md border border-green-200 dark:border-green-800">
-                        {{ count($tabungList) }} unit
+                        <?php echo e(count($tabungList)); ?> unit
                     </p>
                 </div>
                 
-                @if($record->keterangan)
+                <!--[if BLOCK]><![endif]--><?php if($record->keterangan): ?>
                 <div class="space-y-2 md:col-span-2 xl:col-span-3">
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Keterangan:</label>
                     <div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
                         <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                            📝 {{ $record->keterangan }}
+                            📝 <?php echo e($record->keterangan); ?>
+
                         </p>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </div>
         </div>
         
-        {{-- Daftar Tabung --}}
+        
         <div class="bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-8 py-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-b border-gray-200 dark:border-gray-700">
                 <h4 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                     🏷️ Daftar Tabung
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                        {{ count($tabungList) }} item
+                        <?php echo e(count($tabungList)); ?> item
                     </span>
                 </h4>
             </div>
             
-            @if(count($tabungList) > 0)
+            <!--[if BLOCK]><![endif]--><?php if(count($tabungList) > 0): ?>
                 <div class="overflow-x-auto">
                     <table class="min-w-full">
                         <thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -83,47 +97,49 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                            @foreach($tabungList as $tabung)
+                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $tabungList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tabung): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
                                     <td class="px-8 py-5 whitespace-nowrap border-r border-gray-200 dark:border-gray-700">
                                         <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-bold">
-                                            {{ $tabung['no'] }}
+                                            <?php echo e($tabung['no']); ?>
+
                                         </span>
                                     </td>
                                     <td class="px-8 py-5 whitespace-nowrap border-r border-gray-200 dark:border-gray-700">
                                         <div class="flex items-center space-x-3">
                                             <span class="text-2xl">🏷️</span>
                                             <span class="text-base font-mono font-semibold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-lg">
-                                                {{ $tabung['qr_code'] }}
+                                                <?php echo e($tabung['qr_code']); ?>
+
                                             </span>
                                         </div>
                                     </td>
                                     <td class="px-8 py-5 whitespace-nowrap">
-                                        @if($tabung['status'] === 'isi')
+                                        <!--[if BLOCK]><![endif]--><?php if($tabung['status'] === 'isi'): ?>
                                             <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800 border border-green-200">
                                                 ✅ Isi
                                             </span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-red-100 text-red-800 border border-red-200">
                                                 ❌ Kosong
                                             </span>
-                                        @endif
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     </td>
                                 </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                         </tbody>
                     </table>
                 </div>
-            @else
+            <?php else: ?>
                 <div class="px-8 py-12 text-center">
                     <div class="text-6xl mb-4">📦</div>
                     <p class="text-lg text-gray-500 dark:text-gray-400 font-medium">Tidak ada data tabung untuk volume ini</p>
                     <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Silakan tambahkan data tabung terlebih dahulu</p>
                 </div>
-            @endif
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
         </div>
         
-        {{-- Statistik Status --}}
+        
         <div class="bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-8">
             <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-700 pb-3 flex items-center gap-3">
                 📈 Statistik Status
@@ -132,19 +148,19 @@
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Total Tabung Berisi:</label>
                     <p class="text-lg font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-4 py-3 rounded-lg border border-green-200 dark:border-green-700">
-                        🟢 {{ collect($tabungList)->where('status', 'isi')->count() }} unit
+                        🟢 <?php echo e(collect($tabungList)->where('status', 'isi')->count()); ?> unit
                     </p>
                 </div>
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Total Tabung Kosong:</label>
                     <p class="text-lg font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-4 py-3 rounded-lg border border-red-200 dark:border-red-700">
-                        🔴 {{ collect($tabungList)->where('status', 'kosong')->count() }} unit
+                        🔴 <?php echo e(collect($tabungList)->where('status', 'kosong')->count()); ?> unit
                     </p>
                 </div>
             </div>
         </div>
         
-        {{-- Informasi Timestamp --}}
+        
         <div class="bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-8">
             <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-700 pb-3 flex items-center gap-3">
                 ⏰ Informasi Waktu
@@ -153,10 +169,21 @@
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Data Dibuat:</label>
                     <p class="text-base text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-4 py-3 rounded-lg font-mono border border-gray-200 dark:border-gray-700">
-                        🕐 {{ $record->created_at->format('d/m/Y H:i:s') }}
+                        🕐 <?php echo e($record->created_at->format('d/m/Y H:i:s')); ?>
+
                     </p>
                 </div>
             </div>
         </div>
     </div>
-</x-filament-panels::page>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal166a02a7c5ef5a9331faf66fa665c256)): ?>
+<?php $attributes = $__attributesOriginal166a02a7c5ef5a9331faf66fa665c256; ?>
+<?php unset($__attributesOriginal166a02a7c5ef5a9331faf66fa665c256); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal166a02a7c5ef5a9331faf66fa665c256)): ?>
+<?php $component = $__componentOriginal166a02a7c5ef5a9331faf66fa665c256; ?>
+<?php unset($__componentOriginal166a02a7c5ef5a9331faf66fa665c256); ?>
+<?php endif; ?>
+<?php /**PATH C:\Users\yasin\OneDrive\Desktop\ADMIN-TABUNG\resources\views/filament/resources/volume-tabung-resource/pages/view-volume-tabung.blade.php ENDPATH**/ ?>

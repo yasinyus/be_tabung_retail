@@ -12,6 +12,7 @@ class Armada extends Model
     use HasFactory;
 
     protected $fillable = [
+        'kode_kendaraan',
         'nopol',
         'kapasitas',
         'tahun',

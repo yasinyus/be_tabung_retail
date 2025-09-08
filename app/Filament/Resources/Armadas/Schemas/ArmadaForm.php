@@ -13,6 +13,15 @@ class ArmadaForm
     {
         return $schema
             ->components([
+                TextInput::make('kode_kendaraan')
+                    ->label('Kode Kendaraan')
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(20)
+                    ->placeholder('Contoh: KC0001')
+                    ->helperText('Kode unik untuk kendaraan')
+                    ->validationAttribute('kode kendaraan'),
+                    
                 TextInput::make('nopol')
                     ->label('Nomor Polisi')
                     ->required()
@@ -24,14 +33,14 @@ class ArmadaForm
                     ->validationAttribute('nomor polisi'),
                     
                 TextInput::make('kapasitas')
-                    ->label('Kapasitas (Ton)')
+                    ->label('Kapasitas (Tabung)')
                     ->required()
                     ->numeric()
                     ->minValue(0)
-                    ->maxValue(50)
-                    ->placeholder('Contoh: 5')
-                    ->helperText('Kapasitas angkut dalam ton')
-                    ->suffix('ton'),
+                    ->maxValue(500)
+                    ->placeholder('Contoh: 50')
+                    ->helperText('Kapasitas angkut dalam tabung')
+                    ->suffix('tabung'),
                     
                 Select::make('tahun')
                     ->label('Tahun Pembuatan')

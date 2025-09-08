@@ -10,6 +10,9 @@ use App\Exports\PelangganExport;
 use App\Exports\PelangganTemplateExport;
 use App\Imports\PelangganImport;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -97,8 +100,62 @@ class PelanggansTable
                 Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
-                    ->url(fn ($record) => PelangganResource::getUrl('edit', ['record' => $record]))
-                    ->color('info'),
+                    ->color('info')
+                    ->form([
+                        TextInput::make('kode_pelanggan')
+                            ->label('Kode Pelanggan')
+                            ->default(fn ($record) => $record->kode_pelanggan)
+                            ->disabled(),
+                            
+                        TextInput::make('nama_pelanggan')
+                            ->label('Nama Pelanggan')
+                            ->default(fn ($record) => $record->nama_pelanggan)
+                            ->disabled(),
+                            
+                        Textarea::make('lokasi_pelanggan')
+                            ->label('Lokasi Pelanggan')
+                            ->default(fn ($record) => $record->lokasi_pelanggan)
+                            ->disabled()
+                            ->rows(3),
+                            
+                        TextInput::make('harga_tabung')
+                            ->label('Harga Tabung')
+                            ->default(fn ($record) => 'Rp ' . number_format($record->harga_tabung, 0, ',', '.'))
+                            ->disabled(),
+                            
+                        TextInput::make('email')
+                            ->label('Email')
+                            ->default(fn ($record) => $record->email)
+                            ->disabled(),
+                            
+                        Select::make('jenis_pelanggan')
+                            ->label('Jenis Pelanggan')
+                            ->options([
+                                'umum' => 'Umum',
+                                'agen' => 'Agen',
+                            ])
+                            ->default(fn ($record) => $record->jenis_pelanggan)
+                            ->disabled(),
+                            
+                        TextInput::make('penanggung_jawab')
+                            ->label('Penanggung Jawab')
+                            ->default(fn ($record) => $record->penanggung_jawab)
+                            ->disabled(),
+                            
+                        TextInput::make('created_at')
+                            ->label('Dibuat Pada')
+                            ->default(fn ($record) => $record->created_at?->format('d-m-Y H:i:s'))
+                            ->disabled(),
+                            
+                        TextInput::make('updated_at')
+                            ->label('Diupdate Pada')
+                            ->default(fn ($record) => $record->updated_at?->format('d-m-Y H:i:s'))
+                            ->disabled(),
+                    ])
+                    ->modalHeading(fn ($record) => 'Detail Pelanggan - ' . $record->kode_pelanggan)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->modalWidth('4xl'),
                 Action::make('edit')
                     ->label('Edit')
                     ->icon('heroicon-o-pencil')

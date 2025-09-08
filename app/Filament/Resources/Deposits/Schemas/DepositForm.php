@@ -23,6 +23,15 @@ class DepositForm
                     ->searchable()
                     ->required()
                     ->reactive()
+                    ->default(function () {
+                        // Auto-select pelanggan jika ada parameter kode_pelanggan
+                        $kode_pelanggan = request()->get('kode_pelanggan');
+                        if ($kode_pelanggan) {
+                            $pelanggan = Pelanggan::where('kode_pelanggan', $kode_pelanggan)->first();
+                            return $pelanggan ? $pelanggan->id : null;
+                        }
+                        return null;
+                    })
                     ->afterStateUpdated(function (callable $set, $state) {
                         if ($state) {
                             $pelanggan = Pelanggan::find($state);
@@ -36,12 +45,24 @@ class DepositForm
                 TextInput::make('kode_pelanggan')
                     ->label('Kode Pelanggan')
                     ->disabled()
-                    ->dehydrated(true),
+                    ->dehydrated(true)
+                    ->default(function () {
+                        $kode_pelanggan = request()->get('kode_pelanggan');
+                        return $kode_pelanggan ?: null;
+                    }),
                     
                 TextInput::make('nama_pelanggan')
                     ->label('Nama Pelanggan')
                     ->disabled()
-                    ->dehydrated(true),
+                    ->dehydrated(true)
+                    ->default(function () {
+                        $kode_pelanggan = request()->get('kode_pelanggan');
+                        if ($kode_pelanggan) {
+                            $pelanggan = Pelanggan::where('kode_pelanggan', $kode_pelanggan)->first();
+                            return $pelanggan ? $pelanggan->nama_pelanggan : null;
+                        }
+                        return null;
+                    }),
                     
                 TextInput::make('saldo')
                     ->label('Deposit/Saldo')
