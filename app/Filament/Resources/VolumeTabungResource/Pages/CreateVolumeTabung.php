@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateVolumeTabung extends CreateRecord
 {
     protected static string $resource = VolumeTabungResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

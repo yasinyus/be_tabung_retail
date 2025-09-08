@@ -3,6 +3,11 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Auth\Events\Login;
+use App\Listeners\HandleUserLogout;
+use App\Listeners\HandleUserLogin;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +27,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register login event listener
+        Event::listen(
+            Login::class,
+            HandleUserLogin::class,
+        );
+        
+        // Register logout event listener
+        Event::listen(
+            Logout::class,
+            HandleUserLogout::class,
+        );
     }
 }

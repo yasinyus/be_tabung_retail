@@ -94,6 +94,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\PreventDoubleLogin::class, // ✅ RE-ENABLED PREVENT DOUBLE LOGIN
             ])
             ->authMiddleware([
                 Authenticate::class,     // ✅ ENABLE AUTH MIDDLEWARE

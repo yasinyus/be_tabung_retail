@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateTabung extends CreateRecord
 {
     protected static string $resource = TabungResource::class;
+    
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

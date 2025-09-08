@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'api.role' => \App\Http\Middleware\CheckApiRole::class,
+            'prevent.double.login' => \App\Http\Middleware\PreventDoubleLogin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -7,6 +7,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Hidden;
 use Filament\Schemas\Schema;
 use App\Models\Tabung;
 use Illuminate\Support\Facades\Auth;
@@ -29,12 +30,47 @@ class AuditForm
                     ->required()
                     ->maxLength(255),
 
-                TextInput::make('tabung')
-                    ->label('Tabung')
-                    ->placeholder('Masukkan kode tabung atau daftar tabung')
-                    ->maxLength(1000)
+                Repeater::make('tabung_items')
+                    ->label('Daftar Tabung')
+                    ->schema([
+                        TextInput::make('qr_code')
+                            ->label('QR Code/ID Tabung')
+                            ->required()
+                            ->placeholder('Scan atau masukkan QR code tabung'),
+                        
+                        Select::make('status')
+                            ->label('Status Tabung')
+                            ->options([
+                                'Kosong' => 'Kosong',
+                                'Isi' => 'Isi',
+                            ])
+                            ->required()
+                            ->default('Kosong')
+                            ->helperText('Status tabung saat audit'),
+                    ])
+                    ->defaultItems(1)
+                    ->addActionLabel('Tambah Tabung')
+                    ->reorderable()
+                    ->collapsible()
                     ->columnSpanFull()
-                    ->helperText('Contoh: TBG001, TBG002, TBG003 atau format lainnya'),
+                    ->helperText('Daftar QR code atau ID tabung yang diaudit')
+                    ->afterStateHydrated(function ($component, $state, $record) {
+                        if ($record && $record->tabung) {
+                            // Parse the JSON from tabung column
+                            $tabungData = is_string($record->tabung) ? json_decode($record->tabung, true) : $record->tabung;
+                            
+                            if (is_array($tabungData)) {
+                                $formattedData = array_map(function ($item) {
+                                    return [
+                                        'qr_code' => $item['qr_code'] ?? '',
+                                        'status' => (isset($item['volume']) && $item['volume'] > 0) ? 'Isi' : 'Kosong',
+                                    ];
+                                }, $tabungData);
+                                
+                                $component->state($formattedData);
+                            }
+                        }
+                    }),
 
                 TextInput::make('nama')
                     ->label('Nama Auditor')
