@@ -28,6 +28,14 @@ class Tabung extends Model
     {
         return "{$this->kode_tabung} - {$this->seri_tabung} ({$this->tahun})";
     }
+    
+    /**
+     * Relasi ke StokTabung
+     */
+    public function stokTabung()
+    {
+        return $this->hasOne(StokTabung::class, 'kode_tabung', 'kode_tabung');
+    }
 
     // Generate QR Code berdasarkan ID tabung
     public function generateQrCode(): string

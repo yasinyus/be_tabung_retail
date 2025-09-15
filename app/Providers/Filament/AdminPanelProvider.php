@@ -26,7 +26,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()                    // ✅ ENABLE LOGIN
             ->authGuard('web')          // ✅ SET AUTH GUARD
-            ->brandLogo(asset('img/logo.png'))
+            ->brandLogo(asset('img/logo.jpg'))
             ->brandLogoHeight('4rem')
             ->brandName('Admin Tabung Retail')
             ->renderHook(
@@ -94,7 +94,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                \App\Http\Middleware\PreventDoubleLogin::class, // ✅ RE-ENABLED PREVENT DOUBLE LOGIN
+                // \App\Http\Middleware\PreventDoubleLogin::class, // ✅ DISABLED TO FIX LOGIN
             ])
             ->authMiddleware([
                 Authenticate::class,     // ✅ ENABLE AUTH MIDDLEWARE

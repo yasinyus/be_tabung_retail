@@ -4,14 +4,7 @@ namespace App\Filament\Resources\VolumeTabungResource\Tables;
 
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Filters\SelectFilter;
 
 class VolumeTabungsTable
 {
@@ -19,130 +12,110 @@ class VolumeTabungsTable
     {
         return $table
             ->columns([
-                TextColumn::make('tanggal')
-                    ->date('d/m/Y')
-                    ->sortable()
-                    ->label('Tanggal'),
-                    
-                TextColumn::make('lokasi')
+                TextColumn::make('kode_tabung')
+                    ->label('Kode Tabung')
                     ->searchable()
-                    ->label('Lokasi'),
+                    ->sortable(),
                     
-                TextColumn::make('tabung')
-                    ->getStateUsing(function ($record) {
-                        $tabungData = $record->tabung;
-                        if (is_array($tabungData)) {
-                            return (string) count($tabungData);
-                        }
-                        if (is_string($tabungData)) {
-                            $decoded = json_decode($tabungData, true);
-                            if (is_array($decoded)) {
-                                return (string) count($decoded);
-                            }
-                        }
-                        return '0';
-                    })
-                    ->numeric()
-                    ->sortable()
-                    ->label('Jumlah Tabung'),
-                    
-                TextColumn::make('keterangan')
-                    ->searchable()
-                    ->limit(50)
-                    ->tooltip(function (TextColumn $column): ?string {
-                        $state = $column->getState();
-                        
-                        if (strlen($state) <= $column->getCharacterLimit()) {
-                            return null;
-                        }
-                        
-                        return $state;
-                    })
-                    ->label('Keterangan')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('tabung.seri_tabung')
+                    ->label('Seri Tabung')
+                    ->searchable(),
                     
                 TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Kosong' => 'danger',
+                        'Isi' => 'success',
+                        default => 'gray',
+                    }),
+                    
+                TextColumn::make('volume')
+                    ->label('Volume')
+                    ->numeric(decimalPlaces: 2)
+                    ->suffix(' m³ ')
+                    ->placeholder('-')
+                    ->sortable(),
+                    
+                TextColumn::make('lokasi_nama')
+                    ->label('Lokasi')
                     ->getStateUsing(function ($record) {
-                        $tabungData = $record->tabung;
-                        $statusCounts = ['kosong' => 0, 'isi' => 0];
-                        
-                        if (is_array($tabungData)) {
-                            foreach ($tabungData as $tabung) {
-                                $status = $tabung['status'] ?? 'kosong';
-                                if (isset($statusCounts[$status])) {
-                                    $statusCounts[$status]++;
-                                }
-                            }
-                        } elseif (is_string($tabungData)) {
-                            $decoded = json_decode($tabungData, true);
-                            if (is_array($decoded)) {
-                                foreach ($decoded as $tabung) {
-                                    $status = $tabung['status'] ?? 'kosong';
-                                    if (isset($statusCounts[$status])) {
-                                        $statusCounts[$status]++;
-                                    }
-                                }
-                            }
+                        // Menggunakan data dari JOIN query
+                        if (!empty($record->nama_gudang)) {
+                            return $record->nama_gudang;
+                        } elseif (!empty($record->nama_pelanggan)) {
+                            return $record->nama_pelanggan;
                         }
-                        
-                        return "Isi: {$statusCounts['isi']}, Kosong: {$statusCounts['kosong']}";
+                        return $record->lokasi ?? 'Tidak diketahui';
                     })
-                    ->searchable()
-                    ->label('Status Tabung'),
+                    ->searchable(['lokasi', 'gudangs.nama_gudang', 'pelanggans.nama_pelanggan'])
+                    ->placeholder('Tidak diketahui'),
+                    
+                TextColumn::make('tanggal_update')
+                    ->label('Terakhir Update')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
                     
                 TextColumn::make('created_at')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Dibuat'),
-                    
-                TextColumn::make('updated_at')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->label('Diperbarui'),
             ])
             ->filters([
-                Filter::make('tanggal')
-                    ->form([
-                        DatePicker::make('dari')
-                            ->label('Dari Tanggal'),
-                        DatePicker::make('sampai')
-                            ->label('Sampai Tanggal'),
+                SelectFilter::make('status')
+                    ->label('Filter Status')
+                    ->options([
+                        'Kosong' => 'Kosong',
+                        'Isi' => 'Isi',
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['dari'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal', '>=', $date),
-                            )
-                            ->when(
-                                $data['sampai'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal', '<=', $date),
-                            );
+                    ->placeholder('Semua Status'),
+                    
+                SelectFilter::make('volume_filter')
+                    ->label('Filter Volume')
+                    ->options([
+                        'bervolume' => 'Ada Volume',
+                        'tanpa_volume' => 'Tanpa Volume',
+                    ])
+                    ->query(function ($query, $data) {
+                        if ($data['value'] === 'bervolume') {
+                            return $query->whereNotNull('volume')->where('volume', '>', 0);
+                        } elseif ($data['value'] === 'tanpa_volume') {
+                            return $query->whereNull('volume')->orWhere('volume', 0);
+                        }
+                        return $query;
                     })
-                    ->label('Filter Tanggal'),
+                    ->placeholder('Semua Volume'),
             ])
             ->actions([
-                ViewAction::make()
-                    ->label('Lihat')
-                    ->icon('heroicon-o-eye'),
-                EditAction::make()
-                    ->label('Edit')
-                    ->icon('heroicon-o-pencil'),
-                DeleteAction::make()
-                    ->label('Hapus')
-                    ->icon('heroicon-o-trash'),
+                // Actions akan ditambahkan nanti
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->label('Hapus yang dipilih'),
-                ]),
+                // Bulk actions akan ditambahkan nanti
             ])
-            ->defaultSort('tanggal', 'desc')
-            ->emptyStateHeading('Belum ada data status tabung')
-            ->emptyStateDescription('Belum ada data volume tabung yang tercatat dalam sistem.')
-            ->striped();
+            ->modifyQueryUsing(function ($query) {
+                return $query
+                    ->leftJoin('gudangs', function($join) {
+                        $join->on('stok_tabung.lokasi', '=', 'gudangs.kode_gudang')
+                             ->where('stok_tabung.lokasi', 'like', 'GD%');
+                    })
+                    ->leftJoin('pelanggans', function($join) {
+                        $join->on('stok_tabung.lokasi', '=', 'pelanggans.kode_pelanggan')
+                             ->where(function($query) {
+                                 $query->where('stok_tabung.lokasi', 'like', 'PU%')
+                                       ->orWhere('stok_tabung.lokasi', 'like', 'PA%');
+                             });
+                    })
+                    ->leftJoin('tabungs', 'stok_tabung.kode_tabung', '=', 'tabungs.kode_tabung')
+                    ->select(
+                        'stok_tabung.*',
+                        'gudangs.nama_gudang',
+                        'pelanggans.nama_pelanggan',
+                        'tabungs.seri_tabung'
+                    );
+            })
+            ->defaultSort('tanggal_update', 'desc')
+            ->emptyStateHeading('Belum ada data stok tabung')
+            ->emptyStateDescription('Belum ada data stok tabung yang tercatat dalam sistem.');
     }
 }

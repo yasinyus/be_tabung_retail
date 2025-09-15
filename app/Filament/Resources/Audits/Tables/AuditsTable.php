@@ -69,7 +69,7 @@ class AuditsTable
                         $daysDiff = $tanggalAudit->diffInDays($today);
                         
                         if ($daysDiff == 0) {
-                            return 'Tidak aktif';
+                            return 'Diaudit Hari ini';
                         } else {
                             return $daysDiff . ' hari lalu';
                         }

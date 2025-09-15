@@ -15,11 +15,9 @@ class PreventDoubleLogin
      */
     public function handle(Request $request, Closure $next)
     {
-        // Skip untuk route auth dan jika belum login
+        // Skip middleware untuk semua route auth dan halaman publik
         if (!Auth::check() || 
-            $request->routeIs('filament.*auth*') || 
-            str_contains($request->path(), 'login') ||
-            str_contains($request->path(), 'logout')) {
+            $this->shouldSkipRequest($request)) {
             return $next($request);
         }
 
@@ -36,6 +34,10 @@ class PreventDoubleLogin
             
             // Jika ada session lain untuk user yang sama DAN bukan session yang sama
             if ($storedSessionId && $storedSessionId !== $currentSessionId) {
+                
+                // Log untuk debugging
+                Log::info("Double login detected for user {$userId}. Current: {$currentSessionId}, Stored: {$storedSessionId}");
+                
                 // Logout user saat ini
                 Auth::logout();
                 $request->session()->invalidate();
@@ -44,20 +46,54 @@ class PreventDoubleLogin
                 // Hapus cache session lama
                 Cache::forget($cacheKey);
                 
-                // Redirect dengan pesan
+                // Redirect dengan pesan yang lebih friendly
                 return redirect()->route('filament.admin.auth.login')
-                    ->with('status', 'Akun ini sedang digunakan di perangkat lain. Silakan login kembali.')
-                    ->with('error', 'Session conflict detected');
+                    ->with('status', 'Akun ini sedang aktif di perangkat lain. Sesi sebelumnya telah diputus.')
+                    ->withInput(['email' => $user->email]);
             }
             
-            // Update session ID di cache
+            // Update/simpan session ID di cache
             Cache::put($cacheKey, $currentSessionId, now()->addHours(24));
             
         } catch (\Exception $e) {
-            // Jika ada error, izinkan request tetap lanjut
+            // Jika ada error, log dan izinkan request tetap lanjut
             Log::warning('PreventDoubleLogin middleware error: ' . $e->getMessage());
         }
         
         return $next($request);
+    }
+    
+    /**
+     * Determine if the request should skip middleware
+     */
+    private function shouldSkipRequest(Request $request): bool
+    {
+        $skipPatterns = [
+            'login',
+            'logout', 
+            'register',
+            'password',
+            'auth',
+            'api/',
+            '_ignition',
+            'livewire',
+        ];
+        
+        $path = $request->path();
+        
+        foreach ($skipPatterns as $pattern) {
+            if (str_contains($path, $pattern)) {
+                return true;
+            }
+        }
+        
+        // Skip juga untuk route yang mengandung auth
+        if ($request->routeIs('filament.*auth*') || 
+            $request->routeIs('*login*') ||
+            $request->routeIs('*logout*')) {
+            return true;
+        }
+        
+        return false;
     }
 }

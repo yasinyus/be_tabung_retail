@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\VolumeTabungResource\Schemas;
 
-use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
+use App\Models\Tabung;
 
 class VolumeTabungForm
 {
@@ -15,57 +14,46 @@ class VolumeTabungForm
     {
         return $schema
             ->components([
-                DatePicker::make('tanggal')
+                Select::make('kode_tabung')
+                    ->label('Kode Tabung')
                     ->required()
-                    ->displayFormat('d/m/Y')
-                    ->format('Y-m-d')
-                    ->label('Tanggal')
-                    ->placeholder('Pilih tanggal')
-                    ->helperText('Format: DD/MM/YYYY'),
+                    ->searchable()
+                    ->options(function () {
+                        return Tabung::all()->pluck('full_info', 'kode_tabung');
+                    })
+                    ->placeholder('Pilih tabung')
+                    ->helperText('Pilih tabung dari daftar yang tersedia'),
+                    
+                Select::make('status')
+                    ->label('Status')
+                    ->required()
+                    ->options([
+                        'Kosong' => 'Kosong',
+                        'Isi' => 'Isi',
+                    ])
+                    ->default('Kosong')
+                    ->helperText('Status isi tabung'),
+                    
+                TextInput::make('volume')
+                    ->label('Volume (m³)')
+                    ->numeric()
+                    ->step(0.01)
+                    ->placeholder('0.00')
+                    ->helperText('Volume tabung dalam liter (contoh: 12.50)')
+                    ->suffix('L'),
                     
                 TextInput::make('lokasi')
-                    ->required()
+                    ->label('Lokasi Manual')
                     ->maxLength(255)
-                    ->label('Lokasi')
-                    ->placeholder('Contoh: Gudang A')
-                    ->helperText('Lokasi pengukuran volume'),
+                    ->placeholder('Opsional: untuk tabung non-GD/PU/PA')
+                    ->helperText('Kosongkan jika tabung berawalan GD (dari gudang) atau PU/PA (dari pelanggan)'),
                     
-                Repeater::make('tabung')
-                    ->schema([
-                        TextInput::make('qr_code')
-                            ->label('QR Code / ID Tabung')
-                            ->required()
-                            ->placeholder('Contoh: TBG001'),
-                        Select::make('status')
-                            ->label('Status Tabung')
-                            ->required()
-                            ->options([
-                                'kosong' => 'Kosong',
-                                'isi' => 'Isi',
-                            ])
-                            ->placeholder('Pilih status')
-                            ->helperText('Status isi tabung'),
-                    ])
-                    ->columns(2)
-                    ->addActionLabel('Tambah Tabung')
-                    ->label('Daftar Tabung')
-                    ->collapsible()
-                    ->defaultItems(1)
-                    ->helperText('Daftar tabung dan status isinya'),
-                    
-                TextInput::make('nama')
+                DateTimePicker::make('tanggal_update')
+                    ->label('Tanggal Update')
+                    ->default(now())
                     ->required()
-                    ->maxLength(255)
-                    ->label('Nama Petugas')
-                    ->placeholder('Contoh: Ahmad Suryadi')
-                    ->helperText('Nama petugas yang melakukan pengecekan'),
-                    
-                Textarea::make('keterangan')
-                    ->label('Keterangan')
-                    ->placeholder('Keterangan tambahan (opsional)')
-                    ->helperText('Catatan atau keterangan tambahan tentang pengecekan')
-                    ->rows(3)
-                    ->maxLength(500),
+                    ->displayFormat('d/m/Y H:i')
+                    ->helperText('Tanggal dan waktu update stok'),
             ]);
     }
 }

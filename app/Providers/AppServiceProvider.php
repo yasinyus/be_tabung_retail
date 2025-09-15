@@ -27,7 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register login event listener
+        // Register login event listener - TEMPORARILY DISABLED
+        /*
         Event::listen(
             Login::class,
             HandleUserLogin::class,
@@ -38,5 +39,6 @@ class AppServiceProvider extends ServiceProvider
             Logout::class,
             HandleUserLogout::class,
         );
+        */
     }
 }

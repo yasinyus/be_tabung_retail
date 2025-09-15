@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\VolumeTabungResource\Pages;
 use App\Filament\Resources\VolumeTabungResource\Schemas\VolumeTabungForm;
 use App\Filament\Resources\VolumeTabungResource\Tables\VolumeTabungsTable;
-use App\Models\VolumeTabung;
+use App\Models\StokTabung;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -13,15 +13,15 @@ use Filament\Tables\Table;
 
 class VolumeTabungResource extends Resource
 {
-    protected static ?string $model = VolumeTabung::class;
+    protected static ?string $model = StokTabung::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar';
     
-    protected static ?string $navigationLabel = 'Volume Tabung';
+    protected static ?string $navigationLabel = 'Stok Tabung';
     
-    protected static ?string $modelLabel = 'Volume Tabung';
+    protected static ?string $modelLabel = 'Stok Tabung';
     
-    protected static ?string $pluralModelLabel = 'Volume Tabung';
+    protected static ?string $pluralModelLabel = 'Stok Tabung';
 
     protected static ?int $navigationSort = 6;
 
@@ -56,7 +56,7 @@ class VolumeTabungResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        $user = auth()->user();
+        $user = \Illuminate\Support\Facades\Auth::user();
         return $user && in_array($user->role, ['admin_utama']);
     }
 }

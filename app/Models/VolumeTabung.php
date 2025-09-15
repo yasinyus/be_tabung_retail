@@ -16,6 +16,7 @@ class VolumeTabung extends Model
         'lokasi',
         'tabung',
         'nama',
+        'status',
         'keterangan',
     ];
 
