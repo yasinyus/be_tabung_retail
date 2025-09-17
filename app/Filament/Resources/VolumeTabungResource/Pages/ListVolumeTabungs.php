@@ -14,6 +14,11 @@ class ListVolumeTabungs extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\Action::make('list_gudang')
+                ->label('List Nama Gudang')
+                ->icon('heroicon-o-building-storefront')
+                ->color('info')
+                ->url(route('filament.admin.resources.volume-tabungs.list-gudang')),
         ];
     }
 }

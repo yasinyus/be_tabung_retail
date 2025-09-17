@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Tabungs;
 use App\Filament\Resources\Tabungs\Pages\CreateTabung;
 use App\Filament\Resources\Tabungs\Pages\EditTabung;
 use App\Filament\Resources\Tabungs\Pages\ListTabungs;
+use App\Filament\Resources\Tabungs\Pages;
 use App\Filament\Resources\Tabungs\Schemas\TabungForm;
 use App\Filament\Resources\Tabungs\Tables\TabungsTable;
 use App\Models\Tabung;
@@ -82,12 +83,13 @@ class TabungResource extends Resource
             'index' => ListTabungs::route('/'),
             'create' => CreateTabung::route('/create'),
             'edit' => EditTabung::route('/{record}/edit'),
+            'download-progress' => Pages\DownloadProgress::route('/download-progress'),
         ];
     }
 
      public static function shouldRegisterNavigation(): bool
     {
-        $user = auth()->user();
+        $user = Auth::user();
         return $user && in_array($user->role, ['admin_utama', 'admin_umum']);
     }
 }

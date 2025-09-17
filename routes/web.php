@@ -10,6 +10,9 @@ use App\Http\Controllers\QrCodePdfController;
 use App\Http\Controllers\TabungQrCodePdfController;
 use App\Http\Controllers\PelangganQrCodePdfController;
 use App\Http\Controllers\GudangQrCodePdfController;
+use App\Http\Controllers\TestDownloadController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
     return view('welcome');
@@ -35,3 +38,32 @@ Route::get('/download/armada-qr-codes', [QrCodePdfController::class, 'downloadAr
 Route::get('/download/tabung-qr-codes', [TabungQrCodePdfController::class, 'downloadTabungQrCodes'])->name('tabung.qr-codes.pdf');
 Route::get('/download/pelanggan-qr-codes', [PelangganQrCodePdfController::class, 'downloadPelangganQrCodes'])->name('pelanggan.qr-codes.pdf');
 Route::get('/download/gudang-qr-codes', [GudangQrCodePdfController::class, 'downloadGudangQrCodes'])->name('gudang.qr-codes.pdf');
+
+// Test routes for download system
+Route::get('/test/download-model', [TestDownloadController::class, 'testModel']);
+Route::get('/test/download-job', [TestDownloadController::class, 'testJob']);
+
+// Route untuk download ZIP QR codes
+Route::get('/download/qr-zip/{id}', function ($id) {
+    $downloadLog = \App\Models\DownloadLog::where('id', $id)
+        ->where('user_id', Auth::id())
+        ->where('status', 'completed')
+        ->firstOrFail();
+    
+    if (!$downloadLog->file_path || !Storage::exists($downloadLog->file_path)) {
+        abort(404, 'File tidak ditemukan');
+    }
+    
+    return Storage::download($downloadLog->file_path, 'qr-codes-tabung.zip');
+})->middleware('auth')->name('download.qr-zip');
+
+// Route untuk download temporary PDF files
+Route::get('/download/temp/{filename}', function ($filename) {
+    $tempPath = storage_path("app/temp/{$filename}");
+    
+    if (!file_exists($tempPath)) {
+        abort(404, 'File tidak ditemukan');
+    }
+    
+    return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
+})->middleware('auth')->name('download.temp.pdf');
