@@ -233,12 +233,12 @@ class TabungsTable
                         }
                     }),
                     
-                Action::make('download_qr_codes')
-                    ->label('Download QR Codes')
-                    ->icon('heroicon-o-qr-code')
-                    ->color('info')
-                    ->url(route('tabung.qr-codes.pdf'))
-                    ->openUrlInNewTab(),
+                // Action::make('download_qr_codes')
+                //     ->label('Download QR Codes')
+                //     ->icon('heroicon-o-qr-code')
+                //     ->color('info')
+                //     ->url(route('tabung.qr-codes.pdf'))
+                //     ->openUrlInNewTab(),
                     
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

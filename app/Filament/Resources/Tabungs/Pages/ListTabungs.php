@@ -74,8 +74,13 @@ class ListTabungs extends ListRecords
                     try {
                         $result = $this->downloadQrCodesSimple($data);
                         
-                        // Redirect to download URL
-                        if (isset($result['download_url'])) {
+                        // If it's a direct PDF response, return it
+                        if ($result instanceof \Illuminate\Http\Response) {
+                            return $result;
+                        }
+                        
+                        // Otherwise, redirect to download URL
+                        if (is_array($result) && isset($result['download_url'])) {
                             return redirect($result['download_url']);
                         }
                         
@@ -249,13 +254,21 @@ class ListTabungs extends ListRecords
             
             file_put_contents($tempPath, $pdfContent);
             
-            // Create a download URL that will serve the file
-            $downloadUrl = route('download.temp.pdf', ['filename' => $fileName]);
-            
-            Log::info("PDF saved to: {$tempPath}");
-            
-            // Return success response with download URL for immediate redirect
-            return ['status' => 'success', 'file' => $fileName, 'download_url' => $downloadUrl];
+            // Try to create download URL, fallback to direct response
+            try {
+                $downloadUrl = route('download.temp.pdf', ['filename' => $fileName]);
+                Log::info("PDF saved to: {$tempPath}");
+                
+                // Return success response with download URL for immediate redirect
+                return ['status' => 'success', 'file' => $fileName, 'download_url' => $downloadUrl];
+            } catch (\Exception $e) {
+                Log::warning("Route not available, returning direct PDF response: " . $e->getMessage());
+                
+                // Fallback: return direct PDF response
+                return response($pdfContent, 200)
+                    ->header('Content-Type', 'application/pdf')
+                    ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+            }
                 
         } catch (\Exception $e) {
             Log::error("Error in downloadQrCodesSimple: " . $e->getMessage());
