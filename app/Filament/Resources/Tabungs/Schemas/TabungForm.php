@@ -46,6 +46,12 @@ class TabungForm
                     ->default(date('Y'))
                     ->searchable(),
                     
+                TextInput::make('siklus')
+                    ->label('Siklus')
+                    ->maxLength(50)
+                    ->placeholder('Contoh: A, B, C atau angka')
+                    ->helperText('Siklus atau periode tabung'),
+                    
                 Textarea::make('keterangan')
                     ->label('Keterangan')
                     ->placeholder('Tambahkan keterangan atau catatan khusus untuk tabung ini...')

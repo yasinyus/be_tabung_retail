@@ -51,8 +51,6 @@ class VolumeTabungResource extends Resource
             'create' => Pages\CreateVolumeTabung::route('/create'),
             'view' => Pages\ViewVolumeTabung::route('/{record}'),
             'edit' => Pages\EditVolumeTabung::route('/{record}/edit'),
-            'list-gudang' => Pages\ListGudang::route('/list-gudang'),
-            'gudang-detail' => Pages\DetailGudang::route('/gudang/{gudang}'),
         ];
     }
 

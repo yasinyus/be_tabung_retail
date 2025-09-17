@@ -55,6 +55,11 @@ class Transaction extends Model
         return $this->belongsTo(Pelanggan::class, 'customer_id');
     }
     
+    public function detailTransaksi()
+    {
+        return $this->hasOne(DetailTransaksi::class, 'trx_id', 'trx_id');
+    }
+    
     // Scopes
     public function scopePending($query)
     {

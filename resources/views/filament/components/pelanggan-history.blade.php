@@ -77,19 +77,22 @@
             @if($transactions && $transactions->count() > 0)
                 <div class="overflow-hidden bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-300 dark:border-gray-600">
                     <div class="overflow-x-auto">
-                        <table style="width:40%">
+                        <table style="width:100%">
                             <thead >
                                 <tr>
-                                    <td style="width:10%" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <td style="width:20%" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Tanggal
                                     </td>
-                                    <td style="width:10%">
+                                    <td style="width:20%">
                                         Jml Tabung
                                     </td>
-                                    <td style="width:10%">
+                                    <td style="width:20%">
+                                        Tabung
+                                    </td>
+                                    <td style="width:20%">
                                         Total
                                     </td>
-                                    <td style="width:10%">
+                                    <td style="width:20%">
                                         Status
                                     </td>
                                 </tr>
@@ -102,6 +105,39 @@
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
                                             {{ $transaction->jumlah_tabung }} 
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
+                                            @if($transaction->detailTransaksi && $transaction->detailTransaksi->tabung)
+                                                @php
+                                                    $tabungData = $transaction->detailTransaksi->tabung;
+                                                    $tabungList = [];
+                                                    foreach($tabungData as $item) {
+                                                        if(isset($item['kode_tabung']) && isset($item['volume'])) {
+                                                            $tabungList[] = $item['kode_tabung'] . ' (' . $item['volume'] . ' m3)';
+                                                        }
+                                                    }
+                                                @endphp
+                                                <div class="max-w-xs">
+                                                    @if(count($tabungList) > 0)
+                                                        <div class="text-xs space-y-1">
+                                                            @foreach(array_slice($tabungList, 0, 3) as $tabung)
+                                                                <div class="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">
+                                                                    {{ $tabung }}
+                                                                </div>
+                                                            @endforeach
+                                                            @if(count($tabungList) > 3)
+                                                                <div class="text-gray-500 text-xs">
+                                                                    +{{ count($tabungList) - 3 }} lainnya
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    @else
+                                                        <span class="text-gray-400 text-xs">-</span>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="text-gray-400 text-xs">-</span>
+                                            @endif
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-red-600 dark:text-red-400 border border-gray-300 dark:border-gray-600">
                                             Rp {{ number_format($transaction->total ?? 0, 0, ',', '.') }}

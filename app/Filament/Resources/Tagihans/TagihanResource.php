@@ -18,6 +18,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
 use App\Models\Transaction;
+use App\Models\DetailTransaksi;
 use App\Models\SaldoPelanggan;
 use App\Models\Deposit;
 use App\Filament\Resources\Deposits\DepositResource;
@@ -332,8 +333,8 @@ class TagihanResource extends Resource
                                     ->orderBy('created_at', 'desc')
                                     ->get();
                                 
-                                // Get transaction history - menggunakan relationship customer
-                                $transactions = Transaction::with('customer')
+                                // Get transaction history - menggunakan relationship customer dan load detail transaksi
+                                $transactions = Transaction::with(['customer', 'detailTransaksi'])
                                     ->whereHas('customer', function($query) use ($record) {
                                         $query->where('kode_pelanggan', $record->kode_pelanggan);
                                     })

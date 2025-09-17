@@ -5,6 +5,7 @@ namespace App\Filament\Resources\VolumeTabungResource\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use App\Models\Gudang;
 
 class VolumeTabungsTable
 {
@@ -63,6 +64,19 @@ class VolumeTabungsTable
                     ->label('Dibuat'),
             ])
             ->filters([
+                SelectFilter::make('lokasi_gudang')
+                    ->label('Filter Gudang')
+                    ->options(function () {
+                        return Gudang::pluck('nama_gudang', 'kode_gudang')->toArray();
+                    })
+                    ->query(function ($query, $data) {
+                        if (!empty($data['value'])) {
+                            return $query->where('stok_tabung.lokasi', $data['value']);
+                        }
+                        return $query;
+                    })
+                    ->placeholder('Semua Gudang'),
+                    
                 SelectFilter::make('status')
                     ->label('Filter Status')
                     ->options([

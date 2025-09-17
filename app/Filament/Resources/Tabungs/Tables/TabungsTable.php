@@ -48,6 +48,12 @@ class TabungsTable
                     ])
                     ->sortable(),
                     
+                TextColumn::make('siklus')
+                    ->label('Siklus')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Tidak ada siklus'),
+                    
                 TextColumn::make('keterangan')
                     ->label('Keterangan')
                     ->limit(50)
@@ -81,6 +87,16 @@ class TabungsTable
                         
                         return $years;
                     }),
+                    
+                SelectFilter::make('siklus')
+                    ->label('Filter Siklus')
+                    ->options(function () {
+                        // Get unique siklus values from database
+                        return \App\Models\Tabung::whereNotNull('siklus')
+                            ->distinct()
+                            ->pluck('siklus', 'siklus')
+                            ->toArray();
+                    }),
             ])
             ->actions([
                 Action::make('view')
@@ -101,6 +117,11 @@ class TabungsTable
                         \Filament\Forms\Components\TextInput::make('tahun')
                             ->label('Tahun Produksi')
                             ->default(fn ($record) => $record->tahun)
+                            ->disabled(),
+                            
+                        \Filament\Forms\Components\TextInput::make('siklus')
+                            ->label('Siklus')
+                            ->default(fn ($record) => $record->siklus)
                             ->disabled(),
                             
                         \Filament\Forms\Components\Textarea::make('keterangan')
@@ -176,6 +197,7 @@ class TabungsTable
                                     <p><strong>Kode Tabung:</strong> {$record->kode_tabung}</p>
                                     <p><strong>Seri Tabung:</strong> {$record->seri_tabung}</p>
                                     <p><strong>Tahun:</strong> {$record->tahun}</p>
+                                    " . ($record->siklus ? "<p><strong>Siklus:</strong> {$record->siklus}</p>" : "") . "
                                 </div>
                                 <div class='mt-4 text-xs text-gray-500'>
                                     Scan QR Code ini untuk melihat detail tabung
@@ -233,12 +255,12 @@ class TabungsTable
                         }
                     }),
                     
-                // Action::make('download_qr_codes')
-                //     ->label('Download QR Codes')
-                //     ->icon('heroicon-o-qr-code')
-                //     ->color('info')
-                //     ->url(route('tabung.qr-codes.pdf'))
-                //     ->openUrlInNewTab(),
+                Action::make('download_qr_codes')
+                    ->label('Download QR Codes')
+                    ->icon('heroicon-o-qr-code')
+                    ->color('info')
+                    ->url(route('tabung.qr-codes.pdf'))
+                    ->openUrlInNewTab(),
                     
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

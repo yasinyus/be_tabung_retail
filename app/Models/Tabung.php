@@ -15,6 +15,7 @@ class Tabung extends Model
         'kode_tabung',
         'seri_tabung',
         'tahun',
+        'siklus',
         'keterangan',
         'qr_code',
     ];
@@ -26,7 +27,11 @@ class Tabung extends Model
     // Accessor untuk menampilkan informasi lengkap tabung
     public function getFullInfoAttribute(): string
     {
-        return "{$this->kode_tabung} - {$this->seri_tabung} ({$this->tahun})";
+        $info = "{$this->kode_tabung} - {$this->seri_tabung} ({$this->tahun})";
+        if ($this->siklus) {
+            $info .= " - Siklus: {$this->siklus}";
+        }
+        return $info;
     }
     
     /**
@@ -44,6 +49,9 @@ class Tabung extends Model
         $qrData = json_encode([
             'id' => $this->id,
             'code' => $this->kode_tabung,
+            'seri' => $this->seri_tabung,
+            'tahun' => $this->tahun,
+            'siklus' => $this->siklus,
             'url' => url("/tabung/{$this->id}")
         ]);
 
@@ -83,7 +91,7 @@ class Tabung extends Model
 
         static::updated(function ($tabung) {
             // Generate QR code hanya jika field yang mempengaruhi QR code berubah
-            if ($tabung->wasChanged(['kode_tabung', 'seri_tabung', 'tahun']) && !$tabung->wasChanged(['qr_code'])) {
+            if ($tabung->wasChanged(['kode_tabung', 'seri_tabung', 'tahun', 'siklus']) && !$tabung->wasChanged(['qr_code'])) {
                 // Generate immediately, but only if qr_code wasn't already updated
                 $qrCode = base64_encode($tabung->generateQrCode());
                 // Use updateQuietly to avoid triggering events
