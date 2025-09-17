@@ -56,7 +56,3 @@ Route::get('/download/qr-zip/{id}', function ($id) {
     
     return Storage::download($downloadLog->file_path, 'qr-codes-tabung.zip');
 })->middleware('auth')->name('download.qr-zip');
-
-// Route untuk download temporary PDF files
-Route::get('/download/temp/{filename}', [TabungQrCodePdfController::class, 'downloadTempFile'])
-    ->name('download.temp.pdf');
