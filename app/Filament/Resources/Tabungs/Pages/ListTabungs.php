@@ -74,14 +74,19 @@ class ListTabungs extends ListRecords
                     try {
                         $result = $this->downloadQrCodesSimple($data);
                         
-                        // If it's a direct PDF response, return it
-                        if ($result instanceof \Illuminate\Http\Response) {
-                            return $result;
-                        }
-                        
-                        // Otherwise, redirect to download URL
-                        if (is_array($result) && isset($result['download_url'])) {
-                            return redirect($result['download_url']);
+                        // Create download URL from file name
+                        if (is_array($result) && isset($result['file'])) {
+                            $downloadUrl = url("/download/temp/{$result['file']}");
+                            
+                            // Show success notification with download info
+                            Notification::make()
+                                ->success()
+                                ->title('PDF berhasil dihasilkan!')
+                                ->body($result['message'] ?? 'File PDF siap didownload')
+                                ->send();
+                            
+                            // Use JavaScript to open download URL
+                            $this->js("window.open('{$downloadUrl}', '_blank')");
                         }
                         
                         return $result;
@@ -254,21 +259,15 @@ class ListTabungs extends ListRecords
             
             file_put_contents($tempPath, $pdfContent);
             
-            // Try to create download URL, fallback to direct response
-            try {
-                $downloadUrl = route('download.temp.pdf', ['filename' => $fileName]);
-                Log::info("PDF saved to: {$tempPath}");
-                
-                // Return success response with download URL for immediate redirect
-                return ['status' => 'success', 'file' => $fileName, 'download_url' => $downloadUrl];
-            } catch (\Exception $e) {
-                Log::warning("Route not available, returning direct PDF response: " . $e->getMessage());
-                
-                // Fallback: return direct PDF response
-                return response($pdfContent, 200)
-                    ->header('Content-Type', 'application/pdf')
-                    ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
-            }
+            Log::info("PDF saved to: {$tempPath}");
+            
+            // Always return array response for Filament (no direct PDF response)
+            return [
+                'status' => 'success', 
+                'file' => $fileName, 
+                'temp_path' => $tempPath,
+                'message' => "PDF berhasil dibuat. File: {$fileName}"
+            ];
                 
         } catch (\Exception $e) {
             Log::error("Error in downloadQrCodesSimple: " . $e->getMessage());

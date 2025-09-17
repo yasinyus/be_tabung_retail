@@ -60,5 +60,4 @@ Route::get('/download/qr-zip/{id}', function ($id) {
 
 // Route untuk download temporary PDF files
 Route::get('/download/temp/{filename}', [TempDownloadController::class, 'downloadTempPdf'])
-    ->middleware('auth')
     ->name('download.temp.pdf');
