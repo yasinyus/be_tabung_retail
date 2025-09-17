@@ -11,7 +11,6 @@ use App\Http\Controllers\TabungQrCodePdfController;
 use App\Http\Controllers\PelangganQrCodePdfController;
 use App\Http\Controllers\GudangQrCodePdfController;
 use App\Http\Controllers\TestDownloadController;
-use App\Http\Controllers\TempDownloadController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -59,5 +58,5 @@ Route::get('/download/qr-zip/{id}', function ($id) {
 })->middleware('auth')->name('download.qr-zip');
 
 // Route untuk download temporary PDF files
-Route::get('/download/temp/{filename}', [TempDownloadController::class, 'downloadTempPdf'])
+Route::get('/download/temp/{filename}', [TabungQrCodePdfController::class, 'downloadTempFile'])
     ->name('download.temp.pdf');
