@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\InvoiceController;
 
 // API V1 Routes
 Route::prefix('v1')->group(function () {
@@ -55,3 +56,6 @@ Route::fallback(function () {
         ]
     ], 404);
 });
+
+// Additional routes outside API group for Filament compatibility
+Route::get('/download/invoice/{id}', [InvoiceController::class, 'downloadInvoice'])->name('api.laporan.download-invoice');

@@ -7,16 +7,18 @@ use App\Models\Pelanggan;
 use App\Models\Tabung;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceController extends Controller
 {
     public function downloadInvoice($id)
     {
-        $laporan = LaporanPelanggan::findOrFail($id);
-        $pelanggan = Pelanggan::where('kode_pelanggan', $laporan->kode_pelanggan)->firstOrFail();
-        
-        // Get list tabung dari field list_tabung di laporan
-        $listTabungData = collect();
+        try {
+            $laporan = LaporanPelanggan::findOrFail($id);
+            $pelanggan = Pelanggan::where('kode_pelanggan', $laporan->kode_pelanggan)->firstOrFail();
+            
+            // Get list tabung dari field list_tabung di laporan
+            $listTabungData = collect();
         
         if ($laporan->list_tabung && is_array($laporan->list_tabung)) {
             // Handle simple array format: ["TB0001", "TB0002", "TB0003"]
@@ -86,5 +88,15 @@ class InvoiceController extends Controller
         $filename = 'invoice-' . $pelanggan->kode_pelanggan . '-' . $laporan->id . '.pdf';
         
         return $pdf->download($filename);
+        
+        } catch (\Exception $e) {
+            // Log error untuk debugging
+            Log::error('Invoice download error: ' . $e->getMessage());
+            
+            // Return error response
+            return response()->json([
+                'error' => 'Gagal mengunduh invoice: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -38,4 +38,4 @@ Route::get('/download/pelanggan-qr-codes', [PelangganQrCodePdfController::class,
 Route::get('/download/gudang-qr-codes', [GudangQrCodePdfController::class, 'downloadGudangQrCodes'])->name('gudang.qr-codes.pdf');
 
 // Route untuk download invoice laporan
-Route::get('/admin/download-invoice/{id}', [InvoiceController::class, 'downloadInvoice'])->name('laporan.download-invoice');
+Route::get('/download/invoice/{id}', [InvoiceController::class, 'downloadInvoice'])->name('laporan.download-invoice');
