@@ -10,9 +10,7 @@ use App\Http\Controllers\QrCodePdfController;
 use App\Http\Controllers\TabungQrCodePdfController;
 use App\Http\Controllers\PelangganQrCodePdfController;
 use App\Http\Controllers\GudangQrCodePdfController;
-use App\Http\Controllers\TestDownloadController;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\InvoiceController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -39,20 +37,5 @@ Route::get('/download/tabung-qr-codes', [TabungQrCodePdfController::class, 'down
 Route::get('/download/pelanggan-qr-codes', [PelangganQrCodePdfController::class, 'downloadPelangganQrCodes'])->name('pelanggan.qr-codes.pdf');
 Route::get('/download/gudang-qr-codes', [GudangQrCodePdfController::class, 'downloadGudangQrCodes'])->name('gudang.qr-codes.pdf');
 
-// Test routes for download system
-Route::get('/test/download-model', [TestDownloadController::class, 'testModel']);
-Route::get('/test/download-job', [TestDownloadController::class, 'testJob']);
-
-// Route untuk download ZIP QR codes
-Route::get('/download/qr-zip/{id}', function ($id) {
-    $downloadLog = \App\Models\DownloadLog::where('id', $id)
-        ->where('user_id', Auth::id())
-        ->where('status', 'completed')
-        ->firstOrFail();
-    
-    if (!$downloadLog->file_path || !Storage::exists($downloadLog->file_path)) {
-        abort(404, 'File tidak ditemukan');
-    }
-    
-    return Storage::download($downloadLog->file_path, 'qr-codes-tabung.zip');
-})->middleware('auth')->name('download.qr-zip');
+// Route untuk download invoice laporan
+Route::get('/admin/download-invoice/{id}', [InvoiceController::class, 'downloadInvoice'])->name('laporan.download-invoice');

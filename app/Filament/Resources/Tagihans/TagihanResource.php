@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Tagihans;
 
 use App\Filament\Resources\Tagihans\Pages\ListTagihans;
+use App\Filament\Resources\Tagihans\Pages;
 use App\Models\Tagihan;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -19,6 +20,7 @@ use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
 use App\Models\Transaction;
 use App\Models\DetailTransaksi;
+use App\Models\LaporanPelanggan;
 use App\Models\SaldoPelanggan;
 use App\Models\Deposit;
 use App\Filament\Resources\Deposits\DepositResource;
@@ -317,6 +319,13 @@ class TagihanResource extends Resource
                         }
                     }),
                     
+                Action::make('laporan')
+                    ->label('Laporan')
+                    ->icon('heroicon-o-document-text')
+                    ->color('success')
+                    ->url(fn ($record) => route('filament.admin.resources.tagihans.laporan', ['kode_pelanggan' => $record->kode_pelanggan]))
+                    ->openUrlInNewTab(false),
+                    
                 Action::make('lihat')
                     ->label('Lihat')
                     ->icon('heroicon-o-eye')
@@ -407,6 +416,32 @@ class TagihanResource extends Resource
                         // Buat deposit baru - model observer akan otomatis update saldo
                         Deposit::create($depositData);
                         
+                        // Refresh data dan get saldo terbaru setelah deposit ditambahkan
+                        $saldoPelanggan = SaldoPelanggan::where('kode_pelanggan', $data['kode_pelanggan'])->first();
+                        
+                        // Jika belum ada record saldo, buat baru
+                        if (!$saldoPelanggan) {
+                            $saldoPelanggan = SaldoPelanggan::create([
+                                'kode_pelanggan' => $data['kode_pelanggan'],
+                                'saldo' => $data['saldo']
+                            ]);
+                        }
+                        
+                        $sisaDeposit = $saldoPelanggan->saldo;
+                        
+                        // Insert data ke tabel laporan_pelanggan
+                        LaporanPelanggan::create([
+                            'tanggal' => $data['tanggal'],
+                            'kode_pelanggan' => $data['kode_pelanggan'],
+                            'keterangan' => 'Deposit',
+                            'tabung' => 0,
+                            'harga' => 0,
+                            'tambahan_deposit' => $data['saldo'],
+                            'pengurangan_deposit' => 0,
+                            'sisa_deposit' => $sisaDeposit,
+                            'konfirmasi' => false,
+                        ]);
+                        
                         // Notifikasi sukses
                         Notification::make()
                             ->title('Deposit Berhasil Ditambahkan!')
@@ -431,6 +466,7 @@ class TagihanResource extends Resource
     {
         return [
             'index' => ListTagihans::route('/'),
+            'laporan' => Pages\LaporanPelanggan::route('/laporan'),
         ];
     }
     
