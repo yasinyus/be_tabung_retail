@@ -4,6 +4,7 @@ namespace App\Filament\Resources\VolumeTabungResource\Pages;
 
 use App\Filament\Resources\VolumeTabungResource;
 use App\Models\Gudang;
+use App\Models\Pelanggan;
 use App\Models\StokTabung;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -23,17 +24,12 @@ class ListVolumeTabungs extends ListRecords
                 ->modalHeading('Statistik Tabung per Gudang')
                 ->modalContent(view('filament.components.tabung-stats', [
                     'stats' => $this->getStats(),
-                    'gudangStats' => $this->getGudangStats()
+                    'gudangStats' => $this->getGudangStats(),
+                    'pelangganStats' => $this->getPelangganStats()
                 ]))
                 ->modalWidth('7xl')
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel('Tutup'),
-            Actions\CreateAction::make(),
-            Actions\Action::make('list_gudang')
-                ->label('List Nama Gudang')
-                ->icon('heroicon-o-building-storefront')
-                ->color('info')
-                ->url('/admin/volume-tabungs/list-gudang'),
         ];
     }
 
@@ -44,6 +40,7 @@ class ListVolumeTabungs extends ListRecords
         $totalKosong = StokTabung::where('status', 'Kosong')->count();
         $totalVolume = StokTabung::where('status', 'Isi')->sum('volume');
         $totalGudang = Gudang::count();
+        $totalPelanggan = Pelanggan::count();
 
         return [
             'totalTabung' => $totalTabung,
@@ -51,6 +48,7 @@ class ListVolumeTabungs extends ListRecords
             'totalKosong' => $totalKosong,
             'totalVolume' => $totalVolume,
             'totalGudang' => $totalGudang,
+            'totalPelanggan' => $totalPelanggan,
             'persentaseIsi' => $totalTabung > 0 ? round(($totalIsi / $totalTabung) * 100, 1) : 0,
             'persentaseKosong' => $totalTabung > 0 ? round(($totalKosong / $totalTabung) * 100, 1) : 0,
         ];
@@ -67,6 +65,20 @@ class ListVolumeTabungs extends ListRecords
             DB::raw('(SELECT SUM(volume) FROM stok_tabung WHERE lokasi = gudangs.kode_gudang AND status = "Isi") as total_volume')
         ])
         ->orderBy('gudangs.nama_gudang')
+        ->get();
+    }
+
+    private function getPelangganStats()
+    {
+        return Pelanggan::select([
+            'pelanggans.nama_pelanggan',
+            'pelanggans.kode_pelanggan',
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = pelanggans.kode_pelanggan) as total_tabung'),
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = pelanggans.kode_pelanggan AND status = "Isi") as tabung_isi'),
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = pelanggans.kode_pelanggan AND status = "Kosong") as tabung_kosong'),
+            DB::raw('(SELECT SUM(volume) FROM stok_tabung WHERE lokasi = pelanggans.kode_pelanggan AND status = "Isi") as total_volume')
+        ])
+        ->orderBy('pelanggans.nama_pelanggan')
         ->get();
     }
 }
