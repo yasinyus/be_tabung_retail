@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\VolumeTabungResource\Pages;
 
 use App\Filament\Resources\VolumeTabungResource;
+use App\Models\Armada;
 use App\Models\Gudang;
 use App\Models\Pelanggan;
 use App\Models\StokTabung;
@@ -25,7 +26,8 @@ class ListVolumeTabungs extends ListRecords
                 ->modalContent(view('filament.components.tabung-stats', [
                     'stats' => $this->getStats(),
                     'gudangStats' => $this->getGudangStats(),
-                    'pelangganStats' => $this->getPelangganStats()
+                    'pelangganStats' => $this->getPelangganStats(),
+                    'armadaStats' => $this->getArmadaStats()
                 ]))
                 ->modalWidth('7xl')
                 ->modalSubmitAction(false)
@@ -41,6 +43,7 @@ class ListVolumeTabungs extends ListRecords
         $totalVolume = StokTabung::where('status', 'Isi')->sum('volume');
         $totalGudang = Gudang::count();
         $totalPelanggan = Pelanggan::count();
+        $totalArmada = Armada::count();
 
         return [
             'totalTabung' => $totalTabung,
@@ -49,6 +52,7 @@ class ListVolumeTabungs extends ListRecords
             'totalVolume' => $totalVolume,
             'totalGudang' => $totalGudang,
             'totalPelanggan' => $totalPelanggan,
+            'totalArmada' => $totalArmada,
             'persentaseIsi' => $totalTabung > 0 ? round(($totalIsi / $totalTabung) * 100, 1) : 0,
             'persentaseKosong' => $totalTabung > 0 ? round(($totalKosong / $totalTabung) * 100, 1) : 0,
         ];
@@ -79,6 +83,20 @@ class ListVolumeTabungs extends ListRecords
             DB::raw('(SELECT SUM(volume) FROM stok_tabung WHERE lokasi = pelanggans.kode_pelanggan AND status = "Isi") as total_volume')
         ])
         ->orderBy('pelanggans.nama_pelanggan')
+        ->get();
+    }
+
+    private function getArmadaStats()
+    {
+        return Armada::select([
+            'armadas.nopol',
+            'armadas.kode_kendaraan',
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan) as total_tabung'),
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan AND status = "Isi") as tabung_isi'),
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan AND status = "Kosong") as tabung_kosong'),
+            DB::raw('(SELECT SUM(volume) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan AND status = "Isi") as total_volume')
+        ])
+        ->orderBy('armadas.nopol')
         ->get();
     }
 }

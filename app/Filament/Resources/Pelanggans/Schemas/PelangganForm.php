@@ -34,7 +34,7 @@ class PelangganForm
                     ->rows(3),
 
                 TextInput::make('harga_tabung')
-                    ->label('Harga Tabung')
+                    ->label('Harga per m3')
                     ->required()
                     ->numeric()
                     ->prefix('Rp')

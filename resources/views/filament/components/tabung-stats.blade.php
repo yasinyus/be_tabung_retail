@@ -50,6 +50,16 @@
             </div>
         </div>
     </div>
+
+    <!-- Total Armada -->
+    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center">
+            <div class="ml-3">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Armada</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ number_format($stats['totalArmada']) }}</p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Detail Table -->
@@ -182,6 +192,74 @@
                     <tr>
                         <td colspan="5" class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
                             Tidak ada data pelanggan tersedia
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Detail Table Armada -->
+<div class="bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mt-6">
+    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            🚚 Detail per Armada
+        </h3>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table style="width: 100%" class="min-w-full">
+            <thead class="bg-gray-100 dark:bg-gray-700">
+                <tr>
+                    <td scope="col" style="width: 20%" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Nopol
+                    </td>
+                    <td scope="col" style="width: 20%" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Kode Kendaraan
+                    </td>
+                    <td scope="col" style="width: 20%" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Total
+                    </td>
+                    <td scope="col" style="width: 20%" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Isi
+                    </td>
+                    <td scope="col" style="width: 20%" class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Kosong
+                    </td>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                @forelse($armadaStats as $armada)
+                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                            {{ $armada->nopol }}
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-center">
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200">
+                                {{ $armada->kode_kendaraan }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-center">
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200">
+                                {{ number_format($armada->total_tabung) }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-center">
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200">
+                                {{ number_format($armada->tabung_isi) }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-center">
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200">
+                                {{ number_format($armada->tabung_kosong) }}
+                            </span>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                            Tidak ada data armada tersedia
                         </td>
                     </tr>
                 @endforelse

@@ -60,7 +60,7 @@ class PelanggansTable
                     ->formatStateUsing(fn (string $state): string => ucfirst($state)),
                     
                 TextColumn::make('harga_tabung')
-                    ->label('Harga Tabung')
+                    ->label('Harga per m3')
                     ->money('IDR')
                     ->sortable(),
                     
@@ -119,7 +119,7 @@ class PelanggansTable
                             ->rows(3),
                             
                         TextInput::make('harga_tabung')
-                            ->label('Harga Tabung')
+                            ->label('Harga per m3')
                             ->default(fn ($record) => 'Rp ' . number_format($record->harga_tabung, 0, ',', '.'))
                             ->disabled(),
                             
