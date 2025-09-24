@@ -11,6 +11,7 @@ use App\Http\Controllers\TabungQrCodePdfController;
 use App\Http\Controllers\PelangganQrCodePdfController;
 use App\Http\Controllers\GudangQrCodePdfController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LaporanPelangganController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -39,3 +40,7 @@ Route::get('/download/gudang-qr-codes', [GudangQrCodePdfController::class, 'down
 
 // Route untuk download invoice laporan
 Route::get('/download/invoice/{id}', [InvoiceController::class, 'downloadInvoice'])->name('laporan.download-invoice');
+
+// Route untuk export laporan pelanggan
+Route::get('/export/laporan-pelanggan/pdf', [LaporanPelangganController::class, 'exportPdf'])->name('laporan-pelanggan.export.pdf');
+Route::get('/export/laporan-pelanggan/excel', [LaporanPelangganController::class, 'exportExcel'])->name('laporan-pelanggan.export.excel');

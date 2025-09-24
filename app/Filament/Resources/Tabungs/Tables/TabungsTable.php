@@ -28,6 +28,13 @@ class TabungsTable
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->numeric()
+                    ->sortable()
+                    ->size('sm')
+                    ->alignCenter(),
+                    
                 TextColumn::make('kode_tabung')
                     ->label('Kode Tabung')
                     ->searchable()
@@ -266,7 +273,7 @@ class TabungsTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('id', 'asc')
             ->striped();
     }
 }

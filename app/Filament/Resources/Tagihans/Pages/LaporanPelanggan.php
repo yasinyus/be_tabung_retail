@@ -134,17 +134,15 @@ class LaporanPelanggan extends Page implements HasTable
                 ->label('Export PDF')
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('success')
-                ->action(function () {
-                    $this->dispatch('notify', type: 'success', message: 'Export PDF akan segera tersedia');
-                }),
+                ->url(fn () => route('laporan-pelanggan.export.pdf', ['kode_pelanggan' => $this->kodePelanggan]))
+                ->openUrlInNewTab(),
                 
             Actions\Action::make('export_excel')
                 ->label('Export Excel')
                 ->icon('heroicon-o-table-cells')
                 ->color('info')
-                ->action(function () {
-                    $this->dispatch('notify', type: 'success', message: 'Export Excel akan segera tersedia');
-                }),
+                ->url(fn () => route('laporan-pelanggan.export.excel', ['kode_pelanggan' => $this->kodePelanggan]))
+                ->openUrlInNewTab(),
                 
             Actions\Action::make('back')
                 ->label('Kembali')
