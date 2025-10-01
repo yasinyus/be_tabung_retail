@@ -64,9 +64,11 @@ class HistoryPengisianForm
                             ->label('Volume (m³)')
                             ->required()
                             ->numeric()
-                            ->step(0.001)
+                            ->step(0.01)
                             ->placeholder('0.025')
-                            ->suffix('m³'),
+                            ->suffix('m³')
+                            ->formatStateUsing(fn ($state) => $state ? number_format((float)$state, 2, '.', '') : $state)
+                            ->dehydrateStateUsing(fn ($state) => $state ? round((float)$state, 2) : $state),
                     ])
                     ->collapsible()
                     ->cloneable()

@@ -15,12 +15,12 @@ class VolumeTabungsTable
             ->columns([
                 TextColumn::make('kode_tabung')
                     ->label('Kode Tabung')
-                    ->searchable()
+                    ->searchable(['stok_tabung.kode_tabung'])
                     ->sortable(),
                     
                 TextColumn::make('tabung.seri_tabung')
                     ->label('Seri Tabung')
-                    ->searchable(),
+                    ->searchable(['tabungs.seri_tabung']),
                     
                 TextColumn::make('status')
                     ->label('Status')
@@ -49,7 +49,7 @@ class VolumeTabungsTable
                         }
                         return $record->lokasi ?? 'Tidak diketahui';
                     })
-                    ->searchable(['lokasi', 'gudangs.nama_gudang', 'pelanggans.nama_pelanggan'])
+                    ->searchable(['stok_tabung.lokasi', 'gudangs.nama_gudang', 'pelanggans.nama_pelanggan'])
                     ->placeholder('Tidak diketahui'),
                     
                 TextColumn::make('tanggal_update')

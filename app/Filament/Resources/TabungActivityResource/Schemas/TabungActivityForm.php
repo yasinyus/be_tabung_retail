@@ -50,9 +50,9 @@ class TabungActivityForm
                 Select::make('status')
                     ->label('Status Tabung')
                     ->options([
-                        'Pending' => 'Pending',
                         'Kosong' => 'Kosong',
                         'Isi' => 'Isi',
+                        'Rusak' => 'Rusak',
                     ])
                     ->required()
                     ->default('Pending')

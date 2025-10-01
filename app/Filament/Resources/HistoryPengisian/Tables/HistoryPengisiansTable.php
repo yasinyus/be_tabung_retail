@@ -72,7 +72,9 @@ class HistoryPengisiansTable
                     ->label('Keterangan')
                     ->limit(50)
                     ->tooltip(fn ($record) => $record->keterangan)
-                    ->placeholder('Tidak ada keterangan'),
+                    ->placeholder('Tidak ada keterangan')
+                    ->searchable()
+                    ->sortable(),
                     
                 TextColumn::make('created_at')
                     ->label('Dibuat')
@@ -105,6 +107,19 @@ class HistoryPengisiansTable
                             ->toArray();
                     })
                     ->placeholder('Semua Lokasi'),
+                    
+                Filter::make('keterangan')
+                    ->form([
+                        \Filament\Forms\Components\TextInput::make('search_keterangan')
+                            ->label('Cari Keterangan')
+                            ->placeholder('Masukkan kata kunci keterangan...')
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['search_keterangan'],
+                            fn (Builder $query, $search): Builder => $query->where('keterangan', 'like', "%{$search}%")
+                        );
+                    }),
                     
                 Filter::make('tanggal')
                     ->form([

@@ -65,6 +65,8 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Resources\TabungActivityResource::class,
                 \App\Filament\Resources\VolumeTabungResource::class,
                 \App\Filament\Resources\HistoryPengisian\HistoryPengisianResource::class,
+                \App\Filament\Resources\RefundTabungs\RefundTabungResource::class,
+                \App\Filament\Resources\Refunds\RefundResource::class,
                 \App\Filament\Resources\Armadas\ArmadaResource::class,
                 \App\Filament\Resources\Pelanggans\PelangganResource::class,
                 \App\Filament\Resources\Gudangs\GudangResource::class,

@@ -23,6 +23,7 @@ use App\Models\DetailTransaksi;
 use App\Models\LaporanPelanggan;
 use App\Models\SaldoPelanggan;
 use App\Models\Deposit;
+use App\Models\SerahTerimaTabung;
 use App\Filament\Resources\Deposits\DepositResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
@@ -458,6 +459,32 @@ class TagihanResource extends Resource
                     ->modalHeading(fn ($record) => 'Tambah Deposit - ' . $record->nama_pelanggan)
                     ->modalSubmitActionLabel('Simpan Deposit')
                     ->modalWidth('md'),
+                    
+                Action::make('refund')
+                    ->label('Refund')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('danger')
+                    ->form([
+                        ViewField::make('refund_table')
+                            ->view('filament.components.refund-table')
+                            ->viewData(function ($record) {
+                                // Get refund data for this customer with status 'Rusak'
+                                $refundData = SerahTerimaTabung::where('kode_pelanggan', $record->kode_pelanggan)
+                                    ->where('status', 'Rusak')
+                                    ->with('pelanggan')
+                                    ->get();
+                                    
+                                return [
+                                    'kode_pelanggan' => $record->kode_pelanggan,
+                                    'nama_pelanggan' => $record->nama_pelanggan,
+                                    'refund_data' => $refundData,
+                                ];
+                            })
+                    ])
+                    ->modalHeading(fn ($record) => 'Data Refund Tabung - ' . $record->nama_pelanggan)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->modalWidth('7xl'),
             ])
             ->defaultSort('saldo', 'asc'); // Sort by saldo ascending (minus first)
     }

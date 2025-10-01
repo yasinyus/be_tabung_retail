@@ -23,13 +23,38 @@ class AuditsTable
     {
         return $table
             ->modifyQueryUsing(function ($query) {
-                // Override query to show all tabung instead of audits
-                return Tabung::query();
+                // Override query to show all tabung with latest audit data
+                return Tabung::query()
+                    ->leftJoin('audits', function($join) {
+                        $join->whereRaw("JSON_SEARCH(audits.tabung, 'one', tabungs.kode_tabung, null, '$[*].qr_code') IS NOT NULL")
+                             ->whereRaw('audits.tanggal = (
+                                 SELECT MAX(a2.tanggal) 
+                                 FROM audits a2 
+                                 WHERE JSON_SEARCH(a2.tabung, \'one\', tabungs.kode_tabung, null, \'$[*].qr_code\') IS NOT NULL
+                             )');
+                    })
+                    ->leftJoin('gudangs', function($join) {
+                        $join->on('audits.lokasi', '=', 'gudangs.kode_gudang')
+                             ->where('audits.lokasi', 'like', 'GD%');
+                    })
+                    ->leftJoin('pelanggans', function($join) {
+                        $join->on('audits.lokasi', '=', 'pelanggans.kode_pelanggan')
+                             ->where(function($query) {
+                                 $query->where('audits.lokasi', 'like', 'PA%')
+                                       ->orWhere('audits.lokasi', 'like', 'PU%');
+                             });
+                    })
+                    ->select('tabungs.*', 
+                            'audits.lokasi as audit_lokasi', 
+                            'audits.tanggal as audit_tanggal', 
+                            'gudangs.nama_gudang', 
+                            'pelanggans.nama_pelanggan');
             })
+            ->searchable(false)
             ->columns([
                 TextColumn::make('kode_tabung')
                     ->label('Kode Tabung')
-                    ->searchable()
+                    ->searchable(['kode_tabung'])
                     ->sortable(),
 
                 TextColumn::make('tanggal_audit')
@@ -45,8 +70,7 @@ class AuditsTable
                         
                         return $latestAudit ? Carbon::parse($latestAudit->tanggal)->format('d/m/Y') : '-';
                     })
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
 
                 TextColumn::make('status_tabung')
                     ->label('Status Tabung')
@@ -79,39 +103,38 @@ class AuditsTable
                 TextColumn::make('lokasi')
                     ->label('Lokasi')
                     ->getStateUsing(function ($record) {
-                        // Get location from the audit that contains this tabung
-                        $latestAudit = Audit::whereRaw(
-                            "JSON_SEARCH(tabung, 'one', ?, null, '$[*].qr_code') IS NOT NULL",
-                            [$record->kode_tabung]
-                        )
-                        ->orderBy('tanggal', 'desc')
-                        ->first();
-                        
-                        if (!$latestAudit) {
-                            return 'Belum pernah diaudit';
+                        // Use data from JOIN instead of separate query
+                        if (!empty($record->nama_gudang)) {
+                            return $record->nama_gudang;
+                        } elseif (!empty($record->nama_pelanggan)) {
+                            return $record->nama_pelanggan;
+                        } elseif (!empty($record->audit_lokasi)) {
+                            return $record->audit_lokasi;
                         }
-                        
-                        $lokasi = $latestAudit->lokasi;
-                        
-                        // Check if it's a gudang code (starts with GD)
-                        if (str_starts_with($lokasi, 'GD')) {
-                            $gudang = Gudang::where('kode_gudang', $lokasi)->first();
-                            return $gudang ? $gudang->nama_gudang : $lokasi;
-                        }
-                        
-                        // Check if it's a pelanggan code (starts with PA or PU)
-                        if (str_starts_with($lokasi, 'PA') || str_starts_with($lokasi, 'PU')) {
-                            $pelanggan = Pelanggan::where('kode_pelanggan', $lokasi)->first();
-                            return $pelanggan ? $pelanggan->nama_pelanggan : $lokasi;
-                        }
-                        
-                        // Return original location if no match found
-                        return $lokasi;
+                        return 'Belum pernah diaudit';
                     })
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
             ])
             ->filters([
+                \Filament\Tables\Filters\Filter::make('global_search')
+                    ->form([
+                        \Filament\Forms\Components\TextInput::make('search')
+                            ->label('Cari')
+                            ->placeholder('Cari kode tabung atau lokasi...')
+                    ])
+                    ->query(function ($query, array $data) {
+                        if (!empty($data['search'])) {
+                            return $query->where(function ($query) use ($data) {
+                                $search = $data['search'];
+                                $query->where('tabungs.kode_tabung', 'like', "%{$search}%")
+                                      ->orWhere('audits.lokasi', 'like', "%{$search}%")
+                                      ->orWhere('gudangs.nama_gudang', 'like', "%{$search}%")
+                                      ->orWhere('pelanggans.nama_pelanggan', 'like', "%{$search}%");
+                            });
+                        }
+                        return $query;
+                    }),
+                    
                 SelectFilter::make('lokasi')
                     ->label('Lokasi')
                     ->options(function () {
