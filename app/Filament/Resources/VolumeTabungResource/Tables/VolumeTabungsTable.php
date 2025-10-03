@@ -15,12 +15,10 @@ class VolumeTabungsTable
             ->columns([
                 TextColumn::make('kode_tabung')
                     ->label('Kode Tabung')
-                    ->searchable(['stok_tabung.kode_tabung'])
                     ->sortable(),
                     
                 TextColumn::make('tabung.seri_tabung')
-                    ->label('Seri Tabung')
-                    ->searchable(['tabungs.seri_tabung']),
+                    ->label('Seri Tabung'),
                     
                 TextColumn::make('status')
                     ->label('Status')
@@ -49,7 +47,6 @@ class VolumeTabungsTable
                         }
                         return $record->lokasi ?? 'Tidak diketahui';
                     })
-                    ->searchable(['stok_tabung.lokasi', 'gudangs.nama_gudang', 'pelanggans.nama_pelanggan'])
                     ->placeholder('Tidak diketahui'),
                     
                 TextColumn::make('tanggal_update')
@@ -108,7 +105,7 @@ class VolumeTabungsTable
                 // Bulk actions akan ditambahkan nanti
             ])
             ->modifyQueryUsing(function ($query) {
-                return $query
+                $baseQuery = $query
                     ->leftJoin('gudangs', function($join) {
                         $join->on('stok_tabung.lokasi', '=', 'gudangs.kode_gudang')
                              ->where('stok_tabung.lokasi', 'like', 'GD%');
@@ -127,6 +124,19 @@ class VolumeTabungsTable
                         'pelanggans.nama_pelanggan',
                         'tabungs.seri_tabung'
                     );
+                
+                // Handle search parameter from URL
+                if ($search = request()->get('search')) {
+                    $baseQuery->where(function ($query) use ($search) {
+                        $query->where('stok_tabung.kode_tabung', 'like', "%{$search}%")
+                              ->orWhere('stok_tabung.lokasi', 'like', "%{$search}%")
+                              ->orWhere('tabungs.seri_tabung', 'like', "%{$search}%")
+                              ->orWhere('gudangs.nama_gudang', 'like', "%{$search}%")
+                              ->orWhere('pelanggans.nama_pelanggan', 'like', "%{$search}%");
+                    });
+                }
+                
+                return $baseQuery;
             })
             ->defaultSort('tanggal_update', 'desc')
             ->emptyStateHeading('Belum ada data stok tabung')
