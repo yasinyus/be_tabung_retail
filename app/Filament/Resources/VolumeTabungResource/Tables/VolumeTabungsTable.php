@@ -6,6 +6,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use App\Models\Gudang;
+use Illuminate\Database\Eloquent\Builder;
 
 class VolumeTabungsTable
 {
@@ -15,10 +16,16 @@ class VolumeTabungsTable
             ->columns([
                 TextColumn::make('kode_tabung')
                     ->label('Kode Tabung')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where('stok_tabung.kode_tabung', 'like', "%{$search}%");
+                    }),
                     
                 TextColumn::make('tabung.seri_tabung')
-                    ->label('Seri Tabung'),
+                    ->label('Seri Tabung')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where('tabungs.seri_tabung', 'like', "%{$search}%");
+                    }),
                     
                 TextColumn::make('status')
                     ->label('Status')
@@ -47,7 +54,14 @@ class VolumeTabungsTable
                         }
                         return $record->lokasi ?? 'Tidak diketahui';
                     })
-                    ->placeholder('Tidak diketahui'),
+                    ->placeholder('Tidak diketahui')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where(function ($query) use ($search) {
+                            $query->where('gudangs.nama_gudang', 'like', "%{$search}%")
+                                  ->orWhere('pelanggans.nama_pelanggan', 'like', "%{$search}%")
+                                  ->orWhere('stok_tabung.lokasi', 'like', "%{$search}%");
+                        });
+                    }),
                     
                 TextColumn::make('tanggal_update')
                     ->label('Terakhir Update')
@@ -104,7 +118,8 @@ class VolumeTabungsTable
             ->bulkActions([
                 // Bulk actions akan ditambahkan nanti
             ])
-            ->modifyQueryUsing(function ($query) {
+            ->searchable()
+            ->modifyQueryUsing(function (Builder $query, array $data = []) {
                 $baseQuery = $query
                     ->leftJoin('gudangs', function($join) {
                         $join->on('stok_tabung.lokasi', '=', 'gudangs.kode_gudang')
@@ -125,14 +140,15 @@ class VolumeTabungsTable
                         'tabungs.seri_tabung'
                     );
                 
-                // Handle search parameter from URL
-                if ($search = request()->get('search')) {
-                    $baseQuery->where(function ($query) use ($search) {
-                        $query->where('stok_tabung.kode_tabung', 'like', "%{$search}%")
-                              ->orWhere('stok_tabung.lokasi', 'like', "%{$search}%")
-                              ->orWhere('tabungs.seri_tabung', 'like', "%{$search}%")
-                              ->orWhere('gudangs.nama_gudang', 'like', "%{$search}%")
-                              ->orWhere('pelanggans.nama_pelanggan', 'like', "%{$search}%");
+                // Handle search from URL parameter
+                $searchParam = request()->get('search');
+                if ($searchParam) {
+                    $baseQuery->where(function ($query) use ($searchParam) {
+                        $query->where('stok_tabung.kode_tabung', 'like', "%{$searchParam}%")
+                              ->orWhere('stok_tabung.lokasi', 'like', "%{$searchParam}%")
+                              ->orWhere('tabungs.seri_tabung', 'like', "%{$searchParam}%")
+                              ->orWhere('gudangs.nama_gudang', 'like', "%{$searchParam}%")
+                              ->orWhere('pelanggans.nama_pelanggan', 'like', "%{$searchParam}%");
                     });
                 }
                 
