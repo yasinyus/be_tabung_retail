@@ -441,6 +441,7 @@ class TagihanResource extends Resource
                             'pengurangan_deposit' => 0,
                             'sisa_deposit' => $sisaDeposit,
                             'konfirmasi' => false,
+                            'list_tabung' => [], // Tambahkan field list_tabung dengan array kosong
                         ]);
                         
                         // Notifikasi sukses

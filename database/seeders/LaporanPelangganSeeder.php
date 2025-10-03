@@ -28,6 +28,7 @@ class LaporanPelangganSeeder extends Seeder
                 'pengurangan_deposit' => null,
                 'sisa_deposit' => 10000,
                 'konfirmasi' => true,
+                'list_tabung' => [],
             ]);
 
             LaporanPelanggan::create([
@@ -40,6 +41,7 @@ class LaporanPelangganSeeder extends Seeder
                 'pengurangan_deposit' => 5000,
                 'sisa_deposit' => 5000,
                 'konfirmasi' => true,
+                'list_tabung' => [],
             ]);
 
             LaporanPelanggan::create([
@@ -52,6 +54,7 @@ class LaporanPelangganSeeder extends Seeder
                 'pengurangan_deposit' => null,
                 'sisa_deposit' => 5000,
                 'konfirmasi' => false,
+                'list_tabung' => [],
             ]);
         }
     }
