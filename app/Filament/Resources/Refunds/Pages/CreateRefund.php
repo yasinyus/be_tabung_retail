@@ -5,9 +5,11 @@ namespace App\Filament\Resources\Refunds\Pages;
 use App\Filament\Resources\Refunds\RefundResource;
 use App\Models\SerahTerimaTabung;
 use App\Models\SaldoPelanggan;
+use App\Models\LaporanPelanggan;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class CreateRefund extends CreateRecord
 {
@@ -88,11 +90,41 @@ class CreateRefund extends CreateRecord
                 
                 Log::info("Saldo ditambahkan untuk pelanggan {$serahTerima->kode_pelanggan}: +{$record->total_refund}");
                 
+                // Hitung jumlah tabung dari list_tabung JSON
+                $jumlahTabung = 0;
+                if ($serahTerima->tabung && is_array($serahTerima->tabung)) {
+                    $jumlahTabung = count($serahTerima->tabung);
+                } elseif ($serahTerima->tabung && is_string($serahTerima->tabung)) {
+                    $tabungArray = json_decode($serahTerima->tabung, true);
+                    $jumlahTabung = $tabungArray ? count($tabungArray) : 0;
+                }
+                
+                // Insert ke tabel laporan_pelanggan
+                try {
+                    LaporanPelanggan::create([
+                        'tanggal' => Carbon::now(),
+                        'kode_pelanggan' => $serahTerima->kode_pelanggan,
+                        'keterangan' => 'Refund',
+                        'list_tabung' => $serahTerima->tabung ?? [], // Ambil dari serah_terima_tabungs
+                        'tabung' => $jumlahTabung, // Hitung jumlah dari list_tabung
+                        'harga' => $record->total_refund,
+                        'tambahan_deposit' => $record->total_refund, // tambah_deposit = total refund
+                        'pengurangan_deposit' => 0,
+                        'sisa_deposit' => $saldoPelanggan->saldo, // Saldo setelah ditambah refund
+                        'konfirmasi' => 0,
+                    ]);
+                    
+                    Log::info("Laporan pelanggan created for refund - Pelanggan: {$serahTerima->kode_pelanggan}, Total: {$record->total_refund}");
+                } catch (\Exception $e) {
+                    Log::error("Failed to create laporan_pelanggan: " . $e->getMessage());
+                }
+                
                 // Tampilkan notifikasi sukses
                 Notification::make()
                     ->title('Refund berhasil dibuat')
                     ->body("Saldo pelanggan {$serahTerima->kode_pelanggan} telah ditambah sebesar " . 
-                           'Rp ' . number_format($record->total_refund, 0, ',', '.'))
+                           'Rp ' . number_format($record->total_refund, 0, ',', '.') . 
+                           ' dan laporan pelanggan telah diperbarui.')
                     ->success()
                     ->send();
             } else {
