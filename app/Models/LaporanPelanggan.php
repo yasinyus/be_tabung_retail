@@ -20,6 +20,7 @@ class LaporanPelanggan extends Model
         'pengurangan_deposit',
         'sisa_deposit',
         'konfirmasi',
+        'id_bast_invoice',
     ];
 
     protected $casts = [

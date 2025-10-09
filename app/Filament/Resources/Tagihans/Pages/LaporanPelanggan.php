@@ -63,6 +63,12 @@ class LaporanPelanggan extends Page implements HasTable
                     ->searchable()
                     ->wrap(),
                     
+                TextColumn::make('id_bast_invoice')
+                    ->label('ID BAST Invoice')
+                    ->searchable()
+                    ->placeholder('-')
+                    ->alignCenter(),
+                    
                 TextColumn::make('tabung')
                     ->label('Jumlah Tabung')
                     ->placeholder('-')

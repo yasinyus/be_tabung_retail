@@ -105,6 +105,7 @@ class CreateRefund extends CreateRecord
                         'tanggal' => Carbon::now(),
                         'kode_pelanggan' => $serahTerima->kode_pelanggan,
                         'keterangan' => 'Refund',
+                        'id_bast_invoice' => $record->bast_id,
                         'list_tabung' => $serahTerima->tabung ?? [], // Ambil dari serah_terima_tabungs
                         'tabung' => $jumlahTabung, // Hitung jumlah dari list_tabung
                         'harga' => $record->total_refund,
