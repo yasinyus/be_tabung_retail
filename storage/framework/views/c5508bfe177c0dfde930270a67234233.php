@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Pelanggan - {{ $pelanggan->nama_pelanggan }}</title>
+    <title>Laporan Pelanggan - <?php echo e($pelanggan->nama_pelanggan); ?></title>
     <style>
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
@@ -118,29 +118,30 @@
 <body>
     <div class="header">
         <h1>LAPORAN PELANGGAN</h1>
-        <h2>{{ $pelanggan->nama_pelanggan }}</h2>
+        <h2><?php echo e($pelanggan->nama_pelanggan); ?></h2>
     </div>
 
     <div style="display: table; width: 100%; margin-bottom: 30px;">
         <div style="display: table-cell; width: 50%; vertical-align: top;">
             <div class="info-box">
                 <h3>Informasi Pelanggan</h3>
-                <p><strong>Kode:</strong> {{ $pelanggan->kode_pelanggan }}</p>
-                <p><strong>Nama:</strong> {{ $pelanggan->nama_pelanggan }}</p>
-                <p><strong>Alamat:</strong> {{ $pelanggan->alamat ?? '-' }}</p>
-                <p><strong>Telepon:</strong> {{ $pelanggan->telepon ?? '-' }}</p>
+                <p><strong>Kode:</strong> <?php echo e($pelanggan->kode_pelanggan); ?></p>
+                <p><strong>Nama:</strong> <?php echo e($pelanggan->nama_pelanggan); ?></p>
+                <p><strong>Alamat:</strong> <?php echo e($pelanggan->alamat ?? '-'); ?></p>
+                <p><strong>Telepon:</strong> <?php echo e($pelanggan->telepon ?? '-'); ?></p>
             </div>
         </div>
         <div style="display: table-cell; width: 50%; vertical-align: top; padding-left: 20px;">
             <div class="info-box">
                 <h3>Detail Laporan</h3>
-                <p><strong>Total Transaksi:</strong> {{ $laporans->count() }}</p>
-                <p><strong>Tanggal Cetak:</strong> {{ $tanggal_cetak }}</p>
+                <p><strong>Total Transaksi:</strong> <?php echo e($laporans->count()); ?></p>
+                <p><strong>Tanggal Cetak:</strong> <?php echo e($tanggal_cetak); ?></p>
                 <p><strong>Sisa Deposit Terakhir:</strong> 
-                    @php
+                    <?php
                         $lastDeposit = $laporans->first();
-                    @endphp
-                    {{ $lastDeposit && $lastDeposit->sisa_deposit ? 'Rp ' . number_format($lastDeposit->sisa_deposit, 0, ',', '.') : 'Rp 0' }}
+                    ?>
+                    <?php echo e($lastDeposit && $lastDeposit->sisa_deposit ? 'Rp ' . number_format($lastDeposit->sisa_deposit, 0, ',', '.') : 'Rp 0'); ?>
+
                 </p>
             </div>
         </div>
@@ -163,61 +164,63 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($laporans as $index => $laporan)
+                <?php $__empty_1 = true; $__currentLoopData = $laporans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $laporan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
-                        <td class="text-center">{{ $index + 1 }}</td>
-                        <td class="text-center">{{ $laporan->tanggal ? $laporan->tanggal->format('d/m/Y') : '-' }}</td>
-                        <td>{{ $laporan->keterangan ?? '-' }}</td>
-                        <td class="text-center">{{ $laporan->id_bast_invoice ?? '-' }}</td>
-                        <td class="text-center">{{ $laporan->tabung ?? '-' }}</td>
-                        <td class="text-right">{{ $laporan->harga ? 'Rp ' . number_format($laporan->harga, 0, ',', '.') : '-' }}</td>
+                        <td class="text-center"><?php echo e($index + 1); ?></td>
+                        <td class="text-center"><?php echo e($laporan->tanggal ? $laporan->tanggal->format('d/m/Y') : '-'); ?></td>
+                        <td><?php echo e($laporan->keterangan ?? '-'); ?></td>
+                        <td class="text-center"><?php echo e($laporan->id_bast_invoice ?? '-'); ?></td>
+                        <td class="text-center"><?php echo e($laporan->tabung ?? '-'); ?></td>
+                        <td class="text-right"><?php echo e($laporan->harga ? 'Rp ' . number_format($laporan->harga, 0, ',', '.') : '-'); ?></td>
                         <td class="text-right text-success">
-                            {{ $laporan->tambahan_deposit ? '+Rp ' . number_format($laporan->tambahan_deposit, 0, ',', '.') : '-' }}
+                            <?php echo e($laporan->tambahan_deposit ? '+Rp ' . number_format($laporan->tambahan_deposit, 0, ',', '.') : '-'); ?>
+
                         </td>
                         <td class="text-right text-danger">
-                            {{ $laporan->pengurangan_deposit ? '-Rp ' . number_format($laporan->pengurangan_deposit, 0, ',', '.') : '-' }}
+                            <?php echo e($laporan->pengurangan_deposit ? '-Rp ' . number_format($laporan->pengurangan_deposit, 0, ',', '.') : '-'); ?>
+
                         </td>
                         <td class="text-right">
-                            <strong>{{ $laporan->sisa_deposit ? 'Rp ' . number_format($laporan->sisa_deposit, 0, ',', '.') : 'Rp 0' }}</strong>
+                            <strong><?php echo e($laporan->sisa_deposit ? 'Rp ' . number_format($laporan->sisa_deposit, 0, ',', '.') : 'Rp 0'); ?></strong>
                         </td>
                         <td class="text-center">
-                            @if($laporan->konfirmasi)
+                            <?php if($laporan->konfirmasi): ?>
                                 <span style="color: #28a745; font-weight: bold;">✓</span>
-                            @else
+                            <?php else: ?>
                                 <span style="color: #dc3545;">✗</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                     </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="10" class="text-center" style="padding: 20px;">
                             <em>Tidak ada data laporan</em>
                         </td>
                     </tr>
-                @endforelse
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 
-    @if($laporans->count() > 0)
+    <?php if($laporans->count() > 0): ?>
         <div class="summary-box">
             <h4>Ringkasan</h4>
-            <p><strong>Total Transaksi:</strong> {{ $laporans->count() }} transaksi</p>
-            <p><strong>Transaksi Terkonfirmasi:</strong> {{ $laporans->where('konfirmasi', true)->count() }} dari {{ $laporans->count() }}</p>
-            @php
+            <p><strong>Total Transaksi:</strong> <?php echo e($laporans->count()); ?> transaksi</p>
+            <p><strong>Transaksi Terkonfirmasi:</strong> <?php echo e($laporans->where('konfirmasi', true)->count()); ?> dari <?php echo e($laporans->count()); ?></p>
+            <?php
                 $totalHarga = $laporans->sum('harga');
                 $totalDepositMasuk = $laporans->sum('tambahan_deposit');
                 $totalDepositKeluar = $laporans->sum('pengurangan_deposit');
-            @endphp
-            <p><strong>Total Harga:</strong> {{ $totalHarga ? 'Rp ' . number_format($totalHarga, 0, ',', '.') : 'Rp 0' }}</p>
-            <p><strong>Total Deposit Masuk:</strong> {{ $totalDepositMasuk ? 'Rp ' . number_format($totalDepositMasuk, 0, ',', '.') : 'Rp 0' }}</p>
-            <p><strong>Total Deposit Keluar:</strong> {{ $totalDepositKeluar ? 'Rp ' . number_format($totalDepositKeluar, 0, ',', '.') : 'Rp 0' }}</p>
+            ?>
+            <p><strong>Total Harga:</strong> <?php echo e($totalHarga ? 'Rp ' . number_format($totalHarga, 0, ',', '.') : 'Rp 0'); ?></p>
+            <p><strong>Total Deposit Masuk:</strong> <?php echo e($totalDepositMasuk ? 'Rp ' . number_format($totalDepositMasuk, 0, ',', '.') : 'Rp 0'); ?></p>
+            <p><strong>Total Deposit Keluar:</strong> <?php echo e($totalDepositKeluar ? 'Rp ' . number_format($totalDepositKeluar, 0, ',', '.') : 'Rp 0'); ?></p>
         </div>
-    @endif
+    <?php endif; ?>
 
     <div class="footer">
-        <p>Laporan ini dicetak pada {{ $tanggal_cetak }}</p>
-        <p>© {{ date('Y') }} Sistem Manajemen Tabung Gas</p>
+        <p>Laporan ini dicetak pada <?php echo e($tanggal_cetak); ?></p>
+        <p>© <?php echo e(date('Y')); ?> Sistem Manajemen Tabung Gas</p>
     </div>
 </body>
-</html>
+</html><?php /**PATH C:\Users\yasin\OneDrive\Desktop\ADMIN-TABUNG\resources\views/pdf/laporan-pelanggan.blade.php ENDPATH**/ ?>

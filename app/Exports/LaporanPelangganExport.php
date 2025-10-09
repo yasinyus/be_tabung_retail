@@ -36,6 +36,7 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
             'No',
             'Tanggal',
             'Keterangan',
+            'ID BAST Invoice',
             'Jumlah Tabung',
             'Harga',
             'Deposit (+)',
@@ -54,6 +55,7 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
             $no++,
             $laporan->tanggal ? $laporan->tanggal->format('d/m/Y') : '-',
             $laporan->keterangan ?? '-',
+            $laporan->id_bast_invoice ?? '-',
             $laporan->tabung ?? '-',
             $laporan->harga ? 'Rp ' . number_format($laporan->harga, 0, ',', '.') : '-',
             $laporan->tambahan_deposit ? 'Rp ' . number_format($laporan->tambahan_deposit, 0, ',', '.') : '-',
@@ -73,7 +75,7 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
     {
         return [
             1 => ['font' => ['bold' => true]],
-            'A:J' => ['alignment' => ['horizontal' => 'left']],
+            'A:K' => ['alignment' => ['horizontal' => 'left']],
         ];
     }
 }
