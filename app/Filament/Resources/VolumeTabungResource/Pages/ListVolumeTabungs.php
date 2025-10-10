@@ -40,6 +40,7 @@ class ListVolumeTabungs extends ListRecords
         $totalTabung = StokTabung::count();
         $totalIsi = StokTabung::where('status', 'Isi')->count();
         $totalKosong = StokTabung::where('status', 'Kosong')->count();
+        $totalRusak = StokTabung::where('status', 'Rusak')->count();
         $totalVolume = StokTabung::where('status', 'Isi')->sum('volume');
         $totalGudang = Gudang::count();
         $totalPelanggan = Pelanggan::count();
@@ -49,12 +50,14 @@ class ListVolumeTabungs extends ListRecords
             'totalTabung' => $totalTabung,
             'totalIsi' => $totalIsi,
             'totalKosong' => $totalKosong,
+            'totalRusak' => $totalRusak,
             'totalVolume' => $totalVolume,
             'totalGudang' => $totalGudang,
             'totalPelanggan' => $totalPelanggan,
             'totalArmada' => $totalArmada,
             'persentaseIsi' => $totalTabung > 0 ? round(($totalIsi / $totalTabung) * 100, 1) : 0,
             'persentaseKosong' => $totalTabung > 0 ? round(($totalKosong / $totalTabung) * 100, 1) : 0,
+            'persentaseRusak' => $totalTabung > 0 ? round(($totalRusak / $totalTabung) * 100, 1) : 0,
         ];
     }
 
@@ -66,6 +69,7 @@ class ListVolumeTabungs extends ListRecords
             DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = gudangs.kode_gudang) as total_tabung'),
             DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = gudangs.kode_gudang AND status = "Isi") as tabung_isi'),
             DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = gudangs.kode_gudang AND status = "Kosong") as tabung_kosong'),
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = gudangs.kode_gudang AND status = "Rusak") as tabung_rusak'),
             DB::raw('(SELECT SUM(volume) FROM stok_tabung WHERE lokasi = gudangs.kode_gudang AND status = "Isi") as total_volume')
         ])
         ->orderBy('gudangs.nama_gudang')
@@ -80,6 +84,7 @@ class ListVolumeTabungs extends ListRecords
             DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = pelanggans.kode_pelanggan) as total_tabung'),
             DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = pelanggans.kode_pelanggan AND status = "Isi") as tabung_isi'),
             DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = pelanggans.kode_pelanggan AND status = "Kosong") as tabung_kosong'),
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = pelanggans.kode_pelanggan AND status = "Rusak") as tabung_rusak'),
             DB::raw('(SELECT SUM(volume) FROM stok_tabung WHERE lokasi = pelanggans.kode_pelanggan AND status = "Isi") as total_volume')
         ])
         ->orderBy('pelanggans.nama_pelanggan')
@@ -94,6 +99,7 @@ class ListVolumeTabungs extends ListRecords
             DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan) as total_tabung'),
             DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan AND status = "Isi") as tabung_isi'),
             DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan AND status = "Kosong") as tabung_kosong'),
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan AND status = "Rusak") as tabung_rusak'),
             DB::raw('(SELECT SUM(volume) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan AND status = "Isi") as total_volume')
         ])
         ->orderBy('armadas.nopol')

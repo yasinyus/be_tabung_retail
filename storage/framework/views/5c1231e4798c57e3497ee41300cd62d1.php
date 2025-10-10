@@ -5,7 +5,7 @@
         <div class="flex items-center">
             <div class="ml-3">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Tabung</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ number_format($stats['totalTabung']) }}</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo e(number_format($stats['totalTabung'])); ?></p>
             </div>
         </div>
     </div>
@@ -15,7 +15,7 @@
         <div class="flex items-center">
             <div class="ml-3">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Tabung Isi</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ number_format($stats['totalIsi']) }}</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo e(number_format($stats['totalIsi'])); ?></p>
             </div>
         </div>
     </div>
@@ -25,7 +25,7 @@
         <div class="flex items-center">
             <div class="ml-3">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Tabung Kosong</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ number_format($stats['totalKosong']) }}</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo e(number_format($stats['totalKosong'])); ?></p>
             </div>
         </div>
     </div>
@@ -35,7 +35,7 @@
         <div class="flex items-center">
             <div class="ml-3">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Tabung Rusak</p>
-                <p class="text-lg font-semibold text-red-600 dark:text-red-400">{{ number_format($stats['totalRusak']) }}</p>
+                <p class="text-lg font-semibold text-red-600 dark:text-red-400"><?php echo e(number_format($stats['totalRusak'])); ?></p>
             </div>
         </div>
     </div>
@@ -45,7 +45,7 @@
         <div class="flex items-center">
             <div class="ml-3">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Gudang</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ number_format($stats['totalGudang']) }}</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo e(number_format($stats['totalGudang'])); ?></p>
             </div>
         </div>
     </div>
@@ -55,7 +55,7 @@
         <div class="flex items-center">
             <div class="ml-3">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pelanggan</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ number_format($stats['totalPelanggan']) }}</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo e(number_format($stats['totalPelanggan'])); ?></p>
             </div>
         </div>
     </div>
@@ -65,7 +65,7 @@
         <div class="flex items-center">
             <div class="ml-3">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Armada</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ number_format($stats['totalArmada']) }}</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo e(number_format($stats['totalArmada'])); ?></p>
             </div>
         </div>
     </div>
@@ -104,46 +104,52 @@
                 </tr>
             </thead>
             <tbody class="bg-gray-50 dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                @forelse($gudangStats as $gudang)
+                <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $gudangStats; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gudang): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
                         <td class="px-4 py-3 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                {{ $gudang->nama_gudang }}
+                                <?php echo e($gudang->nama_gudang); ?>
+
                             </div>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200">
-                                {{ $gudang->kode_gudang }}
+                                <?php echo e($gudang->kode_gudang); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200">
-                                {{ number_format($gudang->total_tabung) }}
+                                <?php echo e(number_format($gudang->total_tabung)); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200">
-                                {{ number_format($gudang->tabung_isi) }}
+                                <?php echo e(number_format($gudang->tabung_isi)); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200">
-                                {{ number_format($gudang->tabung_kosong) }}
+                                <?php echo e(number_format($gudang->tabung_kosong)); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200">
-                                {{ number_format($gudang->tabung_rusak) }}
+                                <?php echo e(number_format($gudang->tabung_rusak)); ?>
+
                             </span>
                         </td>
                     </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="6" class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
                             Tidak ada data gudang tersedia
                         </td>
                     </tr>
-                @endforelse
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </tbody>
         </table>
     </div>
@@ -182,44 +188,50 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-                @forelse($pelangganStats as $pelanggan)
+                <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $pelangganStats; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pelanggan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
                         <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                            {{ $pelanggan->nama_pelanggan }}
+                            <?php echo e($pelanggan->nama_pelanggan); ?>
+
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200">
-                                {{ $pelanggan->kode_pelanggan }}
+                                <?php echo e($pelanggan->kode_pelanggan); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200">
-                                {{ number_format($pelanggan->total_tabung) }}
+                                <?php echo e(number_format($pelanggan->total_tabung)); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200">
-                                {{ number_format($pelanggan->tabung_isi) }}
+                                <?php echo e(number_format($pelanggan->tabung_isi)); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200">
-                                {{ number_format($pelanggan->tabung_kosong) }}
+                                <?php echo e(number_format($pelanggan->tabung_kosong)); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200">
-                                {{ number_format($pelanggan->tabung_rusak) }}
+                                <?php echo e(number_format($pelanggan->tabung_rusak)); ?>
+
                             </span>
                         </td>
                     </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="6" class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
                             Tidak ada data pelanggan tersedia
                         </td>
                     </tr>
-                @endforelse
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </tbody>
         </table>
     </div>
@@ -258,45 +270,52 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-                @forelse($armadaStats as $armada)
+                <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $armadaStats; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $armada): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
                         <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                            {{ $armada->nopol }}
+                            <?php echo e($armada->nopol); ?>
+
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200">
-                                {{ $armada->kode_kendaraan }}
+                                <?php echo e($armada->kode_kendaraan); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200">
-                                {{ number_format($armada->total_tabung) }}
+                                <?php echo e(number_format($armada->total_tabung)); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200">
-                                {{ number_format($armada->tabung_isi) }}
+                                <?php echo e(number_format($armada->tabung_isi)); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200">
-                                {{ number_format($armada->tabung_kosong) }}
+                                <?php echo e(number_format($armada->tabung_kosong)); ?>
+
                             </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200">
-                                {{ number_format($armada->tabung_rusak) }}
+                                <?php echo e(number_format($armada->tabung_rusak)); ?>
+
                             </span>
                         </td>
                     </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="6" class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
                             Tidak ada data armada tersedia
                         </td>
                     </tr>
-                @endforelse
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </tbody>
         </table>
     </div>
 </div>
+<?php /**PATH C:\Users\yasin\OneDrive\Desktop\ADMIN-TABUNG\resources\views/filament/components/tabung-stats.blade.php ENDPATH**/ ?>
