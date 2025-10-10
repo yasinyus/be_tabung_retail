@@ -33,7 +33,11 @@ class VolumeTabungsTable
                     ->color(fn (string $state): string => match ($state) {
                         'Kosong' => 'danger',
                         'Isi' => 'success',
+                        'Rusak' => 'warning',
                         default => 'gray',
+                    })
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where('stok_tabung.status', 'like', "%{$search}%");
                     }),
                     
                 TextColumn::make('volume')
@@ -59,6 +63,7 @@ class VolumeTabungsTable
                         return $query->where(function ($query) use ($search) {
                             $query->where('gudangs.nama_gudang', 'like', "%{$search}%")
                                   ->orWhere('pelanggans.nama_pelanggan', 'like', "%{$search}%")
+                                  ->orWhere('stok_tabung.status', 'like', "%{$search}%")
                                   ->orWhere('stok_tabung.lokasi', 'like', "%{$search}%");
                         });
                     }),
@@ -93,6 +98,7 @@ class VolumeTabungsTable
                     ->options([
                         'Kosong' => 'Kosong',
                         'Isi' => 'Isi',
+                        'Rusak' => 'Rusak',
                     ])
                     ->placeholder('Semua Status'),
                     
@@ -146,6 +152,7 @@ class VolumeTabungsTable
                     $baseQuery->where(function ($query) use ($searchParam) {
                         $query->where('stok_tabung.kode_tabung', 'like', "%{$searchParam}%")
                               ->orWhere('stok_tabung.lokasi', 'like', "%{$searchParam}%")
+                              ->orWhere('stok_tabung.status', 'like', "%{$searchParam}%")
                               ->orWhere('tabungs.seri_tabung', 'like', "%{$searchParam}%")
                               ->orWhere('gudangs.nama_gudang', 'like', "%{$searchParam}%")
                               ->orWhere('pelanggans.nama_pelanggan', 'like', "%{$searchParam}%");
