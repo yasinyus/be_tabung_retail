@@ -1,7 +1,7 @@
 <div x-data="{
     currentPage: 1,
     itemsPerPage: 10,
-    totalItems: {{ $activities ? $activities->count() : 0 }},
+    totalItems: <?php echo e($activities ? $activities->count() : 0); ?>,
     get totalPages() {
         return Math.ceil(this.totalItems / this.itemsPerPage);
     },
@@ -31,14 +31,14 @@
 }">
     <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white">Riwayat Aktivitas Tabung</h3>
-        @if($activities && $activities->count() > 5)
+        <!--[if BLOCK]><![endif]--><?php if($activities && $activities->count() > 5): ?>
             <div class="text-sm text-gray-500 dark:text-gray-400">
-                Total: {{ $activities->count() }} aktivitas
+                Total: <?php echo e($activities->count()); ?> aktivitas
             </div>
-        @endif
+        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
     </div>
     
-    @if($activities && $activities->count() > 0)
+    <?php if($activities && $activities->count() > 0): ?>
         <div class="overflow-x-auto">
             <table style="100%">
                 <thead >
@@ -67,31 +67,37 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($activities as $index => $activity)
-                        <tr x-show="shouldShowRow({{ $index }})">
+                    <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $activities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <tr x-show="shouldShowRow(<?php echo e($index); ?>)">
                             <td style="width: 5%" class="text-center">
-                                <span x-text="((currentPage - 1) * itemsPerPage) + {{ $index + 1 }}"></span>
+                                <span x-text="((currentPage - 1) * itemsPerPage) + <?php echo e($index + 1); ?>"></span>
                             </td>
                             <td style="width: 12%">
-                                {{ $activity->tanggal ?? ($activity->created_at ? $activity->created_at->format('d/m/Y') : '-') }}
+                                <?php echo e($activity->tanggal ?? ($activity->created_at ? $activity->created_at->format('d/m/Y') : '-')); ?>
+
                             </td>
                             <td style="width: 25%">
-                                {{ $activity->nama_aktivitas ?? '-' }}
+                                <?php echo e($activity->nama_aktivitas ?? '-'); ?>
+
                             </td>
                             <td style="width: 15%">
-                                {{ $activity->dari ?? '-' }}
+                                <?php echo e($activity->dari ?? '-'); ?>
+
                             </td>
                             <td style="width: 15%">
-                                {{ $activity->tujuan ?? '-' }}
+                                <?php echo e($activity->tujuan ?? '-'); ?>
+
                             </td>
                            <td style="width: 20%">
-                                {{ $activity->keterangan ?? '-' }}
+                                <?php echo e($activity->keterangan ?? '-'); ?>
+
                             </td>
                             <td style="width: 13%">
-                                {{ $activity->nama_petugas ?? '-' }}
+                                <?php echo e($activity->nama_petugas ?? '-'); ?>
+
                             </td>
                         </tr>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                 </tbody>
             </table>
         </div>
@@ -118,7 +124,7 @@
                 </button>
             </div>
         </div>
-    @else
+    <?php else: ?>
         <div class="text-center py-8">
             <div class="text-gray-500 dark:text-gray-400">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -128,5 +134,6 @@
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Belum ada riwayat aktivitas untuk tabung ini.</p>
             </div>
         </div>
-    @endif
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 </div>
+<?php /**PATH C:\Users\yasin\OneDrive\Desktop\ADMIN-TABUNG\resources\views/filament/components/tabung-activity-table.blade.php ENDPATH**/ ?>

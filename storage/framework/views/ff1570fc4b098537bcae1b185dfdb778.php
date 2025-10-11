@@ -5,11 +5,11 @@
         <div class="grid grid-cols-2 gap-4 text-sm">
             <div>
                 <span class="font-medium text-gray-700 dark:text-gray-300">Kode:</span>
-                <span class="text-gray-900 dark:text-white">{{ $pelanggan->kode_pelanggan }}</span>
+                <span class="text-gray-900 dark:text-white"><?php echo e($pelanggan->kode_pelanggan); ?></span>
             </div>
             <div>
                 <span class="font-medium text-gray-700 dark:text-gray-300">Nama:</span>
-                <span class="text-gray-900 dark:text-white">{{ $pelanggan->nama_pelanggan }}</span>
+                <span class="text-gray-900 dark:text-white"><?php echo e($pelanggan->nama_pelanggan); ?></span>
             </div>
         </div>
     </div>
@@ -25,13 +25,13 @@
                 currentPageDeposit: 1,
                 itemsPerPageDeposit: 10,
                 get totalPagesDeposit() {
-                    return Math.ceil({{ $deposits->count() }} / this.itemsPerPageDeposit);
+                    return Math.ceil(<?php echo e($deposits->count()); ?> / this.itemsPerPageDeposit);
                 },
                 get startIndexDeposit() {
                     return (this.currentPageDeposit - 1) * this.itemsPerPageDeposit;
                 },
                 get endIndexDeposit() {
-                    return Math.min(this.startIndexDeposit + this.itemsPerPageDeposit, {{ $deposits->count() }});
+                    return Math.min(this.startIndexDeposit + this.itemsPerPageDeposit, <?php echo e($deposits->count()); ?>);
                 },
                 goToPageDeposit(page) {
                     if (page >= 1 && page <= this.totalPagesDeposit) {
@@ -51,7 +51,7 @@
              }">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white">History Deposit</h3>
             
-            @if($deposits && $deposits->count() > 0)
+            <!--[if BLOCK]><![endif]--><?php if($deposits && $deposits->count() > 0): ?>
                 <div class="overflow-hidden bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-300 dark:border-gray-600">
                     <div class="overflow-x-auto">
                         <table style="width:100%">
@@ -72,25 +72,28 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-900">
-                                @php $depositIndex = 0; @endphp
-                                @foreach($deposits as $deposit)
+                                <?php $depositIndex = 0; ?>
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $deposits; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $deposit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800" 
-                                        x-show="Math.floor({{ $depositIndex }} / itemsPerPageDeposit) + 1 === currentPageDeposit">
+                                        x-show="Math.floor(<?php echo e($depositIndex); ?> / itemsPerPageDeposit) + 1 === currentPageDeposit">
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
-                                            <span x-text="startIndexDeposit + ({{ $depositIndex }} % itemsPerPageDeposit) + 1"></span>
+                                            <span x-text="startIndexDeposit + (<?php echo e($depositIndex); ?> % itemsPerPageDeposit) + 1"></span>
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
-                                            {{ $deposit->tanggal ? $deposit->tanggal->format('d/m/Y') : ($deposit->created_at ? $deposit->created_at->format('d/m/Y') : '-') }}
+                                            <?php echo e($deposit->tanggal ? $deposit->tanggal->format('d/m/Y') : ($deposit->created_at ? $deposit->created_at->format('d/m/Y') : '-')); ?>
+
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-600 dark:text-green-400 border border-gray-300 dark:border-gray-600">
-                                            Rp {{ number_format($deposit->saldo, 0, ',', '.') }}
+                                            Rp <?php echo e(number_format($deposit->saldo, 0, ',', '.')); ?>
+
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
-                                            {{ $deposit->keterangan ?: '-' }}
+                                            <?php echo e($deposit->keterangan ?: '-'); ?>
+
                                         </td>
                                     </tr>
-                                    @php $depositIndex++; @endphp
-                                @endforeach
+                                    <?php $depositIndex++; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                             </tbody>
                         </table>
                     </div>
@@ -107,7 +110,7 @@
                                         to
                                         <span class="font-medium" x-text="endIndexDeposit"></span>
                                         of
-                                        <span class="font-medium">{{ $deposits->count() }}</span>
+                                        <span class="font-medium"><?php echo e($deposits->count()); ?></span>
                                         results
                                     </p>
                                 </div>
@@ -140,14 +143,14 @@
                         </div>
                     </div>
                 </div>
-            @else
+            <?php else: ?>
                 <div class="text-center py-8 bg-white dark:bg-gray-900 rounded-lg shadow">
                     <div class="text-gray-500 dark:text-gray-400">
                         <p class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Belum ada deposit</p>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Belum ada riwayat deposit untuk pelanggan ini.</p>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
         </div>
 
         <br><br>
@@ -158,13 +161,13 @@
                 currentPage: 1,
                 itemsPerPage: 10,
                 get totalPages() {
-                    return Math.ceil({{ $transactions->count() }} / this.itemsPerPage);
+                    return Math.ceil(<?php echo e($transactions->count()); ?> / this.itemsPerPage);
                 },
                 get startIndex() {
                     return (this.currentPage - 1) * this.itemsPerPage;
                 },
                 get endIndex() {
-                    return Math.min(this.startIndex + this.itemsPerPage, {{ $transactions->count() }});
+                    return Math.min(this.startIndex + this.itemsPerPage, <?php echo e($transactions->count()); ?>);
                 },
                 goToPage(page) {
                     if (page >= 1 && page <= this.totalPages) {
@@ -184,7 +187,7 @@
              }">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white">History Transaksi</h3>
             
-            @if($transactions && $transactions->count() > 0)
+            <!--[if BLOCK]><![endif]--><?php if($transactions && $transactions->count() > 0): ?>
                 <div class="overflow-hidden bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-300 dark:border-gray-600">
                     <div class="overflow-x-auto">
                         <table style="width:100%">
@@ -211,22 +214,23 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-900">
-                                @php $transactionIndex = 0; @endphp
-                                @foreach($transactions as $transaction)
+                                <?php $transactionIndex = 0; ?>
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $transactions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $transaction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800" 
-                                        x-show="Math.floor({{ $transactionIndex }} / itemsPerPage) + 1 === currentPage">
+                                        x-show="Math.floor(<?php echo e($transactionIndex); ?> / itemsPerPage) + 1 === currentPage">
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
-                                            <span x-text="startIndex + ({{ $transactionIndex }} % itemsPerPage) + 1"></span>
+                                            <span x-text="startIndex + (<?php echo e($transactionIndex); ?> % itemsPerPage) + 1"></span>
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
-                                            {{ $transaction->transaction_date ? \Carbon\Carbon::parse($transaction->transaction_date)->format('d/m/Y') : ($transaction->created_at ? $transaction->created_at->format('d/m/Y') : '-') }}
+                                            <?php echo e($transaction->transaction_date ? \Carbon\Carbon::parse($transaction->transaction_date)->format('d/m/Y') : ($transaction->created_at ? $transaction->created_at->format('d/m/Y') : '-')); ?>
+
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
-                                            {{ $transaction->jumlah_tabung }} 
+                                            <?php echo e($transaction->jumlah_tabung); ?> 
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
-                                            @if($transaction->detailTransaksi && $transaction->detailTransaksi->tabung)
-                                                @php
+                                            <!--[if BLOCK]><![endif]--><?php if($transaction->detailTransaksi && $transaction->detailTransaksi->tabung): ?>
+                                                <?php
                                                     $tabungData = $transaction->detailTransaksi->tabung;
                                                     $tabungList = [];
                                                     foreach($tabungData as $item) {
@@ -234,34 +238,36 @@
                                                             $tabungList[] = $item['kode_tabung'] . ' (' . $item['volume'] . ' m3)';
                                                         }
                                                     }
-                                                @endphp
+                                                ?>
                                                 <div class="max-w-xs">
-                                                    @if(count($tabungList) > 0)
+                                                    <!--[if BLOCK]><![endif]--><?php if(count($tabungList) > 0): ?>
                                                         <div class="text-xs space-y-1">
-                                                            @foreach(array_slice($tabungList, 0, 3) as $tabung)
+                                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = array_slice($tabungList, 0, 3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tabung): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                                 <div class="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">
-                                                                    {{ $tabung }}
+                                                                    <?php echo e($tabung); ?>
+
                                                                 </div>
-                                                            @endforeach
-                                                            @if(count($tabungList) > 3)
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                            <?php if(count($tabungList) > 3): ?>
                                                                 <div class="text-gray-500 text-xs">
-                                                                    +{{ count($tabungList) - 3 }} lainnya
+                                                                    +<?php echo e(count($tabungList) - 3); ?> lainnya
                                                                 </div>
-                                                            @endif
+                                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                         </div>
-                                                    @else
+                                                    <?php else: ?>
                                                         <span class="text-gray-400 text-xs">-</span>
-                                                    @endif
+                                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                 </div>
-                                            @else
+                                            <?php else: ?>
                                                 <span class="text-gray-400 text-xs">-</span>
-                                            @endif
+                                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-red-600 dark:text-red-400 border border-gray-300 dark:border-gray-600">
-                                            Rp {{ number_format($transaction->total ?? 0, 0, ',', '.') }}
+                                            Rp <?php echo e(number_format($transaction->total ?? 0, 0, ',', '.')); ?>
+
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap border border-gray-300 dark:border-gray-600">
-                                            @php
+                                            <?php
                                                 $statusColors = [
                                                     'paid' => 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
                                                     'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100',
@@ -272,14 +278,15 @@
                                                     'pending' => 'Pending',
                                                     'canceled' => 'Canceled',
                                                 ];
-                                            @endphp
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$transaction->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                                {{ $statusLabels[$transaction->status] ?? ucfirst($transaction->status) }}
+                                            ?>
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <?php echo e($statusColors[$transaction->status] ?? 'bg-gray-100 text-gray-800'); ?>">
+                                                <?php echo e($statusLabels[$transaction->status] ?? ucfirst($transaction->status)); ?>
+
                                             </span>
                                         </td>
                                     </tr>
-                                    @php $transactionIndex++; @endphp
-                                @endforeach
+                                    <?php $transactionIndex++; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                             </tbody>
                         </table>
                     </div>
@@ -296,7 +303,7 @@
                                         to
                                         <span class="font-medium" x-text="endIndex"></span>
                                         of
-                                        <span class="font-medium">{{ $transactions->count() }}</span>
+                                        <span class="font-medium"><?php echo e($transactions->count()); ?></span>
                                         results
                                     </p>
                                 </div>
@@ -329,14 +336,14 @@
                         </div>
                     </div>
                 </div>
-            @else
+            <?php else: ?>
                 <div class="text-center py-8 bg-white dark:bg-gray-900 rounded-lg shadow">
                     <div class="text-gray-500 dark:text-gray-400">
                         <p class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Belum ada transaksi</p>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Belum ada riwayat transaksi untuk pelanggan ini.</p>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
         </div>
     </div>
 
@@ -346,3 +353,4 @@
 
     
 </div>
+<?php /**PATH C:\Users\yasin\OneDrive\Desktop\ADMIN-TABUNG\resources\views/filament/components/pelanggan-history.blade.php ENDPATH**/ ?>
