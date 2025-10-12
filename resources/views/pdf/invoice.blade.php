@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice - {{ $pelanggan->nama_pelanggan }}</title>
+    <title>Invoice - {{ $pelanggan->nama_pelanggan }}{{ $laporan->id_bast_invoice }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -204,7 +204,7 @@
             <strong>PT CEI</strong><br>
         </div>
         <h1>INVOICE</h1>
-        {{-- <h2>No: INV-{{ $laporan->id }}-{{ date('Y') }}</h2> --}}
+        {{ $laporan->id_bast_invoice }}
     </div>
 
     <!-- Invoice Info -->
@@ -290,12 +290,7 @@
             <span class="detail-label">Keterangan:</span>
             <span class="detail-value">{{ $laporan->keterangan }}</span>
         </div>
-        @if($laporan->id_bast_invoice)
-            <div class="detail-row">
-                <span class="detail-label">ID BAST Invoice:</span>
-                <span class="detail-value">{{ $laporan->id_bast_invoice }}</span>
-            </div>
-        @endif
+
         @if($laporan->tabung)
             <div class="detail-row">
                 <span class="detail-label">Jumlah Tabung:</span>
