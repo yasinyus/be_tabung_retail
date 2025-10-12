@@ -290,6 +290,12 @@
             <span class="detail-label">Keterangan:</span>
             <span class="detail-value">{{ $laporan->keterangan }}</span>
         </div>
+        @if($laporan->id_bast_invoice)
+            <div class="detail-row">
+                <span class="detail-label">ID BAST Invoice:</span>
+                <span class="detail-value">{{ $laporan->id_bast_invoice }}</span>
+            </div>
+        @endif
         @if($laporan->tabung)
             <div class="detail-row">
                 <span class="detail-label">Jumlah Tabung:</span>
