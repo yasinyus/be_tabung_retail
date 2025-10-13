@@ -31,36 +31,33 @@ class HistoryPengisianResource extends Resource
     // Menggunakan policy untuk mengatur akses
     public static function canViewAny(): bool
     {
-        return true; // Temporarily allow all users for debugging
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        return $user && $user->hasAnyRole(['admin_utama', 'admin_umum', 'kepala_gudang', 'operator_retail']);
+        return $user && $user->hasAnyRole(['admin_utama']);
     }
 
     public static function canView($record): bool
     {
-        return true;
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        return $user && $user->hasAnyRole(['admin_utama']);
     }
 
     public static function canCreate(): bool
     {
-        return false; // Disable create functionality
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        return $user && $user->hasAnyRole(['admin_utama', 'admin_umum', 'kepala_gudang']);
+        // Disable create functionality
+        return false;
     }
 
     public static function canEdit($record): bool
     {
-        return true; // Temporarily allow all for debugging
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        return $user && $user->hasAnyRole(['admin_utama', 'admin_umum', 'kepala_gudang']);
+        return $user && $user->hasAnyRole(['admin_utama']);
     }
 
     public static function canDelete($record): bool
     {
-        return true; // Temporarily allow all for debugging
         /** @var \App\Models\User $user */
         $user = Auth::user();
         return $user && $user->hasAnyRole(['admin_utama']);
@@ -92,9 +89,8 @@ class HistoryPengisianResource extends Resource
         ];
     }
 
-     public static function shouldRegisterNavigation(): bool
+    public static function shouldRegisterNavigation(): bool
     {
-        return true; // Temporarily allow all users for debugging
         /** @var \App\Models\User $user */
         $user = Auth::user();
         return $user && $user->hasAnyRole(['admin_utama']);
