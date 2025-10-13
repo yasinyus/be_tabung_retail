@@ -61,7 +61,6 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
             'Nama Petugas',
             'Status',
             'Jumlah Tabung',
-            'Detail Tabung',
             'Keterangan',
             'Dibuat',
             'Diperbarui',
@@ -70,25 +69,10 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
 
     public function map($record): array
     {
-        // Format tabung data
-        $tabungDetails = '';
+        // Hitung jumlah tabung
         $tabungCount = 0;
-        
         if (is_array($record->tabung) && !empty($record->tabung)) {
             $tabungCount = count($record->tabung);
-            $tabungList = [];
-            foreach ($record->tabung as $index => $tabung) {
-                if (is_array($tabung)) {
-                    $detail = sprintf(
-                        "%d. Kode: %s, Volume: %s kg",
-                        $index + 1,
-                        $tabung['kode_tabung'] ?? 'N/A',
-                        $tabung['volume'] ?? 'N/A'
-                    );
-                    $tabungList[] = $detail;
-                }
-            }
-            $tabungDetails = implode("\n", $tabungList);
         }
 
         return [
@@ -98,7 +82,6 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
             $record->nama ?? '-',
             $record->status ?? '-',
             $tabungCount,
-            $tabungDetails ?: 'Tidak ada data tabung',
             $record->keterangan ?? 'Tidak ada keterangan',
             $record->created_at ? $record->created_at->format('d/m/Y H:i') : '-',
             $record->updated_at ? $record->updated_at->format('d/m/Y H:i') : '-',
@@ -125,7 +108,7 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
                 ],
             ],
             // Style for all data cells
-            'A2:J1000' => [
+            'A2:I1000' => [
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -160,10 +143,9 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
             'D' => 25,  // Nama Petugas
             'E' => 12,  // Status
             'F' => 15,  // Jumlah Tabung
-            'G' => 50,  // Detail Tabung
-            'H' => 30,  // Keterangan
-            'I' => 18,  // Dibuat
-            'J' => 18,  // Diperbarui
+            'G' => 35,  // Keterangan
+            'H' => 18,  // Dibuat
+            'I' => 18,  // Diperbarui
         ];
     }
 }

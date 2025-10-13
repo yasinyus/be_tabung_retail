@@ -97,6 +97,6 @@ class HistoryPengisianResource extends Resource
         return true; // Temporarily allow all users for debugging
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        return $user && $user->hasAnyRole(['admin_utama', 'admin_umum']);
+        return $user && $user->hasAnyRole(['admin_utama']);
     }
 }

@@ -51,12 +51,14 @@ class VolumeTabungResource extends Resource
             'create' => Pages\CreateVolumeTabung::route('/create'),
             'view' => Pages\ViewVolumeTabung::route('/{record}'),
             'edit' => Pages\EditVolumeTabung::route('/{record}/edit'),
+            'list-gudang' => Pages\ListGudang::route('/list-gudang'),
+            'gudang-detail' => Pages\DetailGudang::route('/gudang/{gudang}'),
         ];
     }
 
     public static function shouldRegisterNavigation(): bool
     {
         $user = \Illuminate\Support\Facades\Auth::user();
-        return $user && in_array($user->role, ['admin_utama']);
+        return $user && in_array($user->role, ['admin_utama', 'keuangan']);
     }
 }
