@@ -57,7 +57,7 @@
                         <table style="width:100%; border-collapse: collapse !important;">
                             <thead>
                                 <tr>
-                                    <td style="width:15%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <td style="width:5%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         No
                                     </td>
                                     <td style="width:30%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -196,7 +196,7 @@
                         <table style="width:100%; border-collapse: collapse !important;">
                             <thead>
                                 <tr>
-                                    <td style="width:10%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <td style="width:5%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         No
                                     </td>
                                     <td style="width:20%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
