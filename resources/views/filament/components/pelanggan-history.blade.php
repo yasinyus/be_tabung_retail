@@ -117,22 +117,22 @@
                                                 :disabled="currentPageDeposit === 1"
                                                 :class="currentPageDeposit === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700'"
                                                 class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                            Sebelumnya
+                                           << Sebelumnya
                                         </button>
                                         
-                                        <template x-for="page in Array.from({length: totalPagesDeposit}, (_, i) => i + 1)" :key="page">
+                                        {{-- <template x-for="page in Array.from({length: totalPagesDeposit}, (_, i) => i + 1)" :key="page">
                                             <button @click.stop="goToPageDeposit(page)" 
                                                     :class="page === currentPageDeposit ? 'z-10 bg-indigo-50 dark:bg-indigo-900 border-indigo-500 text-indigo-600 dark:text-indigo-300' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'"
                                                     class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
                                                     x-text="page">
                                             </button>
-                                        </template>
+                                        </template> --}}
                                         
                                         <button @click.stop="nextPageDeposit()" 
                                                 :disabled="currentPageDeposit === totalPagesDeposit"
                                                 :class="currentPageDeposit === totalPagesDeposit ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700'"
                                                 class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                            Berikutnya
+                                            Berikutnya >>
                                         </button>
                                     </nav>
                                 </div>
@@ -306,22 +306,22 @@
                                                 :disabled="currentPage === 1"
                                                 :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700'"
                                                 class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                            Sebelumnya
+                                            << Sebelumnya
                                         </button>
                                         
-                                        <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                                        {{-- <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
                                             <button @click.stop="goToPage(page)" 
                                                     :class="page === currentPage ? 'z-10 bg-indigo-50 dark:bg-indigo-900 border-indigo-500 text-indigo-600 dark:text-indigo-300' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'"
                                                     class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
                                                     x-text="page">
                                             </button>
-                                        </template>
+                                        </template> --}}
                                         
                                         <button @click.stop="nextPage()" 
                                                 :disabled="currentPage === totalPages"
                                                 :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700'"
                                                 class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                            Berikutnya
+                                            Berikutnya >>
                                         </button>
                                     </nav>
                                 </div>
