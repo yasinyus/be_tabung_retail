@@ -203,7 +203,11 @@
         <div class="company-info">
             <strong>PT CEI</strong><br>
         </div>
-        <h1>INVOICE</h1>
+        @if ($laporan->keterangan == 'Refund' || $laporan->keterangan == 'Kembali')
+            <h1>BAST</h1>
+        @else
+            <h1>INVOICE</h1>
+        @endif
         {{ $laporan->id_bast_invoice }}
     </div>
 
