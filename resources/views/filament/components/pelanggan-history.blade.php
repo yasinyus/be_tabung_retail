@@ -115,8 +115,11 @@
                                     <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                     <button @click.stop="prevPageDeposit()" 
                         :disabled="currentPageDeposit === 1"
-                        :class="currentPageDeposit === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-400'"
-                        class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-blue-700 bg-blue-600 text-sm font-medium text-white">
+                        :class="currentPageDeposit === 1 ? 'opacity-50 cursor-not-allowed' : ''"
+                        @mouseover="$event.target.style.backgroundColor = currentPageDeposit === 1 ? '' : '#fbbf24'"
+                        @mouseout="$event.target.style.backgroundColor = '#2563eb'"
+                        style="background-color: #2563eb !important; color: white !important; border-color: #1d4ed8 !important;"
+                        class="relative inline-flex items-center px-3 py-2 rounded-l-md border text-sm font-medium">
                        << Sebelumnya
                     </button>
                                         
@@ -130,8 +133,11 @@
                                         
                                         <button @click.stop="nextPageDeposit()" 
                                                 :disabled="currentPageDeposit === totalPagesDeposit"
-                                                :class="currentPageDeposit === totalPagesDeposit ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-400'"
-                                                class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-blue-700 bg-blue-600 text-sm font-medium text-white">
+                                                :class="currentPageDeposit === totalPagesDeposit ? 'opacity-50 cursor-not-allowed' : ''"
+                                                @mouseover="$event.target.style.backgroundColor = currentPageDeposit === totalPagesDeposit ? '' : '#fbbf24'"
+                                                @mouseout="$event.target.style.backgroundColor = '#2563eb'"
+                                                style="background-color: #2563eb !important; color: white !important; border-color: #1d4ed8 !important;"
+                                                class="relative inline-flex items-center px-3 py-2 rounded-r-md border text-sm font-medium">
                                             Berikutnya >>
                                         </button>
                                     </nav>
@@ -304,8 +310,11 @@
                                     <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                                         <button @click.stop="prevPage()" 
                                                 :disabled="currentPage === 1"
-                                                :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700'"
-                                                class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400">
+                                                :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''"
+                                                @mouseover="$event.target.style.backgroundColor = currentPage === 1 ? '' : '#fbbf24'"
+                                                @mouseout="$event.target.style.backgroundColor = '#2563eb'"
+                                                style="background-color: #2563eb !important; color: white !important; border-color: #1d4ed8 !important;"
+                                                class="relative inline-flex items-center px-3 py-2 rounded-l-md border text-sm font-medium">
                                             << Sebelumnya
                                         </button>
                                         
@@ -319,8 +328,11 @@
                                         
                                         <button @click.stop="nextPage()" 
                                                 :disabled="currentPage === totalPages"
-                                                :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700'"
-                                                class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400">
+                                                :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''"
+                                                @mouseover="$event.target.style.backgroundColor = currentPage === totalPages ? '' : '#fbbf24'"
+                                                @mouseout="$event.target.style.backgroundColor = '#2563eb'"
+                                                style="background-color: #2563eb !important; color: white !important; border-color: #1d4ed8 !important;"
+                                                class="relative inline-flex items-center px-3 py-2 rounded-r-md border text-sm font-medium">
                                             Berikutnya >>
                                         </button>
                                     </nav>
