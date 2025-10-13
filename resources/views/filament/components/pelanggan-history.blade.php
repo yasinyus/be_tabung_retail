@@ -54,19 +54,19 @@
             @if($deposits && $deposits->count() > 0)
                 <div class="overflow-hidden bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-300 dark:border-gray-600">
                     <div class="overflow-x-auto">
-                        <table style="width:100%">
+                        <table style="width:100%; border-collapse: collapse !important;">
                             <thead>
                                 <tr>
-                                    <td style="width:15%" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <td style="width:15%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         No
                                     </td>
-                                    <td style="width:30%" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <td style="width:30%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Tanggal
                                     </td>
-                                    <td style="width:25%" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <td style="width:25%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Jumlah
                                     </td>
-                                    <td style="width:30%" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <td style="width:30%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Keterangan
                                     </td>
                                 </tr>
@@ -76,16 +76,16 @@
                                 @foreach($deposits as $deposit)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800" 
                                         x-show="Math.floor({{ $depositIndex }} / itemsPerPageDeposit) + 1 === currentPageDeposit">
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
+                                        <td style="border: 1px solid white !important;" class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             <span x-text="startIndexDeposit + ({{ $depositIndex }} % itemsPerPageDeposit) + 1"></span>
                                         </td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
+                                        <td style="border: 1px solid white !important;" class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             {{ $deposit->tanggal ? $deposit->tanggal->format('d/m/Y') : ($deposit->created_at ? $deposit->created_at->format('d/m/Y') : '-') }}
                                         </td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-600 dark:text-green-400 border border-gray-300 dark:border-gray-600">
+                                        <td style="border: 1px solid white !important;" class="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-600 dark:text-green-400">
                                             Rp {{ number_format($deposit->saldo, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
+                                        <td style="border: 1px solid white !important;" class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                                             {{ $deposit->keterangan ?: '-' }}
                                         </td>
                                     </tr>
@@ -193,25 +193,25 @@
             @if($transactions && $transactions->count() > 0)
                 <div class="overflow-hidden bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-300 dark:border-gray-600">
                     <div class="overflow-x-auto">
-                        <table style="width:100%">
+                        <table style="width:100%; border-collapse: collapse !important;">
                             <thead>
                                 <tr>
-                                    <td style="width:10%" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <td style="width:10%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         No
                                     </td>
-                                    <td style="width:20%" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    <td style="width:20%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Tanggal
                                     </td>
-                                    <td style="width:15%">
+                                    <td style="width:15%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Jml Tabung
                                     </td>
-                                    <td style="width:25%">
+                                    <td style="width:25%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Tabung
                                     </td>
-                                    <td style="width:15%">
+                                    <td style="width:15%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Total
                                     </td>
-                                    <td style="width:15%">
+                                    <td style="width:15%; border: 1px solid white !important;" class="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Status
                                     </td>
                                 </tr>
@@ -221,16 +221,16 @@
                                 @foreach($transactions as $transaction)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800" 
                                         x-show="Math.floor({{ $transactionIndex }} / itemsPerPage) + 1 === currentPage">
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
+                                        <td style="border: 1px solid white !important;" class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             <span x-text="startIndex + ({{ $transactionIndex }} % itemsPerPage) + 1"></span>
                                         </td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
+                                        <td style="border: 1px solid white !important;" class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             {{ $transaction->transaction_date ? \Carbon\Carbon::parse($transaction->transaction_date)->format('d/m/Y') : ($transaction->created_at ? $transaction->created_at->format('d/m/Y') : '-') }}
                                         </td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
+                                        <td style="border: 1px solid white !important;" class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             {{ $transaction->jumlah_tabung }} 
                                         </td>
-                                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600">
+                                        <td style="border: 1px solid white !important;" class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                                             @if($transaction->detailTransaksi && $transaction->detailTransaksi->tabung)
                                                 @php
                                                     $tabungData = $transaction->detailTransaksi->tabung;
@@ -263,10 +263,10 @@
                                                 <span class="text-gray-400 text-xs">-</span>
                                             @endif
                                         </td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-red-600 dark:text-red-400 border border-gray-300 dark:border-gray-600">
+                                        <td style="border: 1px solid white !important;" class="px-4 py-3 whitespace-nowrap text-sm font-medium text-red-600 dark:text-red-400">
                                             Rp {{ number_format($transaction->total ?? 0, 0, ',', '.') }}
                                         </td>
-                                        <td class="px-4 py-3 whitespace-nowrap border border-gray-300 dark:border-gray-600">
+                                        <td style="border: 1px solid white !important;" class="px-4 py-3 whitespace-nowrap">
                                             @php
                                                 $statusColors = [
                                                     'paid' => 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
