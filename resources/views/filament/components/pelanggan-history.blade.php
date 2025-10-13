@@ -113,12 +113,12 @@
                                 </div>
                                 <div>
                                     <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                        <button @click.stop="prevPageDeposit()" 
-                                                :disabled="currentPageDeposit === 1"
-                                                :class="currentPageDeposit === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700'"
-                                                class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                           << Sebelumnya
-                                        </button>
+                    <button @click.stop="prevPageDeposit()" 
+                        :disabled="currentPageDeposit === 1"
+                        :class="currentPageDeposit === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-400'"
+                        class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-blue-700 bg-blue-600 text-sm font-medium text-white">
+                       << Sebelumnya
+                    </button>
                                         
                                         {{-- <template x-for="page in Array.from({length: totalPagesDeposit}, (_, i) => i + 1)" :key="page">
                                             <button @click.stop="goToPageDeposit(page)" 
@@ -130,8 +130,8 @@
                                         
                                         <button @click.stop="nextPageDeposit()" 
                                                 :disabled="currentPageDeposit === totalPagesDeposit"
-                                                :class="currentPageDeposit === totalPagesDeposit ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-700'"
-                                                class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400">
+                                                :class="currentPageDeposit === totalPagesDeposit ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-400'"
+                                                class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-blue-700 bg-blue-600 text-sm font-medium text-white">
                                             Berikutnya >>
                                         </button>
                                     </nav>
