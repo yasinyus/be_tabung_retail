@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class HistoryPengisianResource extends Resource
 {
@@ -33,14 +34,37 @@ class HistoryPengisianResource extends Resource
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        return $user && $user->hasAnyRole(['admin_utama']);
+        
+        if (!$user) {
+            return false;
+        }
+        
+        // Check both role column and Spatie roles
+        return $user->role === 'admin_utama' || $user->hasRole('admin_utama');
     }
 
     public static function canView($record): bool
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        return $user && $user->hasAnyRole(['admin_utama']);
+        
+        if (!$user) {
+            Log::info('HistoryPengisian canView: No user authenticated');
+            return false;
+        }
+        
+        $hasAccess = $user->role === 'admin_utama' || $user->hasRole('admin_utama');
+        
+        // Debugging: Log current user and role
+        Log::info('HistoryPengisian canView check', [
+            'user_id' => $user->id,
+            'user_role_column' => $user->role,
+            'user_spatie_roles' => $user->getRoleNames(),
+            'record_id' => $record?->id,
+            'has_access' => $hasAccess
+        ]);
+        
+        return $hasAccess;
     }
 
     public static function canCreate(): bool
@@ -53,14 +77,24 @@ class HistoryPengisianResource extends Resource
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        return $user && $user->hasAnyRole(['admin_utama']);
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->role === 'admin_utama' || $user->hasRole('admin_utama');
     }
 
     public static function canDelete($record): bool
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        return $user && $user->hasAnyRole(['admin_utama']);
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->role === 'admin_utama' || $user->hasRole('admin_utama');
     }
 
     public static function form(Schema $schema): Schema
@@ -93,6 +127,11 @@ class HistoryPengisianResource extends Resource
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        return $user && $user->hasAnyRole(['admin_utama']);
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->role === 'admin_utama' || $user->hasRole('admin_utama');
     }
 }
