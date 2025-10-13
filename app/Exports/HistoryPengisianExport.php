@@ -3,7 +3,7 @@
 namespace App\Exports;
 
 use App\Models\VolumeTabung;
-use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Illuminate\Database\Eloquent\Builder;
 
-class HistoryPengisianExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithColumnWidths
+class HistoryPengisianExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths
 {
     protected $filters;
 
@@ -21,7 +21,7 @@ class HistoryPengisianExport implements FromQuery, WithHeadings, WithMapping, Wi
         $this->filters = $filters;
     }
 
-    public function query()
+    public function collection()
     {
         $query = VolumeTabung::query()->orderBy('tanggal', 'desc');
 
@@ -49,7 +49,7 @@ class HistoryPengisianExport implements FromQuery, WithHeadings, WithMapping, Wi
             $query->whereDate('tanggal', '<=', $this->filters['tanggal']['sampai_tanggal']);
         }
 
-        return $query;
+        return $query->get();
     }
 
     public function headings(): array
@@ -80,11 +80,10 @@ class HistoryPengisianExport implements FromQuery, WithHeadings, WithMapping, Wi
             foreach ($record->tabung as $index => $tabung) {
                 if (is_array($tabung)) {
                     $detail = sprintf(
-                        "%d. ID: %s, Kode: %s, Ukuran: %s",
+                        "%d. Kode: %s, Volume: %s kg",
                         $index + 1,
-                        $tabung['id'] ?? 'N/A',
                         $tabung['kode_tabung'] ?? 'N/A',
-                        $tabung['ukuran'] ?? 'N/A'
+                        $tabung['volume'] ?? 'N/A'
                     );
                     $tabungList[] = $detail;
                 }

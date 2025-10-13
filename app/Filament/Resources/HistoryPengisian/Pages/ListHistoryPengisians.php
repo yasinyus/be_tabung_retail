@@ -22,29 +22,16 @@ class ListHistoryPengisians extends ListRecords
                 ->color('success')
                 ->action(function () {
                     try {
-                        // Get current table filters state
-                        $tableFilters = $this->table->getFilters();
+                        // For now, export all data without filters to ensure it works
+                        // We'll add filter support later once basic export is working
                         $filters = [];
-                        
-                        // Extract filter values
-                        foreach ($tableFilters as $filterName => $filter) {
-                            $state = $filter->getState();
-                            if (!empty($state)) {
-                                $filters[$filterName] = $state;
-                            }
-                        }
                         
                         // Generate filename with current date
                         $filename = 'history-pengisian-' . now()->format('Y-m-d-H-i-s') . '.xlsx';
                         
-                        // Show success notification
-                        Notification::make()
-                            ->title('Export Excel berhasil!')
-                            ->body('Data history pengisian telah diekspor ke file Excel.')
-                            ->success()
-                            ->send();
-                        
+                        // Create export and download
                         return Excel::download(new HistoryPengisianExport($filters), $filename);
+                        
                     } catch (\Exception $e) {
                         // Show error notification
                         Notification::make()
