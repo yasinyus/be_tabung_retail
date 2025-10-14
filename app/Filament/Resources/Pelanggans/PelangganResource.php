@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class PelangganResource extends Resource
 {
@@ -26,27 +27,57 @@ class PelangganResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return true; // Temporarily disable authorization for debugging
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return in_array($user->role, ['admin_utama', 'admin_umum', 'keuangan']);
     }
 
     public static function canView($record): bool
     {
-        return true; // Temporarily disable authorization for debugging
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return in_array($user->role, ['admin_utama', 'admin_umum', 'keuangan']);
     }
 
     public static function canCreate(): bool
     {
-        return true; // Temporarily disable authorization for debugging
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return in_array($user->role, ['admin_utama', 'admin_umum', 'keuangan']);
     }
 
     public static function canEdit($record): bool
     {
-        return true; // Temporarily disable authorization for debugging
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return in_array($user->role, ['admin_utama', 'admin_umum', 'keuangan']);
     }
 
     public static function canDelete($record): bool
     {
-        return true; // Temporarily disable authorization for debugging
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return in_array($user->role, ['admin_utama', 'admin_umum', 'keuangan']);
     }
 
     public static function canDeleteAny(): bool
@@ -82,7 +113,12 @@ class PelangganResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        $user = auth()->user();
-        return $user && in_array($user->role, ['admin_utama', 'admin_umum']);
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return in_array($user->role, ['admin_utama', 'admin_umum', 'keuangan']);
     }
 }
