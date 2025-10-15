@@ -25,9 +25,20 @@ class LaporanPelangganController extends Controller
             abort(404, 'Pelanggan tidak ditemukan');
         }
 
-        $laporans = LaporanPelanggan::where('kode_pelanggan', $kodePelanggan)
-            ->orderBy('tanggal', 'desc')
-            ->orderBy('created_at', 'desc')
+        $query = LaporanPelanggan::where('kode_pelanggan', $kodePelanggan);
+
+        // Apply date filters if provided
+        if ($request->has('dari_tanggal') && !empty($request->get('dari_tanggal'))) {
+            $query->whereDate('tanggal', '>=', $request->get('dari_tanggal'));
+        }
+
+        if ($request->has('sampai_tanggal') && !empty($request->get('sampai_tanggal'))) {
+            $query->whereDate('tanggal', '<=', $request->get('sampai_tanggal'));
+        }
+
+        $laporans = $query
+            ->orderBy('tanggal', 'asc')
+            ->orderBy('created_at', 'asc')
             ->get();
 
         $pdf = Pdf::loadView('pdf.laporan-pelanggan', [
@@ -53,8 +64,14 @@ class LaporanPelangganController extends Controller
             abort(404, 'Pelanggan tidak ditemukan');
         }
 
+        // Get filter parameters
+        $filters = [
+            'dari_tanggal' => $request->get('dari_tanggal'),
+            'sampai_tanggal' => $request->get('sampai_tanggal'),
+        ];
+
         return Excel::download(
-            new LaporanPelangganExport($kodePelanggan), 
+            new LaporanPelangganExport($kodePelanggan, $filters), 
             'Laporan_' . $pelanggan->nama_pelanggan . '_' . now()->format('Y-m-d') . '.xlsx'
         );
     }

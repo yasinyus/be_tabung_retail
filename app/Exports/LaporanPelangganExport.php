@@ -16,16 +16,29 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
 {
     protected $kodePelanggan;
     protected $pelanggan;
+    protected $filters;
 
-    public function __construct($kodePelanggan)
+    public function __construct($kodePelanggan, array $filters = [])
     {
         $this->kodePelanggan = $kodePelanggan;
         $this->pelanggan = Pelanggan::where('kode_pelanggan', $kodePelanggan)->first();
+        $this->filters = $filters;
     }
 
     public function collection()
     {
-        return LaporanPelanggan::where('kode_pelanggan', $this->kodePelanggan)
+        $query = LaporanPelanggan::where('kode_pelanggan', $this->kodePelanggan);
+
+        // Apply date filters if provided
+        if (!empty($this->filters['dari_tanggal'])) {
+            $query->whereDate('tanggal', '>=', $this->filters['dari_tanggal']);
+        }
+
+        if (!empty($this->filters['sampai_tanggal'])) {
+            $query->whereDate('tanggal', '<=', $this->filters['sampai_tanggal']);
+        }
+
+        return $query
             ->orderBy('tanggal', 'asc')
             ->orderBy('created_at', 'asc')
             ->get();

@@ -11,8 +11,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
 use Filament\Actions;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanPelanggan extends Page implements HasTable
@@ -48,6 +51,38 @@ class LaporanPelanggan extends Page implements HasTable
                     ->orderBy('tanggal', 'desc')
                     ->orderBy('created_at', 'desc')
             )
+            ->filters([
+                Filter::make('tanggal')
+                    ->form([
+                        DatePicker::make('dari_tanggal')
+                            ->label('Dari Tanggal')
+                            ->placeholder('Pilih tanggal mulai'),
+                        DatePicker::make('sampai_tanggal')
+                            ->label('Sampai Tanggal')
+                            ->placeholder('Pilih tanggal akhir'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['dari_tanggal'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal', '>=', $date),
+                            )
+                            ->when(
+                                $data['sampai_tanggal'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal', '<=', $date),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['dari_tanggal'] ?? null) {
+                            $indicators[] = 'Dari: ' . \Carbon\Carbon::parse($data['dari_tanggal'])->format('d/m/Y');
+                        }
+                        if ($data['sampai_tanggal'] ?? null) {
+                            $indicators[] = 'Sampai: ' . \Carbon\Carbon::parse($data['sampai_tanggal'])->format('d/m/Y');
+                        }
+                        return $indicators;
+                    }),
+            ])
             ->columns([
                 TextColumn::make('row_number')
                     ->label('No')
@@ -140,14 +175,28 @@ class LaporanPelanggan extends Page implements HasTable
                 ->label('Export PDF')
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('success')
-                ->url(fn () => route('laporan-pelanggan.export.pdf', ['kode_pelanggan' => $this->kodePelanggan]))
+                ->url(function () {
+                    $filters = $this->tableFilters['tanggal'] ?? [];
+                    return route('laporan-pelanggan.export.pdf', [
+                        'kode_pelanggan' => $this->kodePelanggan,
+                        'dari_tanggal' => $filters['dari_tanggal'] ?? null,
+                        'sampai_tanggal' => $filters['sampai_tanggal'] ?? null,
+                    ]);
+                })
                 ->openUrlInNewTab(),
                 
             Actions\Action::make('export_excel')
                 ->label('Export Excel')
                 ->icon('heroicon-o-table-cells')
                 ->color('info')
-                ->url(fn () => route('laporan-pelanggan.export.excel', ['kode_pelanggan' => $this->kodePelanggan]))
+                ->url(function () {
+                    $filters = $this->tableFilters['tanggal'] ?? [];
+                    return route('laporan-pelanggan.export.excel', [
+                        'kode_pelanggan' => $this->kodePelanggan,
+                        'dari_tanggal' => $filters['dari_tanggal'] ?? null,
+                        'sampai_tanggal' => $filters['sampai_tanggal'] ?? null,
+                    ]);
+                })
                 ->openUrlInNewTab(),
                 
             Actions\Action::make('back')
