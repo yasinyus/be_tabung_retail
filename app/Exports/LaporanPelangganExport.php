@@ -26,8 +26,8 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
     public function collection()
     {
         return LaporanPelanggan::where('kode_pelanggan', $this->kodePelanggan)
-            ->orderBy('tanggal', 'desc')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('tanggal', 'asc')
+            ->orderBy('created_at', 'asc')
             ->get();
     }
 
