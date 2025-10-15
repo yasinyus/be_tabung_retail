@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\LaporanPelanggan;
 use App\Models\Pelanggan;
+use App\Models\DetailTransaksi;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -38,6 +39,7 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
             'Keterangan',
             'ID BAST Invoice',
             'Jumlah Tabung',
+            'Volume Total (m3)',
             'Harga',
             'Deposit (+)',
             'Deposit (-)',
@@ -50,6 +52,23 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
     public function map($laporan): array
     {
         static $no = 1;
+
+        // Get volume total from detail_transaksi by joining with trx_id = id_bast_invoice
+        $volumeTotal = 0;
+        if (!empty($laporan->id_bast_invoice)) {
+            $detailTransaksi = DetailTransaksi::where('trx_id', $laporan->id_bast_invoice)->first();
+            
+            if ($detailTransaksi && !empty($detailTransaksi->tabung)) {
+                $tabungData = $detailTransaksi->tabung;
+                
+                // Calculate total volume from tabung array
+                if (is_array($tabungData)) {
+                    foreach ($tabungData as $tabung) {
+                        $volumeTotal += $tabung['volume'] ?? 0;
+                    }
+                }
+            }
+        }
         
         return [
             $no++,
@@ -57,6 +76,7 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
             $laporan->keterangan ?? '-',
             $laporan->id_bast_invoice ?? '-',
             $laporan->tabung ?? '-',
+            number_format($volumeTotal, 2),
             $laporan->harga ? 'Rp ' . number_format($laporan->harga, 0, ',', '.') : '-',
             $laporan->tambahan_deposit ? 'Rp ' . number_format($laporan->tambahan_deposit, 0, ',', '.') : '-',
             $laporan->pengurangan_deposit ? 'Rp ' . number_format($laporan->pengurangan_deposit, 0, ',', '.') : '-',
@@ -75,7 +95,7 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
     {
         return [
             1 => ['font' => ['bold' => true]],
-            'A:K' => ['alignment' => ['horizontal' => 'left']],
+            'A:L' => ['alignment' => ['horizontal' => 'left']],
         ];
     }
 }

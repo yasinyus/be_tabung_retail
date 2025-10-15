@@ -261,7 +261,7 @@ class TagihanResource extends Resource
                         }
                         
                         // Simpan transaksi
-                        Transaction::create([
+                        $transaction = Transaction::create([
                             'trx_id' => 'TRX-' . strtoupper(uniqid()),
                             'user_id' => Auth::id(),
                             'customer_id' => $record->id,
@@ -288,6 +288,22 @@ class TagihanResource extends Resource
                                 ]);
                             }
                             
+                            // Insert ke tabel laporan pelanggan
+                            LaporanPelanggan::create([
+                                'tanggal' => $data['transaction_date'],
+                                'kode_pelanggan' => $record->kode_pelanggan,
+                                'keterangan' => $record->jenis_pelanggan === 'agen' 
+                                    ? 'Transaksi Agen - ' . ($data['notes'] ?? 'Pembelian tabung')
+                                    : "Pembelian {$jumlah_tabung} tabung - " . ($data['notes'] ?? 'Transaksi pembelian'),
+                                'tabung' => $jumlah_tabung ?? 0,
+                                'harga' => $total_harga,
+                                'tambahan_deposit' => 0,
+                                'pengurangan_deposit' => $total_harga,
+                                'sisa_deposit' => $saldo_baru,
+                                'konfirmasi' => $data['status'] === 'paid' ? true : false,
+                                'id_bast_invoice' => $transaction->trx_id,
+                            ]);
+                            
                             // Notifikasi berdasarkan jenis pelanggan
                             if ($record->jenis_pelanggan === 'agen') {
                                 Notification::make()
@@ -312,6 +328,20 @@ class TagihanResource extends Resource
                             }
                         } else {
                             // Jika total harga 0, hanya buat record transaksi tanpa update saldo
+                            // Tetapi tetap insert ke laporan pelanggan
+                            LaporanPelanggan::create([
+                                'tanggal' => $data['transaction_date'],
+                                'kode_pelanggan' => $record->kode_pelanggan,
+                                'keterangan' => 'Transaksi tanpa biaya - ' . ($data['notes'] ?? 'Transaksi gratis'),
+                                'tabung' => $jumlah_tabung ?? 0,
+                                'harga' => 0,
+                                'tambahan_deposit' => 0,
+                                'pengurangan_deposit' => 0,
+                                'sisa_deposit' => $saldo_saat_ini,
+                                'konfirmasi' => $data['status'] === 'paid' ? true : false,
+                                'id_bast_invoice' => $transaction->trx_id,
+                            ]);
+                            
                             Notification::make()
                                 ->title('Transaksi Berhasil Dibuat')
                                 ->body("Transaksi untuk {$record->nama_pelanggan} berhasil disimpan tanpa perubahan saldo.")

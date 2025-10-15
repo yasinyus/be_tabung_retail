@@ -7,10 +7,9 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class HistoryPengisianExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths
 {
@@ -49,7 +48,47 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
             $query->whereDate('tanggal', '<=', $this->filters['tanggal']['sampai_tanggal']);
         }
 
-        return $query->get();
+        $records = $query->get();
+        
+        // Transform data to show each tabung in separate row
+        $exportData = new Collection();
+        
+        foreach ($records as $record) {
+            if (is_array($record->tabung) && !empty($record->tabung)) {
+                foreach ($record->tabung as $tabungItem) {
+                    $exportData->push([
+                        'id' => $record->id,
+                        'tanggal' => $record->tanggal,
+                        'lokasi' => $record->lokasi,
+                        'nama' => $record->nama,
+                        'status' => $record->status,
+                        'jumlah_tabung' => count($record->tabung),
+                        'kode_tabung' => $tabungItem['kode_tabung'] ?? '-',
+                        'volume' => $tabungItem['volume'] ?? 0,
+                        'keterangan' => $record->keterangan,
+                        'created_at' => $record->created_at,
+                        'updated_at' => $record->updated_at,
+                    ]);
+                }
+            } else {
+                // If no tabung data, still show the record
+                $exportData->push([
+                    'id' => $record->id,
+                    'tanggal' => $record->tanggal,
+                    'lokasi' => $record->lokasi,
+                    'nama' => $record->nama,
+                    'status' => $record->status,
+                    'jumlah_tabung' => 0,
+                    'kode_tabung' => '-',
+                    'volume' => 0,
+                    'keterangan' => $record->keterangan,
+                    'created_at' => $record->created_at,
+                    'updated_at' => $record->updated_at,
+                ]);
+            }
+        }
+        
+        return $exportData;
     }
 
     public function headings(): array
@@ -61,30 +100,31 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
             'Nama Petugas',
             'Status',
             'Jumlah Tabung',
+            'Kode',
+            'Volume',
             'Keterangan',
             'Dibuat',
             'Diperbarui',
         ];
     }
 
-    public function map($record): array
+    public function map($item): array
     {
-        // Hitung jumlah tabung
-        $tabungCount = 0;
-        if (is_array($record->tabung) && !empty($record->tabung)) {
-            $tabungCount = count($record->tabung);
-        }
-
+        // Convert array to object if needed
+        $row = is_array($item) ? (object) $item : $item;
+        
         return [
-            $record->id,
-            $record->tanggal ? $record->tanggal->format('d/m/Y') : '-',
-            $record->lokasi ?? '-',
-            $record->nama ?? '-',
-            $record->status ?? '-',
-            $tabungCount,
-            $record->keterangan ?? 'Tidak ada keterangan',
-            $record->created_at ? $record->created_at->format('d/m/Y H:i') : '-',
-            $record->updated_at ? $record->updated_at->format('d/m/Y H:i') : '-',
+            $row->id,
+            $row->tanggal ? $row->tanggal->format('d/m/Y') : '-',
+            $row->lokasi ?? '-',
+            $row->nama ?? '-',
+            $row->status ?? '-',
+            $row->jumlah_tabung,
+            $row->kode_tabung ?? '-',
+            $row->volume ?? 0,
+            $row->keterangan ?? '-',
+            $row->created_at ? $row->created_at->format('d/m/Y H:i') : '-',
+            $row->updated_at ? $row->updated_at->format('d/m/Y H:i') : '-',
         ];
     }
 
@@ -108,7 +148,7 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
                 ],
             ],
             // Style for all data cells
-            'A2:I1000' => [
+            'A2:K1000' => [
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -120,13 +160,13 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
                     'wrapText' => true,
                 ],
             ],
-            // Center align for ID, Status, and Jumlah Tabung columns
+            // Center align for ID, Status, Jumlah Tabung, Kode, Volume columns
             'A2:A1000' => [
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ],
             ],
-            'E2:F1000' => [
+            'E2:H1000' => [
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ],
@@ -139,13 +179,15 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
         return [
             'A' => 8,   // ID
             'B' => 15,  // Tanggal Pengisian
-            'C' => 20,  // Lokasi
-            'D' => 25,  // Nama Petugas
-            'E' => 12,  // Status
+            'C' => 15,  // Lokasi
+            'D' => 15,  // Nama Petugas
+            'E' => 10,  // Status
             'F' => 15,  // Jumlah Tabung
-            'G' => 35,  // Keterangan
-            'H' => 18,  // Dibuat
-            'I' => 18,  // Diperbarui
+            'G' => 15,  // Kode
+            'H' => 12,  // Volume
+            'I' => 30,  // Keterangan
+            'J' => 18,  // Dibuat
+            'K' => 18,  // Diperbarui
         ];
     }
 }
