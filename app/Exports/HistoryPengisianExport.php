@@ -54,6 +54,14 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
         $exportData = new Collection();
         
         foreach ($records as $record) {
+            // Calculate total volume per DO
+            $totalVolumePerDO = 0;
+            if (is_array($record->tabung) && !empty($record->tabung)) {
+                foreach ($record->tabung as $tabungItem) {
+                    $totalVolumePerDO += $tabungItem['volume'] ?? 0;
+                }
+            }
+            
             if (is_array($record->tabung) && !empty($record->tabung)) {
                 foreach ($record->tabung as $tabungItem) {
                     $exportData->push([
@@ -65,6 +73,7 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
                         'jumlah_tabung' => count($record->tabung),
                         'kode_tabung' => $tabungItem['kode_tabung'] ?? '-',
                         'volume' => $tabungItem['volume'] ?? 0,
+                        'volume_per_do' => $totalVolumePerDO,
                         'keterangan' => $record->keterangan,
                         'created_at' => $record->created_at,
                         'updated_at' => $record->updated_at,
@@ -81,6 +90,7 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
                     'jumlah_tabung' => 0,
                     'kode_tabung' => '-',
                     'volume' => 0,
+                    'volume_per_do' => 0,
                     'keterangan' => $record->keterangan,
                     'created_at' => $record->created_at,
                     'updated_at' => $record->updated_at,
@@ -103,6 +113,7 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
             'Kode',
             'Volume',
             'Keterangan',
+            'Volume per DO',
             'Dibuat',
             'Diperbarui',
         ];
@@ -123,6 +134,7 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
             $row->kode_tabung ?? '-',
             $row->volume ?? 0,
             $row->keterangan ?? '-',
+            $row->volume_per_do ?? 0,
             $row->created_at ? $row->created_at->format('d/m/Y H:i') : '-',
             $row->updated_at ? $row->updated_at->format('d/m/Y H:i') : '-',
         ];
@@ -148,7 +160,7 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
                 ],
             ],
             // Style for all data cells
-            'A2:K1000' => [
+            'A2:L1000' => [
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -160,13 +172,18 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
                     'wrapText' => true,
                 ],
             ],
-            // Center align for ID, Status, Jumlah Tabung, Kode, Volume columns
+            // Center align for ID, Status, Jumlah Tabung, Kode, Volume, Volume per DO columns
             'A2:A1000' => [
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ],
             ],
             'E2:H1000' => [
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                ],
+            ],
+            'J2:J1000' => [
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 ],
@@ -186,8 +203,9 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
             'G' => 15,  // Kode
             'H' => 12,  // Volume
             'I' => 30,  // Keterangan
-            'J' => 18,  // Dibuat
-            'K' => 18,  // Diperbarui
+            'J' => 15,  // Volume per DO
+            'K' => 18,  // Dibuat
+            'L' => 18,  // Diperbarui
         ];
     }
 }

@@ -11,11 +11,16 @@ class Refund extends Model
 
     protected $fillable = [
         'bast_id',
+        'volume',
+        'kode_pelanggan',
+        'harga_per_m3',
         'total_refund',
         'status_refund',
     ];
 
     protected $casts = [
+        'volume' => 'decimal:2',
+        'harga_per_m3' => 'decimal:2',
         'total_refund' => 'decimal:2',
     ];
 

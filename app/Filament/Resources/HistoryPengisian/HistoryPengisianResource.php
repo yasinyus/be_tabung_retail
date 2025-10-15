@@ -39,8 +39,11 @@ class HistoryPengisianResource extends Resource
             return false;
         }
         
-        // Check both role column and Spatie roles
-        return $user->role === 'admin_utama' || $user->hasRole('admin_utama');
+        // Check both role column and Spatie roles - admin_utama dan keuangan
+        return $user->role === 'admin_utama' 
+            || $user->hasRole('admin_utama')
+            || $user->role === 'keuangan'
+            || $user->hasRole('keuangan');
     }
 
     public static function canView($record): bool
@@ -53,7 +56,10 @@ class HistoryPengisianResource extends Resource
             return false;
         }
         
-        $hasAccess = $user->role === 'admin_utama' || $user->hasRole('admin_utama');
+        $hasAccess = $user->role === 'admin_utama' 
+            || $user->hasRole('admin_utama')
+            || $user->role === 'keuangan'
+            || $user->hasRole('keuangan');
         
         // Debugging: Log current user and role
         Log::info('HistoryPengisian canView check', [
@@ -82,7 +88,10 @@ class HistoryPengisianResource extends Resource
             return false;
         }
         
-        return $user->role === 'admin_utama' || $user->hasRole('admin_utama');
+        return $user->role === 'admin_utama' 
+            || $user->hasRole('admin_utama')
+            || $user->role === 'keuangan'
+            || $user->hasRole('keuangan');
     }
 
     public static function canDelete($record): bool
@@ -94,7 +103,10 @@ class HistoryPengisianResource extends Resource
             return false;
         }
         
-        return $user->role === 'admin_utama' || $user->hasRole('admin_utama');
+        return $user->role === 'admin_utama' 
+            || $user->hasRole('admin_utama')
+            || $user->role === 'keuangan'
+            || $user->hasRole('keuangan');
     }
 
     public static function form(Schema $schema): Schema
@@ -132,6 +144,9 @@ class HistoryPengisianResource extends Resource
             return false;
         }
         
-        return $user->role === 'admin_utama' || $user->hasRole('admin_utama');
+        return $user->role === 'admin_utama' 
+            || $user->hasRole('admin_utama')
+            || $user->role === 'keuangan'
+            || $user->hasRole('keuangan');
     }
 }

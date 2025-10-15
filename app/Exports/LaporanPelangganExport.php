@@ -4,7 +4,7 @@ namespace App\Exports;
 
 use App\Models\LaporanPelanggan;
 use App\Models\Pelanggan;
-use App\Models\DetailTransaksi;
+use App\Models\Refund;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -66,21 +66,12 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
     {
         static $no = 1;
 
-        // Get volume total from detail_transaksi by joining with trx_id = id_bast_invoice
+        // Get total volume from all refunds with matching bast_id = id_bast_invoice
         $volumeTotal = 0;
         if (!empty($laporan->id_bast_invoice)) {
-            $detailTransaksi = DetailTransaksi::where('trx_id', $laporan->id_bast_invoice)->first();
-            
-            if ($detailTransaksi && !empty($detailTransaksi->tabung)) {
-                $tabungData = $detailTransaksi->tabung;
-                
-                // Calculate total volume from tabung array
-                if (is_array($tabungData)) {
-                    foreach ($tabungData as $tabung) {
-                        $volumeTotal += $tabung['volume'] ?? 0;
-                    }
-                }
-            }
+            // Sum all volumes from refunds table where bast_id matches
+            $volumeTotal = Refund::where('bast_id', $laporan->id_bast_invoice)
+                ->sum('volume') ?? 0;
         }
         
         return [

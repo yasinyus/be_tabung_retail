@@ -6,6 +6,7 @@ use App\Filament\Resources\Refunds\RefundResource;
 use App\Models\SerahTerimaTabung;
 use App\Models\SaldoPelanggan;
 use App\Models\LaporanPelanggan;
+use App\Models\Pelanggan;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Log;
@@ -31,15 +32,29 @@ class CreateRefund extends CreateRecord
         Log::info('CreateRefund mount - bast_id from URL: ' . $bast_id);
         
         if ($bast_id) {
-            // Set data langsung ke property form
-            $this->data['bast_id'] = $bast_id;
+            // Cari data serah terima dan pelanggan
+            $serahTerima = SerahTerimaTabung::where('bast_id', $bast_id)->first();
             
-            // Alternative: juga coba fill form
-            $this->form->fill([
-                'bast_id' => $bast_id,
-            ]);
+            $formData = ['bast_id' => $bast_id];
             
-            Log::info('CreateRefund mount - form filled with bast_id: ' . $bast_id);
+            if ($serahTerima && $serahTerima->kode_pelanggan) {
+                $pelanggan = Pelanggan::where('kode_pelanggan', $serahTerima->kode_pelanggan)->first();
+                
+                if ($pelanggan) {
+                    $formData['kode_pelanggan'] = $pelanggan->kode_pelanggan;
+                    $formData['harga_per_m3'] = $pelanggan->harga_tabung;
+                    
+                    Log::info('CreateRefund mount - Pelanggan found', [
+                        'kode' => $pelanggan->kode_pelanggan,
+                        'harga' => $pelanggan->harga_tabung
+                    ]);
+                }
+            }
+            
+            // Fill form dengan data yang sudah disiapkan
+            $this->form->fill($formData);
+            
+            Log::info('CreateRefund mount - form filled', $formData);
         }
     }
 
