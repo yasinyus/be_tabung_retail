@@ -58,32 +58,103 @@ class TabungActivityResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return true; // Temporarily disable authorization for debugging
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->role === 'admin_utama' 
+            || $user->hasRole('admin_utama')
+            || $user->role === 'admin_umum'
+            || $user->hasRole('admin_umum')
+            || $user->role === 'keuangan'
+            || $user->hasRole('keuangan');
     }
 
     public static function canCreate(): bool
     {
-        return true; // Temporarily disable authorization for debugging
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->role === 'admin_utama' 
+            || $user->hasRole('admin_utama')
+            || $user->role === 'admin_umum'
+            || $user->hasRole('admin_umum')
+            || $user->role === 'keuangan'
+            || $user->hasRole('keuangan');
     }
 
     public static function canEdit($record): bool
     {
-        return true; // Temporarily disable authorization for debugging
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->role === 'admin_utama' 
+            || $user->hasRole('admin_utama')
+            || $user->role === 'admin_umum'
+            || $user->hasRole('admin_umum')
+            || $user->role === 'keuangan'
+            || $user->hasRole('keuangan');
     }
 
     public static function canDelete($record): bool
     {
-        return true; // Temporarily disable authorization for debugging
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->role === 'admin_utama' 
+            || $user->hasRole('admin_utama')
+            || $user->role === 'admin_umum'
+            || $user->hasRole('admin_umum')
+            || $user->role === 'keuangan'
+            || $user->hasRole('keuangan');
     }
 
     public static function canView($record): bool
     {
-        return true; // Temporarily disable authorization for debugging
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->role === 'admin_utama' 
+            || $user->hasRole('admin_utama')
+            || $user->role === 'admin_umum'
+            || $user->hasRole('admin_umum')
+            || $user->role === 'keuangan'
+            || $user->hasRole('keuangan');
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        $user = auth()->user();
-        return $user && in_array($user->role, ['admin_utama', 'admin_umum']);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->role === 'admin_utama' 
+            || $user->hasRole('admin_utama')
+            || $user->role === 'admin_umum'
+            || $user->hasRole('admin_umum')
+            || $user->role === 'keuangan'
+            || $user->hasRole('keuangan');
     }
 }
