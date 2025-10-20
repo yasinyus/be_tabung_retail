@@ -175,8 +175,13 @@ class LaporanPelanggan extends Page implements HasTable
                         try {
                             DB::beginTransaction();
                             
+                            // Simpan data untuk update record sebelumnya
+                            $kodePelanggan = $record->kode_pelanggan;
+                            $hargaYangSama = $record->total;
+                            $jumlahDikembalikan = $record->pengurangan_deposit ?? 0;
+                            
                             // 1. Kembalikan saldo pelanggan
-                            $saldoPelanggan = SaldoPelanggan::where('kode_pelanggan', $record->kode_pelanggan)->first();
+                            $saldoPelanggan = SaldoPelanggan::where('kode_pelanggan', $kodePelanggan)->first();
                             
                             if ($saldoPelanggan) {
                                 // Jika ada pengurangan deposit, kembalikan ke saldo
@@ -192,9 +197,23 @@ class LaporanPelanggan extends Page implements HasTable
                                 $saldoPelanggan->save();
                             }
                             
-                            // 2. Hapus record laporan
-                            $idBastInvoice = $record->id_bast_invoice;
-                            $kodePelanggan = $record->kode_pelanggan;
+                            // 2. Update sisa_deposit di record sebelumnya yang memiliki harga sama (data duplikasi)
+                            if ($jumlahDikembalikan > 0 && $hargaYangSama > 0) {
+                                // Cari record sebelumnya dengan harga yang sama
+                                $recordSebelumnya = LaporanPelangganModel::where('kode_pelanggan', $kodePelanggan)
+                                    ->where('total', $hargaYangSama)
+                                    ->where('id', '<', $record->id) // Record sebelumnya (ID lebih kecil)
+                                    ->orderBy('id', 'desc') // Ambil yang terdekat
+                                    ->first();
+                                
+                                if ($recordSebelumnya) {
+                                    // Update sisa_deposit dengan menambahkan jumlah yang dikembalikan
+                                    $recordSebelumnya->sisa_deposit = ($recordSebelumnya->sisa_deposit ?? 0) + $jumlahDikembalikan;
+                                    $recordSebelumnya->save();
+                                }
+                            }
+                            
+                            // 3. Hapus record laporan yang dibatalkan
                             $record->delete();
                             
                             DB::commit();
