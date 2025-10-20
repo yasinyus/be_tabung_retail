@@ -14,7 +14,6 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\DatePicker;
-use Filament\Actions\Action as FilamentAction;
 use Filament\Notifications\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
@@ -160,7 +159,7 @@ class LaporanPelanggan extends Page implements HasTable
                     ->openUrlInNewTab(),
             ])
             ->actions([
-                FilamentAction::make('batalkan')
+                \Filament\Actions\Action::make('batalkan')
                     ->label('Batalkan Transaksi')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
