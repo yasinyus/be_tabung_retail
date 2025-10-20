@@ -13,7 +13,7 @@ use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Actions\Action as TableAction;
+use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Actions;
 use Filament\Notifications\Notification;
@@ -161,7 +161,7 @@ class LaporanPelanggan extends Page implements HasTable
                     ->openUrlInNewTab(),
             ])
             ->actions([
-                TableAction::make('batalkan')
+                Action::make('batalkan')
                     ->label('Batalkan Transaksi')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
