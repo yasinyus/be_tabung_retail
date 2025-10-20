@@ -232,7 +232,7 @@ class LaporanPelanggan extends Page implements HasTable
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('export_pdf')
+            \Filament\Actions\Action::make('export_pdf')
                 ->label('Export PDF')
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('success')
@@ -246,7 +246,7 @@ class LaporanPelanggan extends Page implements HasTable
                 })
                 ->openUrlInNewTab(),
                 
-            Actions\Action::make('export_excel')
+            \Filament\Actions\Action::make('export_excel')
                 ->label('Export Excel')
                 ->icon('heroicon-o-table-cells')
                 ->color('info')
@@ -260,7 +260,7 @@ class LaporanPelanggan extends Page implements HasTable
                 })
                 ->openUrlInNewTab(),
                 
-            Actions\Action::make('back')
+            \Filament\Actions\Action::make('back')
                 ->label('Kembali')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
