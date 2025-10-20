@@ -197,19 +197,26 @@ class LaporanPelanggan extends Page implements HasTable
                                 $saldoPelanggan->save();
                             }
                             
-                            // 2. Update sisa_deposit di record sebelumnya yang memiliki harga sama (data duplikasi)
+                            // 2. Update sisa_deposit di record duplikasi (yang memiliki harga sama)
                             if ($jumlahDikembalikan > 0 && $hargaYangSama > 0) {
-                                // Cari record sebelumnya dengan harga yang sama
-                                $recordSebelumnya = LaporanPelangganModel::where('kode_pelanggan', $kodePelanggan)
+                                // Cari record duplikasi (yang memiliki harga yang sama)
+                                $recordDuplikasi = LaporanPelangganModel::where('kode_pelanggan', $kodePelanggan)
                                     ->where('total', $hargaYangSama)
                                     ->where('id', '<', $record->id) // Record sebelumnya (ID lebih kecil)
                                     ->orderBy('id', 'desc') // Ambil yang terdekat
                                     ->first();
                                 
-                                if ($recordSebelumnya) {
-                                    // Update sisa_deposit dengan menambahkan jumlah yang dikembalikan
-                                    $recordSebelumnya->sisa_deposit = ($recordSebelumnya->sisa_deposit ?? 0) + $jumlahDikembalikan;
-                                    $recordSebelumnya->save();
+                                if ($recordDuplikasi) {
+                                    // Cari record sebelum record duplikasi untuk ambil sisa_deposit-nya
+                                    $recordSebelumDuplikasi = LaporanPelangganModel::where('kode_pelanggan', $kodePelanggan)
+                                        ->where('id', '<', $recordDuplikasi->id) // Record sebelum duplikasi
+                                        ->orderBy('id', 'desc') // Ambil yang terdekat
+                                        ->first();
+                                    
+                                    // Ambil sisa_deposit dari record sebelum duplikasi, lalu tambahkan jumlah yang dikembalikan
+                                    $sisaDepositSebelumnya = $recordSebelumDuplikasi ? ($recordSebelumDuplikasi->sisa_deposit ?? 0) : 0;
+                                    $recordDuplikasi->sisa_deposit = $sisaDepositSebelumnya + $jumlahDikembalikan;
+                                    $recordDuplikasi->save();
                                 }
                             }
                             
