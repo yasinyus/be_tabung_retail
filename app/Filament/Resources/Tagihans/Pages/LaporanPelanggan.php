@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Tagihans\Pages;
 use App\Filament\Resources\Tagihans\TagihanResource;
 use App\Models\LaporanPelanggan as LaporanPelangganModel;
 use App\Models\Pelanggan;
+use App\Models\SaldoPelanggan;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -12,10 +13,13 @@ use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Actions\Action as TableAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanPelanggan extends Page implements HasTable
@@ -155,6 +159,65 @@ class LaporanPelanggan extends Page implements HasTable
                     ->color('info')
                     ->url(fn ($record) => route('laporan.download-invoice', $record->id))
                     ->openUrlInNewTab(),
+            ])
+            ->actions([
+                TableAction::make('batalkan')
+                    ->label('Batalkan Transaksi')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Batalkan Transaksi')
+                    ->modalDescription(fn ($record) => 
+                        'Apakah Anda yakin ingin membatalkan transaksi ini? ' .
+                        'Saldo sebesar Rp ' . number_format($record->pengurangan_deposit ?? 0, 0, ',', '.') . 
+                        ' akan dikembalikan ke pelanggan dan record ini akan dihapus.'
+                    )
+                    ->modalSubmitActionLabel('Ya, Batalkan')
+                    ->action(function ($record) {
+                        try {
+                            DB::beginTransaction();
+                            
+                            // 1. Kembalikan saldo pelanggan
+                            $saldoPelanggan = SaldoPelanggan::where('kode_pelanggan', $record->kode_pelanggan)->first();
+                            
+                            if ($saldoPelanggan) {
+                                // Jika ada pengurangan deposit, kembalikan ke saldo
+                                if ($record->pengurangan_deposit > 0) {
+                                    $saldoPelanggan->saldo += $record->pengurangan_deposit;
+                                }
+                                
+                                // Jika ada tambahan deposit, kurangi dari saldo
+                                if ($record->tambahan_deposit > 0) {
+                                    $saldoPelanggan->saldo -= $record->tambahan_deposit;
+                                }
+                                
+                                $saldoPelanggan->save();
+                            }
+                            
+                            // 2. Hapus record laporan
+                            $idBastInvoice = $record->id_bast_invoice;
+                            $kodePelanggan = $record->kode_pelanggan;
+                            $record->delete();
+                            
+                            DB::commit();
+                            
+                            Notification::make()
+                                ->title('Transaksi Berhasil Dibatalkan')
+                                ->body('Saldo pelanggan telah dikembalikan dan record telah dihapus.')
+                                ->success()
+                                ->send();
+                                
+                        } catch (\Exception $e) {
+                            DB::rollBack();
+                            
+                            Notification::make()
+                                ->title('Gagal Membatalkan Transaksi')
+                                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->visible(fn ($record) => !empty($record->id_bast_invoice)),
             ])
             ->striped()
             ->defaultPaginationPageOption(25)
