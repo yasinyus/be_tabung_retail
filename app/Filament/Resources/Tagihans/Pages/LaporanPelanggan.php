@@ -6,6 +6,8 @@ use App\Filament\Resources\Tagihans\TagihanResource;
 use App\Models\LaporanPelanggan as LaporanPelangganModel;
 use App\Models\Pelanggan;
 use App\Models\SaldoPelanggan;
+use App\Models\Refund;
+use App\Models\StokTabung;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -110,6 +112,33 @@ class LaporanPelanggan extends Page implements HasTable
                     ->label('Jumlah Tabung')
                     ->placeholder('-')
                     ->alignCenter(),
+                    
+                TextColumn::make('total_volume')
+                    ->label('Total Volume (m³)')
+                    ->placeholder('-')
+                    ->alignCenter()
+                    ->state(function ($record) {
+                        // Jika keterangan = "Tagihan", ambil dari stok_tabung berdasarkan list_tabung
+                        if ($record->keterangan === 'Tagihan' && $record->list_tabung) {
+                            // Parse list_tabung (format: ["kode1", "kode2", ...])
+                            $listTabung = is_string($record->list_tabung) 
+                                ? json_decode($record->list_tabung, true) 
+                                : $record->list_tabung;
+                            
+                            if (is_array($listTabung) && count($listTabung) > 0) {
+                                // Sum volume dari stok_tabung berdasarkan kode_tabung
+                                $totalVolume = StokTabung::whereIn('kode_tabung', $listTabung)->sum('volume');
+                                return $totalVolume > 0 ? number_format($totalVolume, 2, ',', '.') : '-';
+                            }
+                        }
+                        
+                        // Jika bukan "Tagihan", ambil dari refunds
+                        if (!$record->id_bast_invoice) {
+                            return '-';
+                        }
+                        $totalVolume = Refund::where('bast_id', $record->id_bast_invoice)->sum('volume');
+                        return $totalVolume > 0 ? number_format($totalVolume, 2, ',', '.') : '-';
+                    }),
                     
                 TextColumn::make('harga')
                     ->label('Harga')
@@ -244,7 +273,7 @@ class LaporanPelanggan extends Page implements HasTable
                     ->visible(fn ($record) => !empty($record->id_bast_invoice)),
             ])
             ->striped()
-            ->defaultPaginationPageOption(25)
+            ->defaultPaginationPageOption(10)
             ->emptyStateHeading('Belum ada laporan')
             ->emptyStateDescription('Belum ada data laporan untuk pelanggan ini.')
             ->emptyStateIcon('heroicon-o-document-text');
