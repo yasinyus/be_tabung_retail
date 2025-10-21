@@ -151,25 +151,46 @@
             <thead>
                 <tr>
                     <th style="width: 4%;">No</th>
-                    <th style="width: 10%;">Tanggal</th>
-                    <th style="width: 20%;">Keterangan</th>
-                    <th style="width: 12%;">ID BAST Invoice</th>
+                    <th style="width: 9%;">Tanggal</th>
+                    <th style="width: 18%;">Keterangan</th>
+                    <th style="width: 11%;">ID BAST Invoice</th>
                     <th style="width: 6%;">Tabung</th>
-                    <th style="width: 12%;">Harga</th>
-                    <th style="width: 12%;">Deposit (+)</th>
-                    <th style="width: 12%;">Deposit (-)</th>
-                    <th style="width: 10%;">Sisa</th>
-                    <th style="width: 6%;">Status</th>
+                    <th style="width: 8%;">Volume (m³)</th>
+                    <th style="width: 11%;">Harga</th>
+                    <th style="width: 10%;">Deposit (+)</th>
+                    <th style="width: 10%;">Deposit (-)</th>
+                    <th style="width: 9%;">Sisa</th>
+                    <th style="width: 4%;">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($laporans as $index => $laporan)
+                    @php
+                        // Calculate total volume based on keterangan
+                        $volumeTotal = 0;
+                        
+                        // Jika keterangan = "Tagihan", ambil dari stok_tabung berdasarkan list_tabung
+                        if ($laporan->keterangan === 'Tagihan' && $laporan->list_tabung) {
+                            $listTabung = is_string($laporan->list_tabung) 
+                                ? json_decode($laporan->list_tabung, true) 
+                                : $laporan->list_tabung;
+                            
+                            if (is_array($listTabung) && count($listTabung) > 0) {
+                                $volumeTotal = \App\Models\StokTabung::whereIn('kode_tabung', $listTabung)->sum('volume') ?? 0;
+                            }
+                        } 
+                        // Jika bukan "Tagihan", ambil dari refunds
+                        elseif (!empty($laporan->id_bast_invoice)) {
+                            $volumeTotal = \App\Models\Refund::where('bast_id', $laporan->id_bast_invoice)->sum('volume') ?? 0;
+                        }
+                    @endphp
                     <tr>
                         <td class="text-center">{{ $index + 1 }}</td>
                         <td class="text-center">{{ $laporan->tanggal ? $laporan->tanggal->format('d/m/Y') : '-' }}</td>
                         <td>{{ $laporan->keterangan ?? '-' }}</td>
                         <td class="text-center">{{ $laporan->id_bast_invoice ?? '-' }}</td>
                         <td class="text-center">{{ $laporan->tabung ?? '-' }}</td>
+                        <td class="text-center">{{ $volumeTotal > 0 ? number_format($volumeTotal, 2, ',', '.') : '-' }}</td>
                         <td class="text-right">{{ $laporan->harga ? 'Rp ' . number_format($laporan->harga, 0, ',', '.') : '-' }}</td>
                         <td class="text-right text-success">
                             {{ $laporan->tambahan_deposit ? '+Rp ' . number_format($laporan->tambahan_deposit, 0, ',', '.') : '-' }}
@@ -190,7 +211,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" class="text-center" style="padding: 20px;">
+                        <td colspan="11" class="text-center" style="padding: 20px;">
                             <em>Tidak ada data laporan</em>
                         </td>
                     </tr>

@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Models\LaporanPelanggan;
 use App\Models\Pelanggan;
 use App\Models\Refund;
+use App\Models\StokTabung;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -66,12 +67,25 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
     {
         static $no = 1;
 
-        // Get total volume from all refunds with matching bast_id = id_bast_invoice
+        // Calculate total volume based on keterangan
         $volumeTotal = 0;
-        if (!empty($laporan->id_bast_invoice)) {
+        
+        // Jika keterangan = "Tagihan", ambil dari stok_tabung berdasarkan list_tabung
+        if ($laporan->keterangan === 'Tagihan' && $laporan->list_tabung) {
+            // Parse list_tabung (format: ["kode1", "kode2", ...])
+            $listTabung = is_string($laporan->list_tabung) 
+                ? json_decode($laporan->list_tabung, true) 
+                : $laporan->list_tabung;
+            
+            if (is_array($listTabung) && count($listTabung) > 0) {
+                // Sum volume dari stok_tabung berdasarkan kode_tabung
+                $volumeTotal = StokTabung::whereIn('kode_tabung', $listTabung)->sum('volume') ?? 0;
+            }
+        } 
+        // Jika bukan "Tagihan", ambil dari refunds
+        elseif (!empty($laporan->id_bast_invoice)) {
             // Sum all volumes from refunds table where bast_id matches
-            $volumeTotal = Refund::where('bast_id', $laporan->id_bast_invoice)
-                ->sum('volume') ?? 0;
+            $volumeTotal = Refund::where('bast_id', $laporan->id_bast_invoice)->sum('volume') ?? 0;
         }
         
         return [
