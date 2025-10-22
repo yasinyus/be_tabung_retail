@@ -244,7 +244,7 @@ class TagihanResource extends Resource
                             'tanggal' => $data['transaction_date'],
                             'kode_pelanggan' => $record->kode_pelanggan,
                             'keterangan' => 'Tagihan - ' . ($data['notes'] ?? 'Transaksi tagihan'),
-                            'list_tabung' => null,
+                            'list_tabung' => [],
                             'tabung' => 0,
                             'harga' => $total_harga,
                             'tambahan_deposit' => 0,
