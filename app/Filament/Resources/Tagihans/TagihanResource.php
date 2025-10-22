@@ -191,9 +191,12 @@ class TagihanResource extends Resource
                         $saldoPelanggan = SaldoPelanggan::where('kode_pelanggan', $record->kode_pelanggan)->first();
                         $saldo_saat_ini = $saldoPelanggan ? $saldoPelanggan->saldo : 0;
                         
+                        // Generate trx_id dengan format TRX-MANUAL-{random}
+                        $trx_id = 'TRX-MANUAL-' . strtoupper(uniqid());
+                        
                         // Simpan transaksi
                         $transaction = Transaction::create([
-                            'trx_id' => 'TRX-' . strtoupper(uniqid()),
+                            'trx_id' => $trx_id,
                             'user_id' => Auth::id(),
                             'customer_id' => $record->id,
                             'transaction_date' => $data['transaction_date'],
@@ -206,18 +209,17 @@ class TagihanResource extends Resource
                             'notes' => $data['notes'] ?? null,
                         ]);
                         
-                        // Simpan detail transaksi dengan volume jika ada
-                        if (!empty($data['volume']) && $data['volume'] > 0) {
-                            // Simpan volume tanpa breakdown per tabung
-                            DetailTransaksi::create([
-                                'trx_id' => $transaction->trx_id,
-                                'tabung' => [[
-                                    'kode_tabung' => 'VOLUME-ONLY',
-                                    'volume' => $data['volume']
-                                ]],
-                                'keterangan' => 'Volume total: ' . $data['volume'] . ' m³',
-                            ]);
-                        }
+                        // Simpan detail transaksi dengan volume (selalu buat dengan 1 tabung)
+                        $volume_input = !empty($data['volume']) && $data['volume'] > 0 ? $data['volume'] : 0;
+                        
+                        DetailTransaksi::create([
+                            'trx_id' => $trx_id,
+                            'tabung' => [[
+                                'kode_tabung' => 'VOLUME-ONLY',
+                                'volume' => $volume_input
+                            ]],
+                            'keterangan' => 'Volume total: ' . $volume_input . ' m³',
+                        ]);
                         
                         // Hitung saldo baru berdasarkan apakah ada harga atau tidak
                         $saldo_baru = $saldo_saat_ini;
@@ -239,7 +241,7 @@ class TagihanResource extends Resource
                             }
                         }
                         
-                        // Insert ke tabel laporan pelanggan
+                        // Insert ke tabel laporan pelanggan dengan trx_id sebagai id_bast_invoice
                         LaporanPelanggan::create([
                             'tanggal' => $data['transaction_date'],
                             'kode_pelanggan' => $record->kode_pelanggan,
@@ -251,7 +253,7 @@ class TagihanResource extends Resource
                             'pengurangan_deposit' => $pengurangan_deposit,
                             'sisa_deposit' => $saldo_baru,
                             'konfirmasi' => $data['status'] === 'paid' ? true : false,
-                            'id_bast_invoice' => '-',
+                            'id_bast_invoice' => $trx_id,
                         ]);
                         
                         // Notifikasi sukses
