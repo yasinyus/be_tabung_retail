@@ -118,18 +118,38 @@ class LaporanPelanggan extends Page implements HasTable
                     ->placeholder('-')
                     ->alignCenter()
                     ->state(function ($record) {
-                        // Jika keterangan = "Tagihan", ambil dari stok_tabung berdasarkan list_tabung
-                        if ($record->keterangan === 'Tagihan' && $record->list_tabung) {
-                            // Parse list_tabung (format: ["kode1", "kode2", ...])
-                            $listTabung = is_string($record->list_tabung) 
-                                ? json_decode($record->list_tabung, true) 
-                                : $record->list_tabung;
-                            
-                            if (is_array($listTabung) && count($listTabung) > 0) {
-                                // Sum volume dari stok_tabung berdasarkan kode_tabung
-                                $totalVolume = StokTabung::whereIn('kode_tabung', $listTabung)->sum('volume');
-                                return $totalVolume > 0 ? number_format($totalVolume, 2, ',', '.') : '-';
+                        // Jika keterangan mengandung "Tagihan" dan ada list_tabung
+                        if (str_contains($record->keterangan ?? '', 'Tagihan')) {
+                            // Cek apakah list_tabung ada dan tidak kosong
+                            if ($record->list_tabung) {
+                                $listTabung = is_string($record->list_tabung) 
+                                    ? json_decode($record->list_tabung, true) 
+                                    : $record->list_tabung;
+                                
+                                if (is_array($listTabung) && count($listTabung) > 0) {
+                                    // Sum volume dari stok_tabung berdasarkan kode_tabung
+                                    $totalVolume = StokTabung::whereIn('kode_tabung', $listTabung)->sum('volume');
+                                    return $totalVolume > 0 ? number_format($totalVolume, 2, ',', '.') : '-';
+                                }
                             }
+                            
+                            // Jika list_tabung kosong, cek di detail_transaksi
+                            if (!empty($record->id_bast_invoice) && $record->id_bast_invoice !== '-') {
+                                $detailTransaksi = \App\Models\DetailTransaksi::where('trx_id', $record->id_bast_invoice)->first();
+                                if ($detailTransaksi && $detailTransaksi->tabung) {
+                                    $tabungArray = is_string($detailTransaksi->tabung) 
+                                        ? json_decode($detailTransaksi->tabung, true) 
+                                        : $detailTransaksi->tabung;
+                                    
+                                    if (is_array($tabungArray)) {
+                                        $totalVolume = collect($tabungArray)->sum('volume');
+                                        return $totalVolume > 0 ? number_format($totalVolume, 2, ',', '.') : '-';
+                                    }
+                                }
+                            }
+                            
+                            // Jika tidak ada data volume
+                            return '-';
                         }
                         
                         // Jika bukan "Tagihan", ambil dari refunds

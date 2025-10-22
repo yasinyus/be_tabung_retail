@@ -70,20 +70,36 @@ class LaporanPelangganExport implements FromCollection, WithHeadings, WithMappin
         // Calculate total volume based on keterangan
         $volumeTotal = 0;
         
-        // Jika keterangan = "Tagihan", ambil dari stok_tabung berdasarkan list_tabung
-        if ($laporan->keterangan === 'Tagihan' && $laporan->list_tabung) {
-            // Parse list_tabung (format: ["kode1", "kode2", ...])
-            $listTabung = is_string($laporan->list_tabung) 
-                ? json_decode($laporan->list_tabung, true) 
-                : $laporan->list_tabung;
+        // Jika keterangan mengandung "Tagihan"
+        if (str_contains($laporan->keterangan ?? '', 'Tagihan')) {
+            // Cek apakah list_tabung ada dan tidak kosong
+            if ($laporan->list_tabung) {
+                $listTabung = is_string($laporan->list_tabung) 
+                    ? json_decode($laporan->list_tabung, true) 
+                    : $laporan->list_tabung;
+                
+                if (is_array($listTabung) && count($listTabung) > 0) {
+                    // Sum volume dari stok_tabung berdasarkan kode_tabung
+                    $volumeTotal = StokTabung::whereIn('kode_tabung', $listTabung)->sum('volume') ?? 0;
+                }
+            }
             
-            if (is_array($listTabung) && count($listTabung) > 0) {
-                // Sum volume dari stok_tabung berdasarkan kode_tabung
-                $volumeTotal = StokTabung::whereIn('kode_tabung', $listTabung)->sum('volume') ?? 0;
+            // Jika list_tabung kosong, cek di detail_transaksi
+            if ($volumeTotal == 0 && !empty($laporan->id_bast_invoice) && $laporan->id_bast_invoice !== '-') {
+                $detailTransaksi = \App\Models\DetailTransaksi::where('trx_id', $laporan->id_bast_invoice)->first();
+                if ($detailTransaksi && $detailTransaksi->tabung) {
+                    $tabungArray = is_string($detailTransaksi->tabung) 
+                        ? json_decode($detailTransaksi->tabung, true) 
+                        : $detailTransaksi->tabung;
+                    
+                    if (is_array($tabungArray)) {
+                        $volumeTotal = collect($tabungArray)->sum('volume') ?? 0;
+                    }
+                }
             }
         } 
         // Jika bukan "Tagihan", ambil dari refunds
-        elseif (!empty($laporan->id_bast_invoice)) {
+        elseif (!empty($laporan->id_bast_invoice) && $laporan->id_bast_invoice !== '-') {
             // Sum all volumes from refunds table where bast_id matches
             $volumeTotal = Refund::where('bast_id', $laporan->id_bast_invoice)->sum('volume') ?? 0;
         }
