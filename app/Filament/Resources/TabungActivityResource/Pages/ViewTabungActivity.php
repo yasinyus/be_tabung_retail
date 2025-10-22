@@ -32,9 +32,58 @@ class ViewTabungActivity extends ViewRecord
     
     protected function getViewData(): array
     {
+        $tabungList = $this->getTabungList();
+        $volumeHargaData = $this->getVolumeAndHarga($tabungList);
+        
         return [
             'record' => $this->record,
-            'tabungList' => $this->getTabungList(),
+            'tabungList' => $tabungList,
+            'totalVolume' => $volumeHargaData['totalVolume'],
+            'totalHarga' => $volumeHargaData['totalHarga'],
+            'showVolumeHarga' => $this->shouldShowVolumeHarga(),
+        ];
+    }
+
+    protected function shouldShowVolumeHarga(): bool
+    {
+        $aktivitasYangMenampilkan = [
+            'Kirim Tabung Meter',
+            'Kirim Tabung Ke Agen',
+            'Kirim Tabung Ke Pelanggan',
+        ];
+        
+        return in_array($this->record->nama_aktivitas, $aktivitasYangMenampilkan);
+    }
+
+    protected function getVolumeAndHarga(array $tabungList): array
+    {
+        $totalVolume = 0;
+        $totalHarga = 0;
+        
+        if (!$this->shouldShowVolumeHarga()) {
+            return ['totalVolume' => 0, 'totalHarga' => 0];
+        }
+        
+        foreach ($tabungList as $tabung) {
+            $kodeTabung = $tabung['qr_code'];
+            
+            // Ambil data dari stok_tabung
+            $stokTabung = \App\Models\StokTabung::where('kode_tabung', $kodeTabung)->first();
+            
+            if ($stokTabung) {
+                $totalVolume += $stokTabung->volume ?? 0;
+                
+                // Ambil harga dari tabel tabung
+                $tabungData = \App\Models\Tabung::where('kode_tabung', $kodeTabung)->first();
+                if ($tabungData) {
+                    $totalHarga += $tabungData->harga ?? 0;
+                }
+            }
+        }
+        
+        return [
+            'totalVolume' => $totalVolume,
+            'totalHarga' => $totalHarga,
         ];
     }
 

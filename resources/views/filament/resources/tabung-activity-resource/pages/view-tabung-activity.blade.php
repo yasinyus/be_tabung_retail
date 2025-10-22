@@ -63,6 +63,22 @@
                     </p>
                 </div>
                 
+                @if($showVolumeHarga)
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Total Volume:</label>
+                        <p class="text-xl font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 px-3 py-2 rounded-md border border-purple-200 dark:border-purple-800">
+                            {{ number_format($totalVolume, 2, ',', '.') }} m³
+                        </p>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Total Harga:</label>
+                        <p class="text-xl font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-md border border-green-200 dark:border-green-800">
+                            Rp {{ number_format($totalHarga, 0, ',', '.') }}
+                        </p>
+                    </div>
+                @endif
+                
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Tanggal Aktivitas:</label>
                     <p class="text-base text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-md font-mono">
