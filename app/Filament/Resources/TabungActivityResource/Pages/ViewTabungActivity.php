@@ -64,21 +64,30 @@ class ViewTabungActivity extends ViewRecord
             return ['totalVolume' => 0, 'totalHarga' => 0];
         }
         
+        // Ambil harga per tabung dari pelanggan berdasarkan tujuan (kode_pelanggan)
+        $hargaPerTabung = 0;
+        if ($this->record->tujuan) {
+            $pelanggan = \App\Models\Pelanggan::where('kode_pelanggan', $this->record->tujuan)
+                ->orWhere('nama_pelanggan', $this->record->tujuan)
+                ->first();
+            
+            if ($pelanggan && $pelanggan->harga_tabung) {
+                $hargaPerTabung = $pelanggan->harga_tabung;
+            }
+        }
+        
         foreach ($tabungList as $tabung) {
             $kodeTabung = $tabung['qr_code'];
             
-            // Ambil data dari stok_tabung
+            // Ambil data dari stok_tabung untuk volume
             $stokTabung = \App\Models\StokTabung::where('kode_tabung', $kodeTabung)->first();
             
             if ($stokTabung) {
                 $totalVolume += $stokTabung->volume ?? 0;
-                
-                // Ambil harga dari tabel tabung
-                $tabungData = \App\Models\Tabung::where('kode_tabung', $kodeTabung)->first();
-                if ($tabungData) {
-                    $totalHarga += $tabungData->harga ?? 0;
-                }
             }
+            
+            // Hitung total harga berdasarkan harga per tabung dari pelanggan
+            $totalHarga += $hargaPerTabung;
         }
         
         return [

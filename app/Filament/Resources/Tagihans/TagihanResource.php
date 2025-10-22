@@ -148,6 +148,15 @@ class TagihanResource extends Resource
                                 $total = $state * $harga_satuan;
                                 $set('total_harga', $total);
                             }),
+                        
+                        TextInput::make('volume')
+                            ->label('Volume (m³)')
+                            ->numeric()
+                            ->step(0.01)
+                            ->minValue(0)
+                            ->placeholder('Masukkan total volume')
+                            ->helperText('Opsional: Total volume untuk transaksi ini')
+                            ->suffix('m³'),
                             
                         DatePicker::make('transaction_date')
                             ->label('Tanggal Transaksi')
@@ -274,6 +283,26 @@ class TagihanResource extends Resource
                             'status' => $data['status'],
                             'notes' => $data['notes'],
                         ]);
+                        
+                        // Simpan detail transaksi dengan volume jika ada
+                        if (!empty($data['volume']) && $data['volume'] > 0) {
+                            // Generate tabung array dengan volume yang dibagi rata per tabung
+                            $tabungArray = [];
+                            $volumePerTabung = $jumlah_tabung > 0 ? $data['volume'] / $jumlah_tabung : 0;
+                            
+                            for ($i = 1; $i <= ($jumlah_tabung ?? 1); $i++) {
+                                $tabungArray[] = [
+                                    'kode_tabung' => 'TB-AUTO-' . $i,
+                                    'volume' => round($volumePerTabung, 2)
+                                ];
+                            }
+                            
+                            DetailTransaksi::create([
+                                'trx_id' => $transaction->trx_id,
+                                'tabung' => $tabungArray,
+                                'keterangan' => 'Detail transaksi dengan volume: ' . $data['volume'] . ' m³',
+                            ]);
+                        }
                         
                         // Update saldo untuk semua jenis pelanggan jika ada total harga
                         if ($total_harga > 0) {
