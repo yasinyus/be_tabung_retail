@@ -16,6 +16,82 @@ class EditTabungActivity extends EditRecord
         return 'Edit Aktivitas Tabung';
     }
 
+    protected function afterSave(): void
+    {
+        $record = $this->record;
+        // Hanya update jika aktivitas yang relevan
+        $aktivitasYangMenampilkan = [
+            'Kirim Tabung Meter',
+            'Kirim Tabung Ke Agen',
+            'Kirim Tabung Ke Pelanggan',
+        ];
+        if (!in_array($record->nama_aktivitas, $aktivitasYangMenampilkan)) {
+            return;
+        }
+
+
+        // Hitung ulang total volume dan harga
+        $tabungList = is_array($record->tabung) ? $record->tabung : [];
+        $totalVolume = 0;
+        foreach ($tabungList as $kodeTabung) {
+            $stokTabung = \App\Models\StokTabung::where('kode_tabung', $kodeTabung)->first();
+            if ($stokTabung) {
+                $totalVolume += $stokTabung->volume ?? 0;
+            }
+        }
+
+        // Ambil harga per m3 dari pelanggan tujuan
+        $hargaPerM3 = 0;
+        if ($record->tujuan) {
+            $pelanggan = \App\Models\Pelanggan::where('kode_pelanggan', $record->tujuan)
+                ->orWhere('nama_pelanggan', $record->tujuan)
+                ->first();
+            if ($pelanggan && $pelanggan->harga_tabung) {
+                $hargaPerM3 = $pelanggan->harga_tabung;
+            }
+        }
+        $totalHarga = $hargaPerM3 * $totalVolume;
+
+        // Update juga tabel aktivitas_tabung (record ini)
+        $record->total_tabung = count($tabungList);
+        $record->total_volume = $totalVolume;
+        $record->total_harga = $totalHarga;
+        $record->save();
+
+        // Update detail_transaksi yang terkait (berdasarkan trx_id = id_bast_invoice)
+        $laporan = \App\Models\LaporanPelanggan::where('id_bast_invoice', $record->id)->first();
+        if ($laporan) {
+            $trx_id = $laporan->id_bast_invoice;
+            $detail = \App\Models\DetailTransaksi::where('trx_id', $trx_id)->first();
+            if ($detail) {
+                $detail->tabung = collect($tabungList)->map(function($kode) use ($totalVolume) {
+                    return [
+                        'kode_tabung' => $kode,
+                        'volume' => $totalVolume // volume total dibagi rata jika mau, atau total saja
+                    ];
+                })->toArray();
+                $detail->keterangan = 'Volume total: ' . $totalVolume . ' m³';
+                $detail->save();
+            }
+
+            // Update laporan_pelanggan
+            $laporan->harga = $totalHarga;
+            $laporan->save();
+
+            // Update saldo pelanggan jika harga berubah
+            $saldoPelanggan = \App\Models\SaldoPelanggan::where('kode_pelanggan', $laporan->kode_pelanggan)->first();
+            if ($saldoPelanggan) {
+                // Hitung selisih harga lama dan baru
+                $selisih = ($laporan->pengurangan_deposit ?? 0) - $totalHarga;
+                $saldoPelanggan->saldo += $selisih;
+                $saldoPelanggan->save();
+                $laporan->pengurangan_deposit = $totalHarga;
+                $laporan->sisa_deposit = $saldoPelanggan->saldo;
+                $laporan->save();
+            }
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [
