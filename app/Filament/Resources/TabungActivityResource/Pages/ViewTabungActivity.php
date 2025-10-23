@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TabungActivityResource\Pages;
 
 use App\Filament\Resources\TabungActivityResource;
 use Filament\Actions\EditAction;
+use Illuminate\Support\Facades\Auth;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -20,14 +21,17 @@ class ViewTabungActivity extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        return [
-            EditAction::make()
+        $actions = [];
+        $user = Auth::user();
+        if ($user && ($user->role ?? null) === 'admin_utama') {
+            $actions[] = EditAction::make()
                 ->label('Edit')
-                ->icon('heroicon-o-pencil'),
-            DeleteAction::make()
-                ->label('Hapus')
-                ->icon('heroicon-o-trash'),
-        ];
+                ->icon('heroicon-o-pencil');
+        }
+        $actions[] = DeleteAction::make()
+            ->label('Hapus')
+            ->icon('heroicon-o-trash');
+        return $actions;
     }
     
     protected function getViewData(): array

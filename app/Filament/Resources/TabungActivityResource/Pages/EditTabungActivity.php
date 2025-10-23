@@ -7,8 +7,24 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 
+use Illuminate\Support\Facades\Auth;
+
 class EditTabungActivity extends EditRecord
 {
+
+    protected function authorizeAccess(): void
+    {
+        $user = Auth::user();
+        if (!$user || ($user->role ?? null) !== 'admin_utama') {
+            abort(403, 'Hanya admin_utama yang dapat mengedit aktivitas tabung.');
+        }
+    }
+
+    public function mount($record): void
+    {
+        $this->authorizeAccess();
+        parent::mount($record);
+    }
     protected static string $resource = TabungActivityResource::class;
 
     public function getTitle(): string
