@@ -64,18 +64,19 @@ class ViewTabungActivity extends ViewRecord
             return ['totalVolume' => 0, 'totalHarga' => 0];
         }
         
-        // Ambil harga per tabung dari pelanggan berdasarkan tujuan (kode_pelanggan)
-        $hargaPerTabung = 0;
+        // Ambil harga per m³ dari pelanggan berdasarkan tujuan (kode_pelanggan)
+        $hargaPerM3 = 0;
         if ($this->record->tujuan) {
             $pelanggan = \App\Models\Pelanggan::where('kode_pelanggan', $this->record->tujuan)
                 ->orWhere('nama_pelanggan', $this->record->tujuan)
                 ->first();
             
             if ($pelanggan && $pelanggan->harga_tabung) {
-                $hargaPerTabung = $pelanggan->harga_tabung;
+                $hargaPerM3 = $pelanggan->harga_tabung;
             }
         }
         
+        // Hitung total volume dari semua tabung
         foreach ($tabungList as $tabung) {
             $kodeTabung = $tabung['qr_code'];
             
@@ -85,10 +86,10 @@ class ViewTabungActivity extends ViewRecord
             if ($stokTabung) {
                 $totalVolume += $stokTabung->volume ?? 0;
             }
-            
-            // Hitung total harga berdasarkan harga per tabung dari pelanggan
-            $totalHarga += $hargaPerTabung;
         }
+        
+        // Total Harga = Harga per m³ × Total Volume
+        $totalHarga = $hargaPerM3 * $totalVolume;
         
         return [
             'totalVolume' => $totalVolume,
