@@ -69,25 +69,33 @@ class EditTabungActivity extends EditRecord
         $totalHarga = $hargaPerM3 * $totalVolume;
 
         // Update juga tabel aktivitas_tabung (record ini)
-        $record->total_tabung = count($tabungList);
-        $record->total_volume = $totalVolume;
-        $record->total_harga = $totalHarga;
-        $record->save();
+    $record->total_tabung = count($tabungList);
+    $record->save();
 
-        // Update detail_transaksi yang terkait (berdasarkan trx_id = id_bast_invoice)
+        // Update detail_transaksi dan transactions yang terkait (berdasarkan trx_id = id_bast_invoice)
         $laporan = \App\Models\LaporanPelanggan::where('id_bast_invoice', $record->id)->first();
         if ($laporan) {
             $trx_id = $laporan->id_bast_invoice;
             $detail = \App\Models\DetailTransaksi::where('trx_id', $trx_id)->first();
             if ($detail) {
-                $detail->tabung = collect($tabungList)->map(function($kode) use ($totalVolume) {
+                // Buat array tabung: [{kode_tabung, volume}]
+                $tabungArr = collect($tabungList)->map(function($kode) {
+                    $stok = \App\Models\StokTabung::where('kode_tabung', $kode)->first();
                     return [
                         'kode_tabung' => $kode,
-                        'volume' => $totalVolume // volume total dibagi rata jika mau, atau total saja
+                        'volume' => $stok ? (float) $stok->volume : 0
                     ];
                 })->toArray();
-                $detail->keterangan = 'Volume total: ' . $totalVolume . ' m³';
+                $detail->tabung = $tabungArr;
+                $detail->keterangan = 'Volume total: ' . collect($tabungArr)->sum('volume') . ' m³';
                 $detail->save();
+            }
+
+            // Update transactions.total
+            $transaction = \App\Models\Transaction::where('trx_id', $trx_id)->first();
+            if ($transaction) {
+                $transaction->total = $totalHarga;
+                $transaction->save();
             }
 
             // Update laporan_pelanggan

@@ -20,6 +20,7 @@ class TabungActivity extends Model
         'nama_petugas',
         'id_user',
         'total_tabung',
+        'total_harga',
         'tanggal',
         'status',
         'waktu'

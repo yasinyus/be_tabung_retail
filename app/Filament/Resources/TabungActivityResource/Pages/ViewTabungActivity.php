@@ -80,21 +80,17 @@ class ViewTabungActivity extends ViewRecord
             }
         }
         
-        // Hitung total volume dari semua tabung
-        foreach ($tabungList as $tabung) {
-            $kodeTabung = $tabung['qr_code'];
-            
-            // Ambil data dari stok_tabung untuk volume
-            $stokTabung = \App\Models\StokTabung::where('kode_tabung', $kodeTabung)->first();
-            
-            if ($stokTabung) {
-                $totalVolume += $stokTabung->volume ?? 0;
+        // Ambil detail_transaksi berdasarkan trx_id (id aktivitas tabung)
+        $detail = \App\Models\DetailTransaksi::where('trx_id', $this->record->id)->first();
+        $totalVolume = 0;
+        if ($detail && $detail->tabung) {
+            $tabungArr = is_string($detail->tabung) ? json_decode($detail->tabung, true) : $detail->tabung;
+            if (is_array($tabungArr)) {
+                $totalVolume = collect($tabungArr)->sum('volume');
             }
         }
-        
         // Total Harga = Harga per m³ × Total Volume
         $totalHarga = $hargaPerM3 * $totalVolume;
-        
         return [
             'totalVolume' => $totalVolume,
             'totalHarga' => $totalHarga,

@@ -8,6 +8,8 @@ use App\Models\Gudang;
 use App\Models\Pelanggan;
 use App\Models\StokTabung;
 use Filament\Actions;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\VolumeTabungExport;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\DB;
 
@@ -18,6 +20,13 @@ class ListVolumeTabungs extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('export_excel')
+                ->label('⬇️ Export Excel')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->action(function () {
+                    return Excel::download(new VolumeTabungExport, 'volume-tabung.xlsx');
+                }),
             Actions\Action::make('view_stats')
                 ->label('📊 Lihat Statistik')
                 ->icon('heroicon-o-chart-bar')
