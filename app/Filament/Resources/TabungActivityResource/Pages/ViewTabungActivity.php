@@ -80,13 +80,16 @@ class ViewTabungActivity extends ViewRecord
             }
         }
         
-        // Ambil detail_transaksi berdasarkan trx_id (id aktivitas tabung)
-        $detail = \App\Models\DetailTransaksi::where('trx_id', $this->record->id)->first();
+        // Ambil id_bast_invoice dari laporan_pelanggan, lalu ambil detail_transaksi berdasarkan trx_id tersebut
+        $laporan = \App\Models\LaporanPelanggan::where('id_bast_invoice', $this->record->id)->first();
         $totalVolume = 0;
-        if ($detail && $detail->tabung) {
-            $tabungArr = is_string($detail->tabung) ? json_decode($detail->tabung, true) : $detail->tabung;
-            if (is_array($tabungArr)) {
-                $totalVolume = collect($tabungArr)->sum('volume');
+        if ($laporan && $laporan->id_bast_invoice) {
+            $detail = \App\Models\DetailTransaksi::where('trx_id', $laporan->id_bast_invoice)->first();
+            if ($detail && $detail->tabung) {
+                $tabungArr = is_string($detail->tabung) ? json_decode($detail->tabung, true) : $detail->tabung;
+                if (is_array($tabungArr)) {
+                    $totalVolume = collect($tabungArr)->sum('volume');
+                }
             }
         }
         // Total Harga = Harga per m³ × Total Volume

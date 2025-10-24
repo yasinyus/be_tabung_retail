@@ -72,10 +72,13 @@ class EditTabungActivity extends EditRecord
     $record->total_tabung = count($tabungList);
     $record->save();
 
-        // Update detail_transaksi dan transactions yang terkait (berdasarkan trx_id = id_bast_invoice)
+        // Ambil id_bast_invoice dari laporan_pelanggan (relasi ke aktivitas_tabung)
         $laporan = \App\Models\LaporanPelanggan::where('id_bast_invoice', $record->id)->first();
+        $trx_id = null;
         if ($laporan) {
             $trx_id = $laporan->id_bast_invoice;
+        }
+        if ($trx_id) {
             $detail = \App\Models\DetailTransaksi::where('trx_id', $trx_id)->first();
             if ($detail) {
                 // Buat array tabung: [{kode_tabung, volume}]
