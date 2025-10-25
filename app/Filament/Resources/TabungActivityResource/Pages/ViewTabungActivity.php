@@ -21,17 +21,14 @@ class ViewTabungActivity extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        $actions = [];
-        $user = Auth::user();
-        if ($user && ($user->role ?? null) === 'admin_utama') {
-            $actions[] = EditAction::make()
+        return [
+            EditAction::make()
                 ->label('Edit')
-                ->icon('heroicon-o-pencil');
-        }
-        $actions[] = DeleteAction::make()
-            ->label('Hapus')
-            ->icon('heroicon-o-trash');
-        return $actions;
+                ->icon('heroicon-o-pencil'),
+            DeleteAction::make()
+                ->label('Hapus')
+                ->icon('heroicon-o-trash'),
+        ];
     }
     
     protected function getViewData(): array
@@ -68,35 +65,28 @@ class ViewTabungActivity extends ViewRecord
             return ['totalVolume' => 0, 'totalHarga' => 0];
         }
         
-        // Ambil harga per m³ dari pelanggan berdasarkan tujuan (kode_pelanggan)
-        $hargaPerM3 = 0;
-        if ($this->record->tujuan) {
-            $pelanggan = \App\Models\Pelanggan::where('kode_pelanggan', $this->record->tujuan)
-                ->orWhere('nama_pelanggan', $this->record->tujuan)
-                ->first();
+        foreach ($tabungList as $tabung) {
+            $kodeTabung = $tabung['qr_code'];
             
-            if ($pelanggan && $pelanggan->harga_tabung) {
-                $hargaPerM3 = $pelanggan->harga_tabung;
+            // Ambil data dari stok_tabung
+            $stokTabung = \App\Models\StokTabung::where('kode_tabung', $kodeTabung)->first();
+            
+            if ($stokTabung) {
+                $totalVolume += $stokTabung->volume ?? 0;
+                
+                // Ambil harga dari tabel pelanggan
+                
             }
+        }
+
+        $tabungData = \App\Models\Pelanggan::where('kode_pelanggan', $this->record->tujuan)->first();
+        if ($tabungData) {
+                $totalHarga += $tabungData->harga_tabung ?? 0;
         }
         
-        // Ambil id_bast_invoice dari laporan_pelanggan, lalu ambil detail_transaksi berdasarkan trx_id tersebut
-        $laporan = \App\Models\LaporanPelanggan::where('id_bast_invoice', $this->record->id)->first();
-        $totalVolume = 0;
-        if ($laporan && $laporan->id_bast_invoice) {
-            $detail = \App\Models\DetailTransaksi::where('trx_id', $laporan->id_bast_invoice)->first();
-            if ($detail && $detail->tabung) {
-                $tabungArr = is_string($detail->tabung) ? json_decode($detail->tabung, true) : $detail->tabung;
-                if (is_array($tabungArr)) {
-                    $totalVolume = collect($tabungArr)->sum('volume');
-                }
-            }
-        }
-        // Total Harga = Harga per m³ × Total Volume
-        $totalHarga = $hargaPerM3 * $totalVolume;
         return [
             'totalVolume' => $totalVolume,
-            'totalHarga' => $totalHarga,
+            'totalHarga' => $totalHarga * $totalVolume,
         ];
     }
 
