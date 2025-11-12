@@ -159,7 +159,7 @@ class TabungActivitiesTable
                             if ($gudang && $gudang->nama_gudang) {
                                 $displayName = $gudang->nama_gudang;
                             }
-                        } elseif (str_starts_with($state, 'PA') || str_starts_with($state, 'PU')) {
+                        } elseif (str_starts_with($state, 'PA') || str_starts_with($state, 'PU') || str_starts_with($state, 'PM')) {
                             // Pelanggan
                             $pelanggan = Pelanggan::where('kode_pelanggan', $state)->first();
                             if ($pelanggan && $pelanggan->nama_pelanggan) {
@@ -264,7 +264,7 @@ class TabungActivitiesTable
                             if ($gudang && $gudang->nama_gudang) {
                                 $displayName = $gudang->nama_gudang;
                             }
-                        } elseif (str_starts_with($state, 'PA') || str_starts_with($state, 'PU')) {
+                        } elseif (str_starts_with($state, 'PA') || str_starts_with($state, 'PU') || str_starts_with($state, 'PM')) {
                             // Pelanggan
                             $pelanggan = Pelanggan::where('kode_pelanggan', $state)->first();
                             if ($pelanggan && $pelanggan->nama_pelanggan) {

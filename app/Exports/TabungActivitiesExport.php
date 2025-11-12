@@ -119,7 +119,7 @@ class TabungActivitiesExport implements FromCollection, WithHeadings, WithMappin
                 if ($gudang && $gudang->nama_gudang) {
                     $displayDari = $gudang->nama_gudang;
                 }
-            } elseif (str_starts_with($activity->dari, 'PA') || str_starts_with($activity->dari, 'PU')) {
+            } elseif (str_starts_with($activity->dari, 'PA') || str_starts_with($activity->dari, 'PU') || str_starts_with($activity->dari, 'PM')) {
                 $pelanggan = Pelanggan::where('kode_pelanggan', $activity->dari)->first();
                 if ($pelanggan && $pelanggan->nama_pelanggan) {
                     $displayDari = $pelanggan->nama_pelanggan;
@@ -135,7 +135,7 @@ class TabungActivitiesExport implements FromCollection, WithHeadings, WithMappin
                 if ($gudang && $gudang->nama_gudang) {
                     $displayTujuan = $gudang->nama_gudang;
                 }
-            } elseif (str_starts_with($activity->tujuan, 'PA') || str_starts_with($activity->tujuan, 'PU')) {
+            } elseif (str_starts_with($activity->tujuan, 'PA') || str_starts_with($activity->tujuan, 'PU') || str_starts_with($activity->tujuan, 'PM')) {
                 $pelanggan = Pelanggan::where('kode_pelanggan', $activity->tujuan)->first();
                 if ($pelanggan && $pelanggan->nama_pelanggan) {
                     $displayTujuan = $pelanggan->nama_pelanggan;
