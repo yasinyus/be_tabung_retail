@@ -208,6 +208,67 @@ class LaporanPelanggan extends Page implements HasTable
                     ->openUrlInNewTab(),
             ])
             ->actions([
+                \Filament\Actions\Action::make('batalkan_deposit')
+                    ->label('Batalkan')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Batalkan Deposit')
+                    ->modalDescription(fn ($record) => 
+                        'Apakah Anda yakin ingin membatalkan deposit ini? ' .
+                        'Deposit sebesar Rp ' . number_format($record->tambahan_deposit ?? 0, 0, ',', '.') . 
+                        ' akan dikurangi dari saldo pelanggan.'
+                    )
+                    ->modalSubmitActionLabel('Ya, Batalkan')
+                    ->action(function ($record) {
+                        try {
+                            DB::beginTransaction();
+                            
+                            $kodePelanggan = $record->kode_pelanggan;
+                            $depositDibatalkan = $record->tambahan_deposit ?? 0;
+                            
+                            // 1. Kurangi saldo pelanggan
+                            $saldoPelanggan = SaldoPelanggan::where('kode_pelanggan', $kodePelanggan)->first();
+                            
+                            if ($saldoPelanggan) {
+                                $saldoPelanggan->saldo -= $depositDibatalkan;
+                                $saldoPelanggan->save();
+                            }
+                            
+                            // 2. Update sisa_deposit di semua record setelah record yang dibatalkan
+                            $recordsSetelahnya = LaporanPelangganModel::where('kode_pelanggan', $kodePelanggan)
+                                ->where('id', '>', $record->id)
+                                ->orderBy('id', 'asc')
+                                ->get();
+                            
+                            foreach ($recordsSetelahnya as $recordSetelah) {
+                                $recordSetelah->sisa_deposit -= $depositDibatalkan;
+                                $recordSetelah->save();
+                            }
+                            
+                            // 3. Hapus record deposit yang dibatalkan
+                            $record->delete();
+                            
+                            DB::commit();
+                            
+                            Notification::make()
+                                ->title('Deposit Berhasil Dibatalkan')
+                                ->body('Deposit telah dikurangi dari saldo pelanggan.')
+                                ->success()
+                                ->send();
+                                
+                        } catch (\Exception $e) {
+                            DB::rollBack();
+                            
+                            Notification::make()
+                                ->title('Gagal Membatalkan Deposit')
+                                ->body('Terjadi kesalahan: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->visible(fn ($record) => !empty($record->tambahan_deposit) && $record->tambahan_deposit > 0),
+                    
                 \Filament\Actions\Action::make('batalkan')
                     ->label('Batalkan Transaksi')
                     ->icon('heroicon-o-x-circle')

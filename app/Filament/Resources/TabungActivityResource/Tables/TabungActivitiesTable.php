@@ -143,13 +143,6 @@ class TabungActivitiesTable
                     ->sortable()
                     ->limit(25),
 
-                TextColumn::make('user.name')
-                    ->label('User Account')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable()
-                    ->limit(25),
-
                 TextColumn::make('dari')
                     ->label('Dari')
                     ->searchable()
@@ -158,9 +151,25 @@ class TabungActivitiesTable
                     ->formatStateUsing(function ($state) {
                         if (!$state) return $state;
                         
+                        // Get display name based on code prefix
+                        $displayName = $state;
+                        if (str_starts_with($state, 'GD')) {
+                            // Gudang
+                            $gudang = Gudang::where('kode_gudang', $state)->first();
+                            if ($gudang && $gudang->nama_gudang) {
+                                $displayName = $gudang->nama_gudang;
+                            }
+                        } elseif (str_starts_with($state, 'PA') || str_starts_with($state, 'PU')) {
+                            // Pelanggan
+                            $pelanggan = Pelanggan::where('kode_pelanggan', $state)->first();
+                            if ($pelanggan && $pelanggan->nama_pelanggan) {
+                                $displayName = $pelanggan->nama_pelanggan;
+                            }
+                        }
+                        
                         $details = self::getCodeDetails($state);
                         if ($details) {
-                            $safeCode = htmlspecialchars($state, ENT_QUOTES, 'UTF-8');
+                            $safeDisplayName = htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8');
                             $jsCode = json_encode($state);
                             
                             // Embed JavaScript jika belum ada
@@ -231,12 +240,12 @@ class TabungActivitiesTable
                             return new HtmlString($script . "
                                 <span class='cursor-pointer text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors duration-200'
                                       onclick='showCodeDetails({$jsCode}); return false;'>
-                                    {$safeCode}
+                                    {$safeDisplayName}
                                 </span>
                             ");
                         }
                         
-                        return $state;
+                        return $displayName;
                     }),
 
                 TextColumn::make('tujuan')
@@ -247,19 +256,35 @@ class TabungActivitiesTable
                     ->formatStateUsing(function ($state) {
                         if (!$state) return $state;
                         
+                        // Get display name based on code prefix
+                        $displayName = $state;
+                        if (str_starts_with($state, 'GD')) {
+                            // Gudang
+                            $gudang = Gudang::where('kode_gudang', $state)->first();
+                            if ($gudang && $gudang->nama_gudang) {
+                                $displayName = $gudang->nama_gudang;
+                            }
+                        } elseif (str_starts_with($state, 'PA') || str_starts_with($state, 'PU')) {
+                            // Pelanggan
+                            $pelanggan = Pelanggan::where('kode_pelanggan', $state)->first();
+                            if ($pelanggan && $pelanggan->nama_pelanggan) {
+                                $displayName = $pelanggan->nama_pelanggan;
+                            }
+                        }
+                        
                         $details = self::getCodeDetails($state);
                         if ($details) {
-                            $safeCode = htmlspecialchars($state, ENT_QUOTES, 'UTF-8');
+                            $safeDisplayName = htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8');
                             $jsCode = json_encode($state);
                             return new HtmlString("
                                 <span class='cursor-pointer text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors duration-200'
                                       onclick='showCodeDetails({$jsCode}); return false;'>
-                                    {$safeCode}
+                                    {$safeDisplayName}
                                 </span>
                             ");
                         }
                         
-                        return $state;
+                        return $displayName;
                     }),
 
                 BadgeColumn::make('status')
@@ -277,6 +302,57 @@ class TabungActivitiesTable
                     ->sortable()
                     ->badge()
                     ->color('primary'),
+
+                TextColumn::make('total_volume')
+                    ->label('Total Volume (m³)')
+                    ->getStateUsing(function ($record) {
+                        try {
+                            // Ambil array kode_tabung dari kolom tabung di aktivitas_tabung
+                            $tabungList = $record->tabung;
+                            
+                            if (empty($tabungList) || !is_array($tabungList)) {
+                                return '-';
+                            }
+                            
+                            // Flatten array - extract hanya kode_tabung string
+                            $kodeTabungList = [];
+                            foreach ($tabungList as $item) {
+                                if (is_array($item)) {
+                                    // Jika array, cari key qr_code atau kode_tabung
+                                    if (isset($item['qr_code']) && is_string($item['qr_code'])) {
+                                        $kodeTabungList[] = $item['qr_code'];
+                                    } elseif (isset($item['kode_tabung']) && is_string($item['kode_tabung'])) {
+                                        $kodeTabungList[] = $item['kode_tabung'];
+                                    }
+                                } elseif (is_string($item)) {
+                                    // Jika string langsung, gunakan sebagai kode_tabung
+                                    $kodeTabungList[] = $item;
+                                }
+                            }
+                            
+                            // Pastikan array hanya berisi string dan tidak ada duplikat
+                            $kodeTabungList = array_values(array_unique(array_filter($kodeTabungList, 'is_string')));
+                            
+                            if (empty($kodeTabungList)) {
+                                return '-';
+                            }
+                            
+                            // Ambil total volume dari stok_tabung berdasarkan kode_tabung
+                            $totalVolume = \App\Models\StokTabung::whereIn('kode_tabung', $kodeTabungList)
+                                ->sum('volume');
+                            
+                            if ($totalVolume > 0) {
+                                return number_format($totalVolume, 2, ',', '.');
+                            }
+                            
+                            return '-';
+                        } catch (\Exception $e) {
+                            return '-';
+                        }
+                    })
+                    ->badge()
+                    ->color('success')
+                    ->toggleable(),
 
                 TextColumn::make('tanggal')
                     ->label('Tanggal')
