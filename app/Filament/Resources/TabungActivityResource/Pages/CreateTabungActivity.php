@@ -23,8 +23,23 @@ class CreateTabungActivity extends CreateRecord
         // Auto-calculate total tabung dari repeater
         if (isset($data['tabung']) && is_array($data['tabung'])) {
             $data['total_tabung'] = count($data['tabung']);
+            
+            // Calculate total_volume from stok_tabung
+            $totalVolume = 0;
+            foreach ($data['tabung'] as $item) {
+                $kodeTabung = is_array($item) && isset($item['qr_code']) ? $item['qr_code'] : $item;
+                
+                if ($kodeTabung) {
+                    $stokTabung = \App\Models\StokTabung::where('kode_tabung', $kodeTabung)->first();
+                    if ($stokTabung && $stokTabung->volume) {
+                        $totalVolume += $stokTabung->volume;
+                    }
+                }
+            }
+            $data['total_volume'] = $totalVolume;
         } else {
             $data['total_tabung'] = 0;
+            $data['total_volume'] = 0;
         }
         
         // Convert QR code repeater to array format

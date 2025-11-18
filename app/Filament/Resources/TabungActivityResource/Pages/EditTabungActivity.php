@@ -69,8 +69,9 @@ class EditTabungActivity extends EditRecord
         $totalHarga = $hargaPerM3 * $totalVolume;
 
         // Update juga tabel aktivitas_tabung (record ini)
-    $record->total_tabung = count($tabungList);
-    $record->save();
+        $record->total_tabung = count($tabungList);
+        $record->total_volume = $totalVolume;
+        $record->save();
 
         // Ambil id_bast_invoice dari laporan_pelanggan (relasi ke aktivitas_tabung)
         $laporan = \App\Models\LaporanPelanggan::where('id_bast_invoice', $record->id)->first();

@@ -306,49 +306,11 @@ class TabungActivitiesTable
                 TextColumn::make('total_volume')
                     ->label('Total Volume (m³)')
                     ->getStateUsing(function ($record) {
-                        try {
-                            // Ambil array kode_tabung dari kolom tabung di aktivitas_tabung
-                            $tabungList = $record->tabung;
-                            
-                            if (empty($tabungList) || !is_array($tabungList)) {
-                                return '-';
-                            }
-                            
-                            // Flatten array - extract hanya kode_tabung string
-                            $kodeTabungList = [];
-                            foreach ($tabungList as $item) {
-                                if (is_array($item)) {
-                                    // Jika array, cari key qr_code atau kode_tabung
-                                    if (isset($item['qr_code']) && is_string($item['qr_code'])) {
-                                        $kodeTabungList[] = $item['qr_code'];
-                                    } elseif (isset($item['kode_tabung']) && is_string($item['kode_tabung'])) {
-                                        $kodeTabungList[] = $item['kode_tabung'];
-                                    }
-                                } elseif (is_string($item)) {
-                                    // Jika string langsung, gunakan sebagai kode_tabung
-                                    $kodeTabungList[] = $item;
-                                }
-                            }
-                            
-                            // Pastikan array hanya berisi string dan tidak ada duplikat
-                            $kodeTabungList = array_values(array_unique(array_filter($kodeTabungList, 'is_string')));
-                            
-                            if (empty($kodeTabungList)) {
-                                return '-';
-                            }
-                            
-                            // Ambil total volume dari stok_tabung berdasarkan kode_tabung
-                            $totalVolume = \App\Models\StokTabung::whereIn('kode_tabung', $kodeTabungList)
-                                ->sum('volume');
-                            
-                            if ($totalVolume > 0) {
-                                return number_format($totalVolume, 2, ',', '.');
-                            }
-                            
-                            return '-';
-                        } catch (\Exception $e) {
-                            return '-';
+                        // Baca langsung dari database column total_volume
+                        if ($record->total_volume !== null && $record->total_volume > 0) {
+                            return number_format($record->total_volume, 2, ',', '.');
                         }
+                        return '-';
                     })
                     ->badge()
                     ->color('success')

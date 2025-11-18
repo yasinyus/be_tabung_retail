@@ -65,17 +65,20 @@ class ViewTabungActivity extends ViewRecord
             return ['totalVolume' => 0, 'totalHarga' => 0];
         }
         
-        foreach ($tabungList as $tabung) {
-            $kodeTabung = $tabung['qr_code'];
-            
-            // Ambil data dari stok_tabung
-            $stokTabung = \App\Models\StokTabung::where('kode_tabung', $kodeTabung)->first();
-            
-            if ($stokTabung) {
-                $totalVolume += $stokTabung->volume ?? 0;
+        // Ambil total_volume langsung dari database jika sudah tersimpan
+        if ($this->record && $this->record->total_volume !== null) {
+            $totalVolume = $this->record->total_volume;
+        } else {
+            // Fallback: hitung dari stok_tabung jika belum ada di database
+            foreach ($tabungList as $tabung) {
+                $kodeTabung = $tabung['qr_code'];
                 
-                // Ambil harga dari tabel pelanggan
+                // Ambil data dari stok_tabung
+                $stokTabung = \App\Models\StokTabung::where('kode_tabung', $kodeTabung)->first();
                 
+                if ($stokTabung) {
+                    $totalVolume += $stokTabung->volume ?? 0;
+                }
             }
         }
 

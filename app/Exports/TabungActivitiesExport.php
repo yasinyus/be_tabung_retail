@@ -78,38 +78,8 @@ class TabungActivitiesExport implements FromCollection, WithHeadings, WithMappin
 
     public function map($activity): array
     {
-        // Hitung total volume dari stok_tabung
-        $tabungList = $activity->tabung;
-        $totalVolume = 0;
-        
-        if (!empty($tabungList) && is_array($tabungList)) {
-            // Flatten array - extract hanya kode_tabung string
-            $kodeTabungList = [];
-            foreach ($tabungList as $item) {
-                if (is_array($item)) {
-                    // Jika array, cari key qr_code atau kode_tabung
-                    if (isset($item['qr_code']) && is_string($item['qr_code'])) {
-                        $kodeTabungList[] = $item['qr_code'];
-                    } elseif (isset($item['kode_tabung']) && is_string($item['kode_tabung'])) {
-                        $kodeTabungList[] = $item['kode_tabung'];
-                    }
-                } elseif (is_string($item)) {
-                    // Jika string langsung, gunakan sebagai kode_tabung
-                    $kodeTabungList[] = $item;
-                }
-            }
-            
-            // Pastikan array hanya berisi string dan tidak ada duplikat
-            $kodeTabungList = array_values(array_unique(array_filter($kodeTabungList, 'is_string')));
-            
-            if (!empty($kodeTabungList)) {
-                try {
-                    $totalVolume = StokTabung::whereIn('kode_tabung', $kodeTabungList)->sum('volume');
-                } catch (\Exception $e) {
-                    $totalVolume = 0;
-                }
-            }
-        }
+        // Ambil total volume langsung dari database column
+        $totalVolume = $activity->total_volume ?? 0;
         
         // Get display name for "Dari"
         $displayDari = $activity->dari;
