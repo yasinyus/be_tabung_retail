@@ -105,11 +105,12 @@ class ListVolumeTabungs extends ListRecords
         return Armada::select([
             'armadas.nopol',
             'armadas.kode_kendaraan',
-            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan) as total_tabung'),
-            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan AND status = "Isi") as tabung_isi'),
-            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan AND status = "Kosong") as tabung_kosong'),
-            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan AND status = "Rusak") as tabung_rusak'),
-            DB::raw('(SELECT SUM(volume) FROM stok_tabung WHERE lokasi = armadas.kode_kendaraan AND status = "Isi") as total_volume')
+            // stok_tabung.lokasi stores vehicle nopol (e.g. 'H 8232 PQ'), so compare with armadas.nopol
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.nopol) as total_tabung'),
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.nopol AND status = "Isi") as tabung_isi'),
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.nopol AND status = "Kosong") as tabung_kosong'),
+            DB::raw('(SELECT COUNT(*) FROM stok_tabung WHERE lokasi = armadas.nopol AND status = "Rusak") as tabung_rusak'),
+            DB::raw('(SELECT SUM(volume) FROM stok_tabung WHERE lokasi = armadas.nopol AND status = "Isi") as total_volume')
         ])
         ->orderBy('armadas.nopol')
         ->get();
