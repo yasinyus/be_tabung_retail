@@ -8,6 +8,9 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Filters\SelectFilter;
+use App\Models\TabungActivity;
+use App\Models\Gudang;
+use App\Models\Pelanggan;
 use Filament\Schemas\Schema;
 
 class TabungActivitiesTable
@@ -117,6 +120,43 @@ class TabungActivitiesTable
                         'Pindah Tabung' => 'Pindah Tabung',
                         'Maintenance' => 'Maintenance',
                     ]),
+                    SelectFilter::make('dari')
+                        ->label('Dari')
+                        ->options(function () {
+                            $codes = TabungActivity::distinct()->pluck('dari')->filter()->values()->toArray();
+                            $options = [];
+                            foreach ($codes as $code) {
+                                $label = $code;
+                                if (str_starts_with($code, 'GD')) {
+                                    $g = Gudang::where('kode_gudang', $code)->first();
+                                    if ($g && $g->nama_gudang) $label = $g->nama_gudang;
+                                } elseif (str_starts_with($code, 'PA') || str_starts_with($code, 'PU') || str_starts_with($code, 'PM')) {
+                                    $p = Pelanggan::where('kode_pelanggan', $code)->first();
+                                    if ($p && $p->nama_pelanggan) $label = $p->nama_pelanggan;
+                                }
+                                $options[$code] = $label;
+                            }
+                            return $options;
+                        })->multiple(),
+
+                    SelectFilter::make('tujuan')
+                        ->label('Tujuan')
+                        ->options(function () {
+                            $codes = TabungActivity::distinct()->pluck('tujuan')->filter()->values()->toArray();
+                            $options = [];
+                            foreach ($codes as $code) {
+                                $label = $code;
+                                if (str_starts_with($code, 'GD')) {
+                                    $g = Gudang::where('kode_gudang', $code)->first();
+                                    if ($g && $g->nama_gudang) $label = $g->nama_gudang;
+                                } elseif (str_starts_with($code, 'PA') || str_starts_with($code, 'PU') || str_starts_with($code, 'PM')) {
+                                    $p = Pelanggan::where('kode_pelanggan', $code)->first();
+                                    if ($p && $p->nama_pelanggan) $label = $p->nama_pelanggan;
+                                }
+                                $options[$code] = $label;
+                            }
+                            return $options;
+                        })->multiple(),
             ])
             ->actions([
                 ViewAction::make()
