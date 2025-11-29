@@ -41,6 +41,14 @@ class ListVolumeTabungs extends ListRecords
                 ->modalWidth('7xl')
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel('Tutup'),
+            Actions\Action::make('reset_filters')
+                ->label('🔄 Reset Filter')
+                ->icon('heroicon-o-refresh')
+                ->color('secondary')
+                ->action(function () {
+                    // Redirect to the index route without query parameters to clear filters
+                    return redirect()->route('filament.resources.volume-tabungs.index');
+                }),
         ];
     }
 
