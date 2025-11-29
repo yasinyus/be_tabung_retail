@@ -40,8 +40,10 @@ class AuditsTable
                     ->leftJoin('pelanggans', function($join) {
                         $join->on('audits.lokasi', '=', 'pelanggans.kode_pelanggan')
                              ->where(function($query) {
+                                 // Include PA, PU and PM codes
                                  $query->where('audits.lokasi', 'like', 'PA%')
-                                       ->orWhere('audits.lokasi', 'like', 'PU%');
+                                       ->orWhere('audits.lokasi', 'like', 'PU%')
+                                       ->orWhere('audits.lokasi', 'like', 'PM%');
                              });
                     })
                     ->select('tabungs.*', 

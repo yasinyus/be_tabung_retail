@@ -67,7 +67,7 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
                     $exportData->push([
                         'id' => $record->id,
                         'tanggal' => $record->tanggal,
-                        'lokasi' => $record->lokasi,
+                        'lokasi' => $record->nama_lokasi ?? $record->lokasi,
                         'nama' => $record->nama,
                         'status' => $record->status,
                         'jumlah_tabung' => count($record->tabung),
@@ -84,7 +84,7 @@ class HistoryPengisianExport implements FromCollection, WithHeadings, WithMappin
                 $exportData->push([
                     'id' => $record->id,
                     'tanggal' => $record->tanggal,
-                    'lokasi' => $record->lokasi,
+                    'lokasi' => $record->nama_lokasi ?? $record->lokasi,
                     'nama' => $record->nama,
                     'status' => $record->status,
                     'jumlah_tabung' => 0,

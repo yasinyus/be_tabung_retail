@@ -134,8 +134,10 @@ class VolumeTabungsTable
                     ->leftJoin('pelanggans', function($join) {
                         $join->on('stok_tabung.lokasi', '=', 'pelanggans.kode_pelanggan')
                              ->where(function($query) {
+                                 // Include PU, PA and PM prefixes for pelanggan
                                  $query->where('stok_tabung.lokasi', 'like', 'PU%')
-                                       ->orWhere('stok_tabung.lokasi', 'like', 'PA%');
+                                       ->orWhere('stok_tabung.lokasi', 'like', 'PA%')
+                                       ->orWhere('stok_tabung.lokasi', 'like', 'PM%');
                              });
                     })
                     ->leftJoin('tabungs', 'stok_tabung.kode_tabung', '=', 'tabungs.kode_tabung')

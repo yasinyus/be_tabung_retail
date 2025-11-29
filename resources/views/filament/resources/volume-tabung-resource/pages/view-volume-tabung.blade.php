@@ -24,7 +24,7 @@
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400">Lokasi:</label>
                     <p class="text-base text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-md">
-                        📍 {{ $record->lokasi }}
+                        📍 {{ $record->nama_lokasi }}
                     </p>
                 </div>
                 

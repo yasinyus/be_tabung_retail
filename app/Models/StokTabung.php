@@ -59,8 +59,8 @@ class StokTabung extends Model
             return $gudang ? $gudang->nama_gudang : $this->lokasi;
         }
         
-        // Jika lokasi berawalan PU atau PA, ambil dari tabel pelanggans
-        if (str_starts_with($lokasi, 'PU') || str_starts_with($lokasi, 'PA')) {
+        // Jika lokasi berawalan PU, PA, atau PM, ambil dari tabel pelanggans
+        if (str_starts_with($lokasi, 'PU') || str_starts_with($lokasi, 'PA') || str_starts_with($lokasi, 'PM')) {
             $pelanggan = Pelanggan::where('kode_pelanggan', $lokasi)->first();
             return $pelanggan ? $pelanggan->nama_pelanggan : $this->lokasi;
         }
