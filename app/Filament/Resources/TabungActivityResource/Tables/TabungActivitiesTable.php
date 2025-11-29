@@ -381,18 +381,41 @@ class TabungActivitiesTable
                 SelectFilter::make('dari')
                     ->label('Dari')
                     ->options(function () {
-                        return TabungActivity::distinct()
-                            ->pluck('dari', 'dari')
-                            ->toArray();
+                        // Build options with friendly names: gudang -> nama_gudang, pelanggan -> nama_pelanggan
+                        $codes = TabungActivity::distinct()->pluck('dari')->filter()->values()->toArray();
+                        $options = [];
+                        foreach ($codes as $code) {
+                            $label = $code;
+                            if (str_starts_with($code, 'GD')) {
+                                $gudang = Gudang::where('kode_gudang', $code)->first();
+                                if ($gudang && $gudang->nama_gudang) $label = $gudang->nama_gudang;
+                            } elseif (str_starts_with($code, 'PA') || str_starts_with($code, 'PU') || str_starts_with($code, 'PM')) {
+                                $pelanggan = Pelanggan::where('kode_pelanggan', $code)->first();
+                                if ($pelanggan && $pelanggan->nama_pelanggan) $label = $pelanggan->nama_pelanggan;
+                            }
+                            $options[$code] = $label;
+                        }
+                        return $options;
                     })
                     ->multiple(),
 
                 SelectFilter::make('tujuan')
                     ->label('Tujuan')
                     ->options(function () {
-                        return TabungActivity::distinct()
-                            ->pluck('tujuan', 'tujuan')
-                            ->toArray();
+                        $codes = TabungActivity::distinct()->pluck('tujuan')->filter()->values()->toArray();
+                        $options = [];
+                        foreach ($codes as $code) {
+                            $label = $code;
+                            if (str_starts_with($code, 'GD')) {
+                                $gudang = Gudang::where('kode_gudang', $code)->first();
+                                if ($gudang && $gudang->nama_gudang) $label = $gudang->nama_gudang;
+                            } elseif (str_starts_with($code, 'PA') || str_starts_with($code, 'PU') || str_starts_with($code, 'PM')) {
+                                $pelanggan = Pelanggan::where('kode_pelanggan', $code)->first();
+                                if ($pelanggan && $pelanggan->nama_pelanggan) $label = $pelanggan->nama_pelanggan;
+                            }
+                            $options[$code] = $label;
+                        }
+                        return $options;
                     })
                     ->multiple(),
             ])
