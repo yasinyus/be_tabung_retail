@@ -25,7 +25,9 @@ class ListVolumeTabungs extends ListRecords
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('success')
                 ->action(function () {
-                    return Excel::download(new VolumeTabungExport, 'volume-tabung.xlsx');
+                    // Pass current table filters so export respects UI filters. Use request filters as fallback to support direct URL queries.
+                    $filters = $this->tableFilters ?? request()->get('filters', []);
+                    return Excel::download(new VolumeTabungExport($filters), 'volume-tabung-' . date('Y-m-d-His') . '.xlsx');
                 }),
             Actions\Action::make('view_stats')
                 ->label('📊 Lihat Statistik')
