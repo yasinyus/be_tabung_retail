@@ -163,7 +163,7 @@ class VolumeTabungsTable
                               ->orWhere('stok_tabung.status', 'like', "%{$searchParam}%")
                               ->orWhere('tabungs.seri_tabung', 'like', "%{$searchParam}%")
                               ->orWhere('gudangs.nama_gudang', 'like', "%{$searchParam}%")
-                              ->orWhere('pelanggans.nama_pelanggan', 'like', "%{$searchParam}%");
+                              ->orWhere('pelanggans.nama_pelanggan', 'like', "%{$searchParam}%")
                               ->orWhere('armadas.nopol', 'like', "%{$searchParam}%");
                     });
                 }
