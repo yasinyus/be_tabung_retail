@@ -6,6 +6,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use App\Models\Gudang;
+use App\Models\Pelanggan;
 use Illuminate\Database\Eloquent\Builder;
 
 class VolumeTabungsTable
@@ -82,10 +83,14 @@ class VolumeTabungsTable
                     ->label('Dibuat'),
             ])
             ->filters([
-                SelectFilter::make('lokasi_gudang')
-                    ->label('Filter Gudang')
+                SelectFilter::make('lokasi')
+                    ->label('Filter Lokasi')
                     ->options(function () {
-                        return Gudang::pluck('nama_gudang', 'kode_gudang')->toArray();
+                        // Combine Gudang and Pelanggan locations so the filter shows all lokasi types
+                        $gudangs = Gudang::pluck('nama_gudang', 'kode_gudang')->toArray();
+                        $pelanggans = Pelanggan::pluck('nama_pelanggan', 'kode_pelanggan')->toArray();
+                        // Merge them; if keys overlap, gudang value will remain (but keys should be unique)
+                        return $gudangs + $pelanggans;
                     })
                     ->query(function ($query, $data) {
                         if (!empty($data['value'])) {
@@ -93,7 +98,7 @@ class VolumeTabungsTable
                         }
                         return $query;
                     })
-                    ->placeholder('Semua Gudang'),
+                    ->placeholder('Semua Lokasi'),
                     
                 SelectFilter::make('status')
                     ->label('Filter Status')

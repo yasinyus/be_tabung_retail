@@ -31,7 +31,7 @@ class ListVolumeTabungs extends ListRecords
                 ->label('📊 Lihat Statistik')
                 ->icon('heroicon-o-chart-bar')
                 ->color('info')
-                ->modalHeading('Statistik Tabung per Gudang')
+                ->modalHeading('Statistik Tabung per Lokasi')
                 ->modalContent(view('filament.components.tabung-stats', [
                     'stats' => $this->getStats(),
                     'gudangStats' => $this->getGudangStats(),
@@ -41,14 +41,7 @@ class ListVolumeTabungs extends ListRecords
                 ->modalWidth('7xl')
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel('Tutup'),
-            Actions\Action::make('reset_filters')
-                ->label('🔄 Reset Filter')
-                ->icon('heroicon-o-arrow-path')
-                ->color('secondary')
-                ->action(function () {
-                    // Redirect to the index route without query parameters to clear filters
-                    return redirect()->route('filament.resources.volume-tabungs.index');
-                }),
+            // Reset filter action removed per request (show all stok locations by default / Filter Lokasi will be used)
         ];
     }
 
