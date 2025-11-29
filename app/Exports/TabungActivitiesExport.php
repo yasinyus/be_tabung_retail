@@ -21,11 +21,39 @@ class TabungActivitiesExport implements FromCollection, WithHeadings, WithMappin
         $this->filters = $filters;
     }
 
+    protected function getFilterArray(string $key): array
+    {
+        if (!isset($this->filters[$key])) {
+            return [];
+        }
+        $val = $this->filters[$key];
+        // Filament uses multiple() returning ['values' => [...]] or ['value'] sometimes,
+        // also support scalar or simple array
+        if (is_array($val)) {
+            if (isset($val['values'])) {
+                $val = $val['values'];
+            } elseif (isset($val['value'])) {
+                $val = $val['value'];
+            }
+        }
+        if (!is_array($val)) {
+            $val = [$val];
+        }
+        $flattened = [];
+        array_walk_recursive($val, function ($v) use (&$flattened) {
+            if (is_string($v) || is_numeric($v)) {
+                $flattened[] = $v;
+            }
+        });
+        return array_values(array_unique($flattened));
+    }
+
     public function collection()
     {
         $query = TabungActivity::with('user')->orderBy('id', 'desc');
         
         // Apply filters if any
+        // STATUS
         if (!empty($this->filters['status'])) {
             // Flatten array in case it's nested
             $statuses = is_array($this->filters['status']) ? $this->filters['status'] : [$this->filters['status']];
@@ -37,6 +65,7 @@ class TabungActivitiesExport implements FromCollection, WithHeadings, WithMappin
             }
         }
         
+        // USER
         if (!empty($this->filters['id_user'])) {
             // Flatten array in case it's nested
             $users = is_array($this->filters['id_user']) ? $this->filters['id_user'] : [$this->filters['id_user']];
@@ -56,6 +85,18 @@ class TabungActivitiesExport implements FromCollection, WithHeadings, WithMappin
             $query->where('tanggal', '<=', $this->filters['tanggal_sampai']);
         }
         
+        // Apply 'dari' filter (support select-multiple and Filament format)
+        $dari = $this->getFilterArray('dari');
+        if (!empty($dari)) {
+            $query->whereIn('dari', $dari);
+        }
+
+        // Apply 'tujuan' filter
+        $tujuan = $this->getFilterArray('tujuan');
+        if (!empty($tujuan)) {
+            $query->whereIn('tujuan', $tujuan);
+        }
+
         return $query->get();
     }
 
