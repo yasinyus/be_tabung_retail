@@ -55,6 +55,8 @@ class VolumeTabungsTable
                             return $record->nama_gudang;
                         } elseif (!empty($record->nama_pelanggan)) {
                             return $record->nama_pelanggan;
+                        } elseif (!empty($record->armada_nopol)) {
+                            return $record->armada_nopol;
                         }
                         return $record->lokasi ?? 'Tidak diketahui';
                     })
@@ -141,11 +143,15 @@ class VolumeTabungsTable
                              });
                     })
                     ->leftJoin('tabungs', 'stok_tabung.kode_tabung', '=', 'tabungs.kode_tabung')
+                    ->leftJoin('armadas', function($join) {
+                        $join->on('stok_tabung.lokasi', '=', 'armadas.nopol');
+                    })
                     ->select(
                         'stok_tabung.*',
                         'gudangs.nama_gudang',
                         'pelanggans.nama_pelanggan',
-                        'tabungs.seri_tabung'
+                        'tabungs.seri_tabung',
+                        'armadas.nopol as armada_nopol',
                     );
                 
                 // Handle search from URL parameter
@@ -158,6 +164,7 @@ class VolumeTabungsTable
                               ->orWhere('tabungs.seri_tabung', 'like', "%{$searchParam}%")
                               ->orWhere('gudangs.nama_gudang', 'like', "%{$searchParam}%")
                               ->orWhere('pelanggans.nama_pelanggan', 'like', "%{$searchParam}%");
+                              ->orWhere('armadas.nopol', 'like', "%{$searchParam}%");
                     });
                 }
                 

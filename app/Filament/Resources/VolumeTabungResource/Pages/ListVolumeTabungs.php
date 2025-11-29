@@ -43,7 +43,7 @@ class ListVolumeTabungs extends ListRecords
                 ->modalCancelActionLabel('Tutup'),
             Actions\Action::make('reset_filters')
                 ->label('🔄 Reset Filter')
-                ->icon('heroicon-o-refresh')
+                ->icon('heroicon-o-arrow-path')
                 ->color('secondary')
                 ->action(function () {
                     // Redirect to the index route without query parameters to clear filters
