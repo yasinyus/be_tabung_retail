@@ -47,22 +47,23 @@ class VolumeTabungExport implements FromCollection, WithHeadings, WithMapping
                 'stok_tabung.updated_at'
             );
 
-        // Apply filters
+        // Apply filters from request
         $filters = $this->filters ?? [];
 
-        // Helper to read filter value whether provided as a scalar or an array with 'value'
+        // Helper to extract filter value
         $getFilterValue = function ($key) use ($filters) {
             if (!isset($filters[$key])) {
                 return null;
             }
             $val = $filters[$key];
-            if (is_array($val) && isset($val['value'])) {
-                return $val['value'];
+            // Handle Filament filter format: ['value' => 'something'] or just 'something'
+            if (is_array($val)) {
+                return $val['value'] ?? null;
             }
             return $val;
         };
 
-        // Lokasi filter (kode keur)
+        // Lokasi filter
         $lokasiVal = $getFilterValue('lokasi');
         if (!empty($lokasiVal)) {
             $query->where('stok_tabung.lokasi', $lokasiVal);
@@ -71,13 +72,16 @@ class VolumeTabungExport implements FromCollection, WithHeadings, WithMapping
         // Status filter
         $statusVal = $getFilterValue('status');
         if (!empty($statusVal)) {
-            // Allow for either a string or an array of statuses
-            $statuses = is_array($statusVal) ? $statusVal : [$statusVal];
-            $statuses = array_values(array_filter($statuses, function($item) {
-                return is_string($item) || is_numeric($item);
-            }));
-            if (!empty($statuses)) {
-                $query->whereIn('stok_tabung.status', $statuses);
+            if (is_array($statusVal)) {
+                // Handle array of statuses
+                $statuses = array_filter($statusVal, function($item) {
+                    return !empty($item);
+                });
+                if (!empty($statuses)) {
+                    $query->whereIn('stok_tabung.status', $statuses);
+                }
+            } else {
+                $query->where('stok_tabung.status', $statusVal);
             }
         }
 
@@ -86,7 +90,9 @@ class VolumeTabungExport implements FromCollection, WithHeadings, WithMapping
         if ($volumeFilter === 'bervolume') {
             $query->whereNotNull('stok_tabung.volume')->where('stok_tabung.volume', '>', 0);
         } elseif ($volumeFilter === 'tanpa_volume') {
-            $query->whereNull('stok_tabung.volume')->orWhere('stok_tabung.volume', 0);
+            $query->where(function($q) {
+                $q->whereNull('stok_tabung.volume')->orWhere('stok_tabung.volume', 0);
+            });
         }
 
         return $query->get();

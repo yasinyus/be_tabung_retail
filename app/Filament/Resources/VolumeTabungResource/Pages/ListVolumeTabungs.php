@@ -25,8 +25,8 @@ class ListVolumeTabungs extends ListRecords
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('success')
                 ->action(function () {
-                    // Pass current table filters so export respects UI filters. Use request filters as fallback to support direct URL queries.
-                    $filters = $this->tableFilters ?? request()->get('filters', []);
+                    // Get filters from request - Filament passes filters as query parameters
+                    $filters = request()->get('filters', []);
                     return Excel::download(new VolumeTabungExport($filters), 'volume-tabung-' . date('Y-m-d-His') . '.xlsx');
                 }),
             Actions\Action::make('view_stats')
