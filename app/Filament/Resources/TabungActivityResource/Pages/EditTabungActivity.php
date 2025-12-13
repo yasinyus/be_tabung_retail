@@ -51,8 +51,8 @@ class EditTabungActivity extends EditRecord
         $totalVolume = 0;
         foreach ($tabungList as $kodeTabung) {
             $stokTabung = \App\Models\StokTabung::where('kode_tabung', $kodeTabung)->first();
-            if ($stokTabung) {
-                $totalVolume += $stokTabung->volume ?? 0;
+            if ($stokTabung && $stokTabung->volume !== null) {
+                $totalVolume += (float)$stokTabung->volume;
             }
         }
 

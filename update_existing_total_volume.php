@@ -32,8 +32,9 @@ foreach ($activities as $activity) {
                 
                 if ($kodeTabung) {
                     $stokTabung = StokTabung::where('kode_tabung', $kodeTabung)->first();
-                    if ($stokTabung && $stokTabung->volume) {
-                        $totalVolume += $stokTabung->volume;
+                    // Fixed: include volume even if it's 0, only skip if null
+                    if ($stokTabung && $stokTabung->volume !== null) {
+                        $totalVolume += (float)$stokTabung->volume;
                     }
                 }
             }

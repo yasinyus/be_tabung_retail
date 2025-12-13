@@ -76,8 +76,8 @@ class ViewTabungActivity extends ViewRecord
                 // Ambil data dari stok_tabung
                 $stokTabung = \App\Models\StokTabung::where('kode_tabung', $kodeTabung)->first();
                 
-                if ($stokTabung) {
-                    $totalVolume += $stokTabung->volume ?? 0;
+                if ($stokTabung && $stokTabung->volume !== null) {
+                    $totalVolume += (float)$stokTabung->volume;
                 }
             }
         }

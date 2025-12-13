@@ -307,9 +307,11 @@ class TabungActivitiesTable
                     ->label('Total Volume (m³)')
                     ->getStateUsing(function ($record) {
                         // Baca langsung dari database column total_volume
-                        if ($record->total_volume !== null && $record->total_volume > 0) {
+                        if ($record->total_volume !== null) {
+                            // Show volume even if it's 0 (means all tabung are kosong)
                             return number_format($record->total_volume, 2, ',', '.');
                         }
+                        // Only show dash if total_volume is truly NULL (not calculated yet)
                         return '-';
                     })
                     ->badge()
