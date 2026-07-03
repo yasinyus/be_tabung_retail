@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('refunds', function (Blueprint $table) {
-            $table->id();
-            $table->string('bast_id')->nullable();
-            $table->decimal('total_refund', 15, 2)->default(0);
-            $table->enum('status_refund', ['Pending', 'Diproses', 'Selesai', 'Dibatalkan'])->default('Pending');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('refunds')) {
+            Schema::create('refunds', function (Blueprint $table) {
+                $table->id();
+                $table->string('bast_id')->nullable();
+                $table->decimal('total_refund', 15, 2)->default(0);
+                $table->enum('status_refund', ['Pending', 'Diproses', 'Selesai', 'Dibatalkan'])->default('Pending');
+                $table->timestamps();
+            });
+        }
     }
 
     /**
