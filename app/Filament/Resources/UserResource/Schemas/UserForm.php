@@ -34,6 +34,7 @@ class UserForm
                         'operator_retail' => 'Operator Retail',
                         'driver' => 'Driver',
                         'auditor' => 'Auditor',
+                        'agen' => 'Agen',
                         'keuangan' => 'Keuangan',
                     ])
                     ->required()

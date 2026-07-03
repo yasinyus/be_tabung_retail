@@ -21,6 +21,7 @@ class RoleSeeder extends Seeder
             'operator', // Added for mobile app
             'driver',
             'auditor',
+            'agen',
             'pelanggan_umum',
             'pelanggan_agen'
         ];
